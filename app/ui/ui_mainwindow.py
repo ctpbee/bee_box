@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'mainwindow.ui',
 # licensing of 'mainwindow.ui' applies.
 #
-# Created: Thu Nov 14 11:33:59 2019
+# Created: Thu Nov 14 11:40:14 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -15,6 +15,7 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(433, 662)
         MainWindow.setMinimumSize(QtCore.QSize(433, 662))
+        MainWindow.setMaximumSize(QtCore.QSize(433, 662))
         icon = QtGui.QIcon()
         icon.addPixmap(QtGui.QPixmap(":/icon/icon/bee.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
         MainWindow.setWindowIcon(icon)
@@ -28,6 +29,6 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "bee boxs", None, -1))
+        MainWindow.setWindowTitle(QtWidgets.QApplication.translate("MainWindow", "bee box", None, -1))
 
 import app.resource.bee_box_rc

@@ -1,8 +1,7 @@
-import os
-import sys
 from PySide2.QtWidgets import QWidget
 
 from app.ui.ui_home import Ui_Home
+from app.global_var import G
 
 
 class HomeWidget(QWidget, Ui_Home):

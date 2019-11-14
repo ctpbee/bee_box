@@ -16,8 +16,14 @@
     <height>662</height>
    </size>
   </property>
+  <property name="maximumSize">
+   <size>
+    <width>433</width>
+    <height>662</height>
+   </size>
+  </property>
   <property name="windowTitle">
-   <string>bee boxs</string>
+   <string>bee box</string>
   </property>
   <property name="windowIcon">
    <iconset resource="../resource/bee_box.qrc">
