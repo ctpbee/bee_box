@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'home.ui',
 # licensing of 'home.ui' applies.
 #
-# Created: Thu Nov 14 10:32:03 2019
+# Created: Thu Nov 14 11:34:07 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -55,7 +55,7 @@ class Ui_Home(object):
 
     def retranslateUi(self, Home):
         Home.setWindowTitle(QtWidgets.QApplication.translate("Home", "Form", None, -1))
-        self.label.setText(QtWidgets.QApplication.translate("Home", "bee boxs", None, -1))
+        self.label.setText(QtWidgets.QApplication.translate("Home", "bee box", None, -1))
         self.setting_btn.setText(QtWidgets.QApplication.translate("Home", "⚙", None, -1))
         self.label_2.setText(QtWidgets.QApplication.translate("Home", "Python版本：", None, -1))
 

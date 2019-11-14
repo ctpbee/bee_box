@@ -35,7 +35,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tray.setContextMenu(menu)
         self.tray.activated.connect(self.iconActivated)
         self.tray.show()
-        self.tray.setToolTip("bee boxs")
+        self.tray.setToolTip("bee box")
 
     def home_handler(self):
         self.widget = HomeWidget(self)

@@ -19,10 +19,16 @@
   <property name="windowTitle">
    <string>bee boxs</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resource/bee_box.qrc">
+    <normaloff>:/icon/icon/bee.png</normaloff>:/icon/icon/bee.png</iconset>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout"/>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resource/bee_box.qrc"/>
+ </resources>
  <connections/>
 </ui>
