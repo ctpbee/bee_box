@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="2,1,7">
+  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="2,1,0,0,7">
    <item>
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="9,0">
      <item>
@@ -54,12 +54,52 @@
      <item>
       <widget class="QLabel" name="label_2">
        <property name="text">
-        <string>Python版本：</string>
+        <string>当前Python版本：</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="py_version"/>
+      <widget class="QLabel" name="py_version">
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="text">
+        <string>桌面端</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton">
+       <property name="text">
+        <string>安装</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>client</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="pushButton_2">
+       <property name="text">
+        <string>部署</string>
+       </property>
+      </widget>
      </item>
     </layout>
    </item>

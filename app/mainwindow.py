@@ -1,6 +1,6 @@
 import sys
 
-from PySide2.QtCore import Qt
+from PySide2.QtCore import Qt, QThread, QThreadPool
 from PySide2.QtGui import QIcon, QCloseEvent
 from PySide2.QtWidgets import QMainWindow, QSystemTrayIcon, QMenu, QDialog, \
     QDesktopWidget
@@ -17,11 +17,13 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # self.setWindowFlags(Qt.FramelessWindowHint)  # 隐藏整个头部
         self.desktop = QDesktopWidget()
         taskbar_height = self.desktop.screenGeometry().height() - self.desktop.availableGeometry().height()  # 任务栏高度
-        self.move((self.desktop.availableGeometry().width() - self.width()),
+        self.move((self.desktop.availableGeometry().width() - self.width() - 5),
                   self.desktop.availableGeometry().height() - self.height() - taskbar_height)  # 初始化位置到右下角
         self.tray_init()
         self.home_handler()
         # 默认打开
+        self.t = QThread()
+        self.t.start()
 
     def tray_init(self):
         icon = QIcon("app/resource/icon/bee.png")

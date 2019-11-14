@@ -34,6 +34,48 @@
     </widget>
    </item>
    <item>
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="2,6,1">
+     <item>
+      <widget class="QLabel" name="label">
+       <property name="text">
+        <string>python路径</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QComboBox" name="py_path_box"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="py_path_btn">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="2,6,1">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>安装路径</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="install_path"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="install_btn">
+       <property name="text">
+        <string>...</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Vertical</enum>

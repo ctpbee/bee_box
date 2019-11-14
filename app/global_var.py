@@ -1,12 +1,20 @@
+import json
+from app.helper import config_path
+
+
 class Config:
     python_path = {}
-    choice_python = None
+    choice_python = ""
+    install_path = ""
+
+    def __setattr__(self, key, value):
+        self.__dict__[key] = value
+        self.to_file()
 
     def update(self, data: dict):
         for k, v in data.items():
             if hasattr(self, k):
                 setattr(self, k, v)
-
 
     def to_dict(self):
         pr = {}
@@ -16,6 +24,14 @@ class Config:
                 pr[name] = value
         return pr
 
+    def to_file(self):
+        with open(config_path, 'w')as f:
+            json.dump(self.to_dict(), f)
+
 
 class G(dict):
     config = Config()
+    bee_box_url = "https://github.com/ctpbee/bee_box/archive/master.zip"
+    desktop_url = ""
+    client_url = ""
+    start_time=''
