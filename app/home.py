@@ -27,6 +27,5 @@ class HomeWidget(QWidget, Ui_Home):
 
     def download(self):
         self.httpp = HttpReq()
-        G.start_time = time.time()
-        self.httpp.download_signal.emit(G.bee_box_url)
         self.httpp.moveToThread(self.mainwindow.t)
+        self.httpp.download_signal.emit(G.bee_box_url)

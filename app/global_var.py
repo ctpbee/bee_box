@@ -34,4 +34,3 @@ class G(dict):
     bee_box_url = "https://github.com/ctpbee/bee_box/archive/master.zip"
     desktop_url = ""
     client_url = ""
-    start_time=''

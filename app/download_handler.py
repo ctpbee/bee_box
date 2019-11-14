@@ -5,7 +5,6 @@ import time
 from PySide2.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from PySide2.QtCore import Signal, QObject, Slot, QFile, QUrl
 from app.global_var import G
-import requests
 from contextlib import closing
 from urllib import request
 
@@ -57,26 +56,15 @@ class HttpReq(QObject):
     @Slot(dict)
     def run(self, data):
         print("开始下载")
-
-        with closing(requests.get(G.bee_box_url)) as response:
-            chunk_size = 1024  # 单次请求最大值
-            # content_size = int(response.headers['content-length'])  # 内容体总大小
-            with open(os.path.join(G.config.install_path, f'{G.start_time}demo.zip'), 'wb') as fp:
-                for data in response.iter_content(chunk_size=chunk_size):
-                    fp.write(data)
+        request.urlretrieve(G.bee_box_url, os.path.join(G.config.install_path, f'demo.zip'),
+                            reporthook=self.report_hook)
         print("download done!")
 
-    # def request(self):
-    #     url = QUrl(G.bee_box_url)
-    #     req = QNetworkRequest(url)
-    #     req.setHeader(QNetworkRequest.ContentTypeHeader, "application/x-www-form-urlencoded")
-    #     self.m_netReply = self.m_netAccessManager.get(req)
-    #     self.m_netReply.finished.connect(self.request_succ)
-    #     self.m_netReply.error.connect(self.request_err)
-    #
-    # def request_succ(self):
-    #     print("download ok")
-    #     print(self.m_netReply.readAll())
-    #
-    # def request_err(self, data):
-    #     print("download fail", data)
+    def report_hook(self, blocknum, block_size, total_size):
+        """
+        :param blocknum: 已经下载的数据块
+        :param block_size: 数据块的大小
+        :param total_size: 远程文件的大小
+        :return:
+        """
+        print(blocknum * block_size * 100 // total_size)
