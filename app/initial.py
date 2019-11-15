@@ -1,7 +1,7 @@
 import os
-from app.helper import py_path, config_path, beebox_path
+from app.lib.helper import py_path, config_path, beebox_path
 import json
-from app.global_var import G
+from app.lib.global_var import G
 
 
 def box_init():

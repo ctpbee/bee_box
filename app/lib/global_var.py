@@ -1,5 +1,5 @@
 import json
-from app.helper import config_path
+from app.lib.helper import config_path
 
 
 class Config:
@@ -31,6 +31,3 @@ class Config:
 
 class G(dict):
     config = Config()
-    bee_box_url = "https://github.com/ctpbee/bee_box/archive/master.zip"
-    desktop_url = ""
-    client_url = ""

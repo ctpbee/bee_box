@@ -6,26 +6,50 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>374</width>
-    <height>560</height>
+    <width>460</width>
+    <height>680</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout_2" stretch="2,1,0,0,7">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,8">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="9,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="9,0,0">
      <item>
       <widget class="QLabel" name="label">
        <property name="styleSheet">
-        <string notr="true">font: 75 italic 16pt &quot;Arial&quot;;
+        <string notr="true">font: 75 italic 40pt &quot;Arial&quot;;
 </string>
        </property>
        <property name="text">
         <string>bee box</string>
        </property>
       </widget>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <widget class="QLabel" name="py_version">
+         <property name="text">
+          <string>Python版本</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </item>
      <item>
       <layout class="QFormLayout" name="formLayout">
@@ -50,71 +74,54 @@
     </layout>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="1,9">
-     <item>
-      <widget class="QLabel" name="label_2">
-       <property name="text">
-        <string>当前Python版本：</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QLabel" name="py_version">
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3">
-     <item>
-      <widget class="QLabel" name="label_3">
-       <property name="text">
-        <string>桌面端</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton">
-       <property name="text">
-        <string>安装</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_4">
-     <item>
-      <widget class="QLabel" name="label_4">
-       <property name="text">
-        <string>client</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="pushButton_2">
-       <property name="text">
-        <string>部署</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item>
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="styleSheet">
+      <string notr="true"/>
      </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>40</height>
-      </size>
+     <property name="frameShape">
+      <enum>QFrame::NoFrame</enum>
      </property>
-    </spacer>
+     <property name="lineWidth">
+      <number>1</number>
+     </property>
+     <property name="sizeAdjustPolicy">
+      <enum>QAbstractScrollArea::AdjustIgnored</enum>
+     </property>
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>438</width>
+        <height>573</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
+       <item>
+        <layout class="QVBoxLayout" name="install_layout"/>
+       </item>
+       <item>
+        <layout class="QVBoxLayout" name="apps_layout"/>
+       </item>
+       <item>
+        <spacer name="verticalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
+    </widget>
    </item>
   </layout>
  </widget>

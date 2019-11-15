@@ -1,8 +1,7 @@
 from PySide2.QtWidgets import QWidget, QFileDialog
-import os
-from app.global_var import G
+from app.lib.global_var import G
 from app.ui.ui_setting import Ui_Setting
-from app.helper import get_py_version, beebox_path
+from app.lib.helper import get_py_version, beebox_path
 
 
 class SettingWidget(QWidget, Ui_Setting):

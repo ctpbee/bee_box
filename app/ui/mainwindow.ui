@@ -32,6 +32,7 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout"/>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
  </widget>
  <resources>
   <include location="../resource/bee_box.qrc"/>

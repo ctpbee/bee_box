@@ -1,9 +1,9 @@
 import sys
 
-from PySide2.QtCore import Qt, QThread, QThreadPool
-from PySide2.QtGui import QIcon, QCloseEvent
+from PySide2.QtCore import Qt, QThreadPool
+from PySide2.QtGui import QIcon, QCloseEvent, QFocusEvent
 from PySide2.QtWidgets import QMainWindow, QSystemTrayIcon, QMenu, QDialog, \
-    QDesktopWidget
+    QDesktopWidget, QLabel, QProgressBar
 from app.ui.ui_mainwindow import Ui_MainWindow
 from app.home import HomeWidget
 from app.setting import SettingWidget
@@ -14,16 +14,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(self.__class__, self).__init__()
         self.setupUi(self)
         self.exit_ = False
-        # self.setWindowFlags(Qt.FramelessWindowHint)  # 隐藏整个头部
-        self.desktop = QDesktopWidget()
-        taskbar_height = self.desktop.screenGeometry().height() - self.desktop.availableGeometry().height()  # 任务栏高度
-        self.move((self.desktop.availableGeometry().width() - self.width() - 5),
-                  self.desktop.availableGeometry().height() - self.height() - taskbar_height)  # 初始化位置到右下角
+        self.layout_init()
         self.tray_init()
+        self.thread_pool = QThreadPool()
+        #
         self.home_handler()
         # 默认打开
-        self.t = QThread()
-        self.t.start()
+
+    def layout_init(self):
+        self.setWindowFlags(Qt.FramelessWindowHint)  # 隐藏整个头部
+        self.desktop = QDesktopWidget()
+        taskbar_height = self.desktop.screenGeometry().height() - self.desktop.availableGeometry().height()  # 任务栏高度
+        self.move((self.desktop.availableGeometry().width() - self.width() - 15),
+                  self.desktop.availableGeometry().height() - self.height() - taskbar_height + 30)  # 初始化位置到右下角
+        self.progressbar = QProgressBar()
+        self.progressbar.setFixedHeight(1)
+        self.progressbar.setRange(0, 0)
+        self.progressbar.setTextVisible(False)
+        self.statusBar.addPermanentWidget(self.progressbar, stretch=10)
 
     def tray_init(self):
         icon = QIcon("app/resource/icon/bee.png")
@@ -64,7 +72,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def closeEvent(self, event: QCloseEvent):
         if self.exit_:
-            self.tray.hide()
             event.accept()
         else:
             self.hide()
