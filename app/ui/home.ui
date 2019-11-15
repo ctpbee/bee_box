@@ -18,6 +18,16 @@
     <layout class="QHBoxLayout" name="horizontalLayout" stretch="9,0,0">
      <item>
       <widget class="QLabel" name="label">
+       <property name="font">
+        <font>
+         <family>Arial</family>
+         <pointsize>40</pointsize>
+         <weight>9</weight>
+         <italic>true</italic>
+         <bold>false</bold>
+         <underline>false</underline>
+        </font>
+       </property>
        <property name="styleSheet">
         <string notr="true">font: 75 italic 40pt &quot;Arial&quot;;
 </string>

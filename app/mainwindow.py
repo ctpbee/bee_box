@@ -1,9 +1,11 @@
 import sys
 
-from PySide2.QtCore import Qt, QThreadPool
+from PySide2.QtCore import Qt, QThreadPool, QEvent, QObject
 from PySide2.QtGui import QIcon, QCloseEvent, QFocusEvent
 from PySide2.QtWidgets import QMainWindow, QSystemTrayIcon, QMenu, QDialog, \
-    QDesktopWidget, QLabel, QProgressBar
+    QDesktopWidget, QLabel, QProgressBar, QWidget
+
+from app.lib.global_var import G
 from app.ui.ui_mainwindow import Ui_MainWindow
 from app.home import HomeWidget
 from app.setting import SettingWidget
@@ -13,13 +15,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(self.__class__, self).__init__()
         self.setupUi(self)
-        self.exit_ = False
         self.layout_init()
         self.tray_init()
-        self.thread_pool = QThreadPool()
-        #
-        self.home_handler()
-        # 默认打开
+        G.thread_pool = self.thread_pool = QThreadPool()
+        self.installEventFilter(self)
+        # 主界面
+        self.widget = HomeWidget(self)
+        self.setCentralWidget(self.widget)
+        self.setting_widget = SettingWidget(self)
 
     def layout_init(self):
         self.setWindowFlags(Qt.FramelessWindowHint)  # 隐藏整个头部
@@ -36,28 +39,24 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def tray_init(self):
         icon = QIcon("app/resource/icon/bee.png")
         menu = QMenu()
-        settingAction = menu.addAction("设置")
-        exitAction = menu.addAction("退出")
-        settingAction.triggered.connect(self.menu_setting_handler)
-        exitAction.triggered.connect(self.quit)
+        settingAction = menu.addAction("⚙  设置")
+        exitAction = menu.addAction("❎  退出")
+        settingAction.triggered.connect(self.setting_handler)
+        exitAction.triggered.connect(self.close)
         self.tray = QSystemTrayIcon()
         self.tray.setIcon(icon)
         self.tray.setContextMenu(menu)
         self.tray.activated.connect(self.iconActivated)
         self.tray.show()
-        self.tray.setToolTip("bee box")
-
-    def home_handler(self):
-        self.widget = HomeWidget(self)
-        self.setCentralWidget(self.widget)
-
-    def menu_setting_handler(self):
-        self.show()
-        self.setting_handler()
+        self.tray.setToolTip("~ bee box")
 
     def setting_handler(self):
-        self.widget = SettingWidget(self)
-        self.setCentralWidget(self.widget)
+        self.setting_widget.show()
+
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.WindowDeactivate:
+            self.hide()
+        return super(self.__class__, self).eventFilter(watched, event)
 
     def iconActivated(self, reason):
         if reason in (QSystemTrayIcon.Trigger, QSystemTrayIcon.DoubleClick):
@@ -65,14 +64,3 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.show()
             else:
                 self.hide()
-
-    def quit(self):
-        self.exit_ = True
-        self.close()
-
-    def closeEvent(self, event: QCloseEvent):
-        if self.exit_:
-            event.accept()
-        else:
-            self.hide()
-            event.ignore()

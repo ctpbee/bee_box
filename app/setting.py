@@ -1,3 +1,4 @@
+from PySide2.QtGui import QCloseEvent
 from PySide2.QtWidgets import QWidget, QFileDialog
 from app.lib.global_var import G
 from app.ui.ui_setting import Ui_Setting
@@ -14,7 +15,6 @@ class SettingWidget(QWidget, Ui_Setting):
         ##  path
         self.py_path_box.currentIndexChanged.connect(self.py_path_change_slot)
         ## button
-        self.back_btn.clicked.connect(self.back_slot)
         self.py_path_btn.clicked.connect(self.py_path_slot)
         self.install_btn.clicked.connect(self.install_path_slot)
 
@@ -23,9 +23,6 @@ class SettingWidget(QWidget, Ui_Setting):
             self.py_path_box.addItem(i)
         self.py_path_box.setCurrentText(G.config.choice_python)
         self.install_path.setText(G.config.install_path)
-
-    def back_slot(self):
-        self.mainwindow.home_handler()
 
     def py_path_change_slot(self):
         path = self.py_path_box.currentText()
@@ -45,3 +42,7 @@ class SettingWidget(QWidget, Ui_Setting):
         if not path: return
         G.config.install_path = path
         self.install_path.setText(path)
+
+    def closeEvent(self, event: QCloseEvent):
+        self.hide()
+        event.ignore()

@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'home.ui',
 # licensing of 'home.ui' applies.
 #
-# Created: Fri Nov 15 16:14:42 2019
+# Created: Fri Nov 15 21:56:11 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -19,6 +19,14 @@ class Ui_Home(object):
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
         self.label = QtWidgets.QLabel(Home)
+        font = QtGui.QFont()
+        font.setFamily("Arial")
+        font.setPointSize(40)
+        font.setWeight(9)
+        font.setItalic(True)
+        font.setUnderline(False)
+        font.setBold(False)
+        self.label.setFont(font)
         self.label.setStyleSheet("font: 75 italic 40pt \"Arial\";\n"
 "")
         self.label.setObjectName("label")

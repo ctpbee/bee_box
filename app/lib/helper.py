@@ -46,4 +46,4 @@ def get_beebox_path():
 
 py_path = find_py_path()
 beebox_path = get_beebox_path()
-config_path = os.path.join(beebox_path, 'global_config.json')
+config_path = os.path.join(beebox_path, '.config.json')
