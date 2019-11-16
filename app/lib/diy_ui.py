@@ -37,14 +37,12 @@ class InstalledDiv:
 
 class AppDiv:
     """
-    +------1--------------2------------3--------+
-    |  +--------+                   +-----+     |
-    |  |  label | --label---name--  | open |    |
-    |  |  image |                   +------+    |
-    |  +--------+   --label----describe----     |
-    |                4                          |
-    |  ---progressBar-------     ---msg---------|
-    +-------------------------------------------+
+    +------1--------------2------------3-------------------+
+    |  +--------+                   +----------------+     |
+    |  |  label | --label---name--  | install|version |    |
+    |  |  image |                   +-----------------+    |
+    |  +--------+   --label----describe----                |
+    +------------------------------------------------------+
     """
 
     def __init__(self, widget):
@@ -60,10 +58,11 @@ class AppDiv:
         self.desc_layout.addWidget(self.name)
         self.desc_layout.addWidget(self.desc)
         ####  3
-        menu = QMenu(self.widget)
+        self.menu = QMenu(self.widget)
         self.action = QToolButton(self.widget)
         self.action.setPopupMode(QToolButton.MenuButtonPopup)
-        self.action.setMenu(menu)
+        self.action.setMenu(self.menu)
+
         ###
         self.app_layout.addWidget(self.icon)
         self.app_layout.addLayout(self.desc_layout)

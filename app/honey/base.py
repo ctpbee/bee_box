@@ -5,6 +5,11 @@ class Actions(dict):
     RUN = "run"
     CANCEL = "cancel"
 
+    @classmethod
+    def to_zn(cls, act):
+        map = {cls.INSTALL: "安装", cls.UNINSTALL: "卸载", cls.UPGRADE: "升级", cls.RUN: "启动", cls.CANCEL: "取消"}
+        return map[act]
+
 
 class BaseHoney:
     icon = ""  # 图标

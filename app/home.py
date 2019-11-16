@@ -22,30 +22,16 @@ class HomeWidget(QWidget, Ui_Home):
         for app_cls in all_app:
             app = app_cls(self, "apps", Actions.INSTALL)
             setattr(self, app.ui_name, app)
-            div = app.div
-            div.icon.setStyleSheet(f"image: url({app.icon});")
-            div.name.setText(app.name)
-            div.desc.setText(app.desc)
-            div.desc.url = app.app_url
-            div.action.setText(app.action)
-            div.action.clicked.connect(app.action_handler)
-            self.apps_layout.addLayout(div.layout)
+            self.apps_layout.addLayout(app.div.layout)
 
     @Slot(dict)
     def install_slot(self, data):
         app_cls = data['cls']
         action = data['action']
-        version = data['version']
         ##
         app = app_cls(self, 'installed', action)
         setattr(self, app.ui_name, app)
-        div = app.div
-        div.icon.setStyleSheet(f"image: url({app.icon});")
-        div.name.setText(app.name)
-        div.desc.setText(version)
-        div.action.setText(app.action)
-        div.action.clicked.connect(app.action_handler)
-        self.installed_layout.addLayout(div.layout)
+        self.installed_layout.addLayout(app.div.layout)
 
     def setting_click(self):
         self.mainwindow.setting_handler()
