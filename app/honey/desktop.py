@@ -7,7 +7,7 @@ from PySide2.QtCore import Slot
 from app.honey.base import BaseHoney, Actions
 from app.lib.global_var import G
 from app.lib.worker import Worker
-from app.lib.diy_ui import AppDiv
+from app.lib.diy_ui import AppDiv, InstalledDiv
 
 
 def format_size(bytes):
@@ -29,7 +29,7 @@ def format_size(bytes):
 
 
 class HDesktop(BaseHoney):
-    def __init__(self, widget, ui_name):
+    def __init__(self, widget, ui_name, action):
         self.widget = widget
         self.__ui_name = ui_name
         ##
@@ -42,8 +42,14 @@ class HDesktop(BaseHoney):
         self.desc = 'ctpbee桌面端'
         self.icon = "app/resource/icon/bee_temp_grey.png"
         ##
-        self.action = Actions.INSTALL  # 默认
-        self.div = AppDiv(self.widget)
+        self.action = action
+        self.div = self.div_init()
+
+    def div_init(self):
+        if self.action == Actions.INSTALL:
+            return AppDiv(self.widget)
+        elif self.action == Actions.RUN:
+            return InstalledDiv(self.widget)
 
     @property
     def ui_name(self):

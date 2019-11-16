@@ -1,6 +1,7 @@
 from PySide2.QtCore import Slot
 from PySide2.QtWidgets import QWidget
 
+from app.honey.base import Actions
 from app.ui.ui_home import Ui_Home
 from app.lib.global_var import G
 from app.honey import all_app
@@ -19,7 +20,7 @@ class HomeWidget(QWidget, Ui_Home):
     def ready_action(self):
         self.py_version.setText(G.config.choice_python)
         for app_cls in all_app:
-            app = app_cls(self, "apps")
+            app = app_cls(self, "apps", Actions.INSTALL)
             setattr(self, app.ui_name, app)
             div = app.div
             div.icon.setStyleSheet(f"image: url({app.icon});")
@@ -36,8 +37,7 @@ class HomeWidget(QWidget, Ui_Home):
         action = data['action']
         version = data['version']
         ##
-        app = app_cls(self, 'installed')
-        app.action = action
+        app = app_cls(self, 'installed', action)
         setattr(self, app.ui_name, app)
         div = app.div
         div.icon.setStyleSheet(f"image: url({app.icon});")

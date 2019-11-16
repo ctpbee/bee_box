@@ -1,6 +1,38 @@
 import webbrowser
 from PySide2.QtGui import QMouseEvent, QFont
-from PySide2.QtWidgets import QWidget, QPushButton, QLabel, QVBoxLayout, QHBoxLayout, QProgressBar
+from PySide2.QtWidgets import QWidget, QPushButton, QLabel, QVBoxLayout, QHBoxLayout, QProgressBar, QToolButton, QMenu, \
+    QAction
+
+
+class InstalledDiv:
+    """
+    +------1--------------2------------3------------------+
+    |  +--------+                   +-------------+  --   |
+    |  |  label | --label---name--  | open/update | |⚙|   |
+    |  |  image |                   +-------------+  --   |
+    |  +--------+   --label----version----                |
+    +-----------------------------------------------------+
+    """
+
+    def __init__(self, widget):
+        self.widget = widget
+        self.layout = QHBoxLayout()
+        ### 1
+        self.icon = QLabel(self.widget)
+        self.name = QLabel(self.widget)
+        self.version = QLabel(self.widget)
+        self.desc_layout = QVBoxLayout()
+        self.desc_layout.addWidget(self.name)
+        self.desc_layout.addWidget(self.version)
+        ####  3
+        self.action = QPushButton(self.widget)
+        ###
+        self.layout.addWidget(self.icon)
+        self.layout.addLayout(self.desc_layout)
+        self.layout.addWidget(self.action)
+        self.layout.setStretch(0, 3)
+        self.layout.setStretch(1, 5)
+        self.layout.setStretch(2, 2)
 
 
 class AppDiv:
@@ -28,7 +60,10 @@ class AppDiv:
         self.desc_layout.addWidget(self.name)
         self.desc_layout.addWidget(self.desc)
         ####  3
-        self.action = QPushButton(self.widget)
+        menu = QMenu(self.widget)
+        self.action = QToolButton(self.widget)
+        self.action.setPopupMode(QToolButton.MenuButtonPopup)
+        self.action.setMenu(menu)
         ###
         self.app_layout.addWidget(self.icon)
         self.app_layout.addLayout(self.desc_layout)

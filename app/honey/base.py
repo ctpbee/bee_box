@@ -7,15 +7,13 @@ class Actions(dict):
 
 
 class BaseHoney:
-    attrs = dict(
-        icon="",  # 图标
-        name="",  # 名称
-        desc="",  # 描述 | 版本
-        download_url="",  # 下载地址
-        app_url="",  # 应用官网
-        versions=[],  # 版本
-        action="",  # 按钮执行动作：安装/卸载/升级/运行
-    )
+    icon = ""  # 图标
+    name = ""  # 名称
+    desc = ""  # 描述 | 版本
+    download_url = ""  # 下载地址
+    app_url = ""  # 应用官网
+    versions = []  # 版本
+    action = ""  # 按钮执行动作：安装/卸载/升级/运行
 
     def download_handler(self):
         """下载处理"""
