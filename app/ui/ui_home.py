@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'home.ui',
 # licensing of 'home.ui' applies.
 #
-# Created: Fri Nov 15 21:56:11 2019
+# Created: Sat Nov 16 15:19:30 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -60,10 +60,16 @@ class Ui_Home(object):
         self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 438, 573))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
+        self.verticalLayout_6.setContentsMargins(0, -1, 0, -1)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
-        self.install_layout = QtWidgets.QVBoxLayout()
-        self.install_layout.setObjectName("install_layout")
-        self.verticalLayout_6.addLayout(self.install_layout)
+        self.installed_layout = QtWidgets.QVBoxLayout()
+        self.installed_layout.setObjectName("installed_layout")
+        self.verticalLayout_6.addLayout(self.installed_layout)
+        self.line = QtWidgets.QFrame(self.scrollAreaWidgetContents)
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setObjectName("line")
+        self.verticalLayout_6.addWidget(self.line)
         self.apps_layout = QtWidgets.QVBoxLayout()
         self.apps_layout.setObjectName("apps_layout")
         self.verticalLayout_6.addLayout(self.apps_layout)

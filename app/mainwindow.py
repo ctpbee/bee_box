@@ -1,6 +1,6 @@
 import sys
 
-from PySide2.QtCore import Qt, QThreadPool, QEvent, QObject
+from PySide2.QtCore import Qt, QThreadPool, QEvent, QObject, Signal
 from PySide2.QtGui import QIcon, QCloseEvent, QFocusEvent
 from PySide2.QtWidgets import QMainWindow, QSystemTrayIcon, QMenu, QDialog, \
     QDesktopWidget, QLabel, QProgressBar, QWidget
@@ -11,13 +11,21 @@ from app.home import HomeWidget
 from app.setting import SettingWidget
 
 
+class Job(QObject):
+    install_signal = Signal(dict)
+
+    def __init__(self):
+        super(self.__class__, self).__init__()
+
+
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(self.__class__, self).__init__()
         self.setupUi(self)
+        self.job = Job()
         self.layout_init()
         self.tray_init()
-        G.thread_pool = self.thread_pool = QThreadPool()
+        G.thread_pool = self.thread_pool = QThreadPool.globalInstance()
         self.installEventFilter(self)
         # 主界面
         self.widget = HomeWidget(self)
@@ -53,10 +61,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def setting_handler(self):
         self.setting_widget.show()
 
-    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
-        if event.type() == QEvent.WindowDeactivate:
-            self.hide()
-        return super(self.__class__, self).eventFilter(watched, event)
+    # def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+    #     if event.type() == QEvent.WindowDeactivate:
+    #         self.hide()
+    #     return super(self.__class__, self).eventFilter(watched, event)
 
     def iconActivated(self, reason):
         if reason in (QSystemTrayIcon.Trigger, QSystemTrayIcon.DoubleClick):
@@ -64,3 +72,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                 self.show()
             else:
                 self.hide()
+
+    def closeEvent(self, event: QCloseEvent):
+        G.pool_done = True
+        event.accept()
