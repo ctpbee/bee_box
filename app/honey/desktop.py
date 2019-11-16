@@ -56,6 +56,7 @@ class HDesktop(BaseHoney):
             content_length_s = response.headers.get('content-length')
             if not is_chunked and content_length_s.isdigit():
                 content_size = int(content_length_s)
+                self.div.progressbar.setRange(0, content_size)
             else:
                 content_size = None
             with open(self.install_path, "wb") as file:
@@ -64,19 +65,27 @@ class HDesktop(BaseHoney):
                     if not self.flag or G.pool_done:
                         self.action = Actions.INSTALL
                         self.div.progressbar.setVisible(False)
+                        self.div.progress_msg.setVisible(False)
                         self.div.action.setText(self.action)
                         return False
-                    file.write(data)
+                    file.write(data)  ##
                     self.count += 1
-                    speed = (chunk_size * self.count) / (time.time() - self.start_time)
-                    print("speed ", format_size(speed))
+                    ##show
+                    if content_size:
+                        self.div.progressbar.setValue((chunk_size * self.count))
+                        self.div.progress_msg.setText("download...")
+                    else:
+                        speed = format_size((chunk_size * self.count) / (time.time() - self.start_time))
+                        self.div.progress_msg.setText(speed + "/s")
         return True
 
     def on_download_success(self):
-        signal = dict(cls=self.__class__, action=Actions.RUN, version=self.versions.pop())
+        signal = dict(cls=self.__class__, action=Actions.RUN, version=self.versions[0])
         self.widget.mainwindow.job.install_signal.emit(signal)
         self.action = Actions.INSTALL
         self.div.action.setText(self.action)
+        self.div.progressbar.setVisible(False)
+        self.div.progress_msg.setVisible(False)
 
     def install_handler(self):
         pass
@@ -91,6 +100,8 @@ class HDesktop(BaseHoney):
             self.count = 0
             self.flag = True
             self.div.progressbar.setVisible(True)
+            self.div.progress_msg.setVisible(True)
+            self.div.progress_msg.setText("connect...")
             self.action = Actions.CANCEL
             self.div.action.setText(self.action)
             G.thread_pool.start(Worker(self.download_handler, callback=self.on_download_success))

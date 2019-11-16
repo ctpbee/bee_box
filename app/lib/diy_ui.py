@@ -10,6 +10,8 @@ class AppDiv:
     |  |  label | --label---name--  | open |    |
     |  |  image |                   +------+    |
     |  +--------+   --label----describe----     |
+    |                4                          |
+    |  ---progressBar-------     ---msg---------|
     +-------------------------------------------+
     """
 
@@ -34,15 +36,20 @@ class AppDiv:
         self.app_layout.setStretch(0, 3)
         self.app_layout.setStretch(1, 5)
         self.app_layout.setStretch(2, 2)
-        ##
+        ##  4
+        self.progress_layout = QHBoxLayout()
         self.progressbar = QProgressBar()
         self.progressbar.setFixedHeight(1)
         self.progressbar.setTextVisible(False)
         self.progressbar.setRange(0, 0)
         self.progressbar.setVisible(False)
+        self.progress_msg = QLabel(self.widget)
+        self.progress_msg.setVisible(False)
+        self.progress_layout.addWidget(self.progressbar)
+        self.progress_layout.addWidget(self.progress_msg)
         ###
         self.layout.addLayout(self.app_layout)
-        self.layout.addWidget(self.progressbar)
+        self.layout.addLayout(self.progress_layout)
 
 
 class MyLabel(QLabel):

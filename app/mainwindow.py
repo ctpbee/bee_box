@@ -38,11 +38,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         taskbar_height = self.desktop.screenGeometry().height() - self.desktop.availableGeometry().height()  # 任务栏高度
         self.move((self.desktop.availableGeometry().width() - self.width() - 15),
                   self.desktop.availableGeometry().height() - self.height() - taskbar_height + 30)  # 初始化位置到右下角
-        self.progressbar = QProgressBar()
-        self.progressbar.setFixedHeight(1)
-        self.progressbar.setRange(0, 0)
-        self.progressbar.setTextVisible(False)
-        self.statusBar.addPermanentWidget(self.progressbar, stretch=10)
+
 
     def tray_init(self):
         icon = QIcon("app/resource/icon/bee.png")
@@ -61,10 +57,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def setting_handler(self):
         self.setting_widget.show()
 
-    # def eventFilter(self, watched: QObject, event: QEvent) -> bool:
-    #     if event.type() == QEvent.WindowDeactivate:
-    #         self.hide()
-    #     return super(self.__class__, self).eventFilter(watched, event)
+    def eventFilter(self, watched: QObject, event: QEvent) -> bool:
+        if event.type() == QEvent.WindowDeactivate:
+            self.hide()
+        return super(self.__class__, self).eventFilter(watched, event)
 
     def iconActivated(self, reason):
         if reason in (QSystemTrayIcon.Trigger, QSystemTrayIcon.DoubleClick):
