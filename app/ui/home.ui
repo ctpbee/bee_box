@@ -40,9 +40,23 @@
      <item>
       <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Python版本:</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QLabel" name="py_version">
          <property name="text">
-          <string>Python版本</string>
+          <string>未选择</string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="Line" name="line_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
@@ -106,7 +120,7 @@
         <x>0</x>
         <y>0</y>
         <width>438</width>
-        <height>573</height>
+        <height>553</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -117,17 +131,37 @@
         <number>0</number>
        </property>
        <item>
-        <layout class="QVBoxLayout" name="installed_layout"/>
+        <layout class="QVBoxLayout" name="installed_layout">
+         <property name="spacing">
+          <number>20</number>
+         </property>
+        </layout>
        </item>
        <item>
         <widget class="Line" name="line">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>20</height>
+          </size>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
+         </property>
+         <property name="lineWidth">
+          <number>2</number>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
        <item>
-        <layout class="QVBoxLayout" name="apps_layout"/>
+        <layout class="QVBoxLayout" name="apps_layout">
+         <property name="spacing">
+          <number>20</number>
+         </property>
+        </layout>
        </item>
        <item>
         <spacer name="verticalSpacer_2">

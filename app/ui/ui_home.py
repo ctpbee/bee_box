@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'home.ui',
 # licensing of 'home.ui' applies.
 #
-# Created: Sat Nov 16 15:19:30 2019
+# Created: Tue Nov 19 13:13:27 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -33,9 +33,17 @@ class Ui_Home(object):
         self.horizontalLayout.addWidget(self.label)
         self.verticalLayout_3 = QtWidgets.QVBoxLayout()
         self.verticalLayout_3.setObjectName("verticalLayout_3")
+        self.label_2 = QtWidgets.QLabel(Home)
+        self.label_2.setObjectName("label_2")
+        self.verticalLayout_3.addWidget(self.label_2)
         self.py_version = QtWidgets.QLabel(Home)
         self.py_version.setObjectName("py_version")
         self.verticalLayout_3.addWidget(self.py_version)
+        self.line_2 = QtWidgets.QFrame(Home)
+        self.line_2.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line_2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line_2.setObjectName("line_2")
+        self.verticalLayout_3.addWidget(self.line_2)
         spacerItem = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
         self.verticalLayout_3.addItem(spacerItem)
         self.horizontalLayout.addLayout(self.verticalLayout_3)
@@ -57,20 +65,25 @@ class Ui_Home(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 438, 573))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 438, 553))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_6 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_6.setContentsMargins(0, -1, 0, -1)
         self.verticalLayout_6.setObjectName("verticalLayout_6")
         self.installed_layout = QtWidgets.QVBoxLayout()
+        self.installed_layout.setSpacing(20)
         self.installed_layout.setObjectName("installed_layout")
         self.verticalLayout_6.addLayout(self.installed_layout)
         self.line = QtWidgets.QFrame(self.scrollAreaWidgetContents)
+        self.line.setMinimumSize(QtCore.QSize(0, 20))
+        self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.line.setLineWidth(2)
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
         self.verticalLayout_6.addWidget(self.line)
         self.apps_layout = QtWidgets.QVBoxLayout()
+        self.apps_layout.setSpacing(20)
         self.apps_layout.setObjectName("apps_layout")
         self.verticalLayout_6.addLayout(self.apps_layout)
         spacerItem1 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Expanding)
@@ -85,6 +98,7 @@ class Ui_Home(object):
     def retranslateUi(self, Home):
         Home.setWindowTitle(QtWidgets.QApplication.translate("Home", "Form", None, -1))
         self.label.setText(QtWidgets.QApplication.translate("Home", "bee box", None, -1))
-        self.py_version.setText(QtWidgets.QApplication.translate("Home", "Python版本", None, -1))
+        self.label_2.setText(QtWidgets.QApplication.translate("Home", "Python版本:", None, -1))
+        self.py_version.setText(QtWidgets.QApplication.translate("Home", "未选择", None, -1))
         self.setting_btn.setText(QtWidgets.QApplication.translate("Home", "⚙", None, -1))
 

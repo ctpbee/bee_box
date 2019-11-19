@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icon">
-    <file>icon/bee.png</file>
+    <file>icon/bee_temp_grey.png</file>
+    <file>icon/CTPBEE.png</file>
   </qresource>
 </RCC>

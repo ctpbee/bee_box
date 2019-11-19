@@ -27,7 +27,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../resource/bee_box.qrc">
-    <normaloff>:/icon/icon/bee.png</normaloff>:/icon/icon/bee.png</iconset>
+    <normaloff>:/icon/icon/CTPBEE.png</normaloff>:/icon/icon/CTPBEE.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout"/>

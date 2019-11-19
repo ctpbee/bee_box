@@ -1,11 +1,14 @@
 import json
-from app.lib.helper import config_path
+from app.lib.path_lib import config_path
 
 
 class Config:
     python_path = {}
     choice_python = ""
     install_path = ""
+    installed_apps = {}
+    pypi_source = ""
+    pypi_use = True
 
     def __setattr__(self, key, value):
         self.__dict__[key] = value

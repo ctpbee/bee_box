@@ -1,49 +1,73 @@
+import gzip
 import os
 import re
-import platform
-
-platform_ = platform.system()
-
-pattern = "[P|p][Y|y][T|t][H|h][O|o][N|n]\d*"  # python
-pattern2 = "[P|p]ython\d*/$"  # python36/
-pattern3 = "[P|p]ython\d*\.{1}exe$"  # python37.exe
+import tarfile
+import zipfile
+import rarfile
 
 
-def get_py_version(path):
-    cmd = f"{path} --version"
-    v = os.popen(cmd).read().replace('\n', '').replace('\r', '')
-    return v
+def un_gz(filepath):
+    """un gz file"""
+    f_name = filepath.replace(".gz", "")
+    # 获取文件的名称，去掉
+    g_file = gzip.GzipFile(filepath)
+    # 创建gzip对象
+    open(f_name, "w+").write(g_file.read())
+    # gzip对象用read()打开后，写入open()建立的文件里。
+    g_file.close()
 
 
-def find_py_path():
-    res = {}
-    paths = os.environ['path'].split(';')
-
-    def matching(path):
-        if re.findall(pattern2, path):  # 匹配python文件夹
-            for item in os.listdir(path):
-                if re.findall(pattern3, item):
-                    return os.path.join(path, item)
-        elif re.findall(pattern3, path):  # 匹配python.exe
-            return path
-
-    for path in paths:
-        if re.findall(pattern, path):  # 筛选出含Python字眼的路径
-            path = path.replace('\\', '/')
-            p = matching(path)
-            if p:
-                res[get_py_version(p)] = p
-    return res
+def un_tar(filepath):
+    """un tar file"""
+    tar = tarfile.open(filepath)
+    names = tar.getnames()
+    folder = filepath.replace(".tar", "")
+    if os.path.isdir(folder):
+        pass
+    else:
+        os.mkdir(folder)
+    # 因为解压后是很多文件，预先建立同名目录
+    for name in names:
+        tar.extract(name, folder)
+    tar.close()
 
 
-def get_beebox_path():
-    usr_path = os.path.join(os.environ['HOMEDRIVE'] + os.environ['HOMEPATH'])
-    beebox_path = os.path.join(usr_path, '.bee_box')
-    if not os.path.exists(beebox_path):
-        os.mkdir(beebox_path)
-    return beebox_path
+def un_zip(filepath: str):
+    """un zip file"""
+    zip_file = zipfile.ZipFile(filepath)
+    folder = filepath.replace(".zip", "")
+    if os.path.isdir(folder):
+        pass
+    else:
+        os.mkdir(folder)
+    for names in zip_file.namelist():
+        zip_file.extract(names, folder)
+    zip_file.close()
 
 
-py_path = find_py_path()
-beebox_path = get_beebox_path()
-config_path = os.path.join(beebox_path, '.config.json')
+def un_rar(filepath):
+    """un rar file"""
+    rar = rarfile.RarFile(filepath)
+    folder = filepath.replace(".rar", "")
+    if os.path.isdir(folder):
+        pass
+    else:
+        os.mkdir(folder)
+    os.chdir(folder)
+    rar.extractall()
+    rar.close()
+
+
+def extract(filepath, postfix=""):
+    if not postfix:
+        postfix = re.findall('\.(zip|rar)', filepath)[0]
+    if postfix == 'zip':
+        un_zip(filepath)
+    elif postfix == 'rar':
+        un_rar(filepath)
+    elif postfix == 'tar':
+        un_tar(filepath)
+    else:
+        raise TypeError("Unknown Zip File Type")
+    if os.path.exists(filepath) and os.path.isfile(filepath):
+        os.remove(filepath)
