@@ -13,6 +13,10 @@
   <property name="windowTitle">
    <string>配置</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="../resource/bee_box.qrc">
+    <normaloff>:/icon/icon/CTPBEE.png</normaloff>:/icon/icon/CTPBEE.png</iconset>
+  </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
     <widget class="QScrollArea" name="scrollArea">
@@ -184,6 +188,8 @@
    </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resource/bee_box.qrc"/>
+ </resources>
  <connections/>
 </ui>
