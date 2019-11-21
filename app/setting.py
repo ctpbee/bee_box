@@ -1,7 +1,6 @@
 import os
 import re
 
-from PySide2.QtGui import QCloseEvent
 from PySide2.QtWidgets import QFileDialog, QDialog
 from app.lib.global_var import G
 from app.ui.ui_setting import Ui_Setting
