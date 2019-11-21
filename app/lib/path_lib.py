@@ -61,24 +61,14 @@ def find_py_path():
     res = {}
     paths = os.environ['path'].split(';')
 
-    def find_pip_path():
-        if os.path.exists(scripts_path) and os.path.isdir(scripts_path):
-            for i in os.listdir(scripts_path):
-                if re.match(pattern4, i):
-                    pip_path = os.path.join(scripts_path, i)
-                    res.setdefault(v, {})["pip_path"] = pip_path
-                    break
-
     for path in paths:
         if re.findall(pattern2, path):  # 筛选出含Python路径
-            scripts_path = os.path.join(path, 'Scripts')
             for item in os.listdir(path):
                 py_path = os.path.join(path, item)
                 if os.path.isfile(py_path):
                     if re.match(pattern3, item):
                         v = get_py_version(py_path)
-                        res.setdefault(v, {})["py_path"] = py_path
-                        find_pip_path()
+                        res[v] = py_path
                         break
     return res
 

@@ -16,7 +16,7 @@ class AppDiv:
     """
     +------1--------------2------------3-------------------+
     |  +--------+                   +----------------+     |
-    |  |  label | --label---name--  | install|version |    |
+    |  |  label | --label---name--  | install|version | ⚙ |
     |  |  image |                   +-----------------+    |
     |  +--------+   --label----describe----                |
     |                     4                                |
@@ -63,14 +63,8 @@ class AppDiv:
         self.progress_layout.addWidget(self.progressbar)
         self.progress_layout.addWidget(self.progress_msg)
 
-        # ##line
-        # self.line = QFrame(self.widget)
-        # self.line.setFrameShape(QFrame.HLine)
-        # self.line.setFrameShadow(QFrame.Sunken)
-        ###
         self.layout.addLayout(self.app_layout)
         self.layout.addLayout(self.progress_layout)
-
 
     def transfer(self, widget, func, *args):
         return {"widget": widget, "func": func, "args": args}

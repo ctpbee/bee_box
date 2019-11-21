@@ -25,10 +25,10 @@ class SettingWidget(QDialog, Ui_Setting):
 
     def ready_action(self):
         for i in G.config.python_path.values():
-            self.py_path_box.addItem(i['py_path'])
+            self.py_path_box.addItem(i)
         curr_py = G.config.python_path.get(G.config.choice_python)
         if curr_py:
-            self.py_path_box.setCurrentText(curr_py['py_path'])
+            self.py_path_box.setCurrentText(curr_py)
 
         self.install_path.setText(G.config.install_path)
 
@@ -50,7 +50,6 @@ class SettingWidget(QDialog, Ui_Setting):
     def py_path_slot(self):
         path, _ = QFileDialog.getOpenFileName(self, '选择文件', '', 'Python (*.exe))')
         if not path:
-            self.tip("py", False)
             return
         self.py_path_box.addItem(path)
         self.py_path_box.setCurrentText(path)
@@ -62,7 +61,9 @@ class SettingWidget(QDialog, Ui_Setting):
 
     def install_path_slot(self):
         path = QFileDialog.getExistingDirectory(self, "安装路径", beebox_path)
-        if path and os.path.exists(path) and os.path.isdir(path):
+        if not path:
+            return
+        if os.path.exists(path) and os.path.isdir(path):
             G.config.install_path = path
             self.install_path.setText(path)
             self.tip("install")
@@ -92,15 +93,11 @@ class SettingWidget(QDialog, Ui_Setting):
         for i, w in ss.items():
             if i == which:
                 if flag:
+                    w.setStyleSheet('color:Green')
                     w.setText("√ success")
                 else:
+                    w.setStyleSheet('color:Red')
                     w.setText("× error")
             else:
                 w.setText("")
 
-    def closeEvent(self, arg__1: QCloseEvent):
-        if G.config.choice_python:
-            arg__1.accept()
-        else:
-            self.tip('py', False)
-            arg__1.ignore()

@@ -4,6 +4,7 @@ import re
 import subprocess
 import time
 import requests
+from PySide2.QtCore import Signal, QThread
 from PySide2.QtWidgets import QAction, QMessageBox
 
 from app.lib.global_var import G
@@ -74,6 +75,8 @@ class Standard(object):
     install_version = ""  # 安装版本
     app_folder = ""  # 应用安装路径
     launch_cmd = ""  # 应用启动命令
+
+
 
     def __init__(self, **kwargs):
         self.cls_name = self.__class__.__name__
@@ -175,7 +178,6 @@ class Standard(object):
         except Exception as e:
             print(e)
             return False
-        ## with closing(requests.get(self.versions[self.install_version], stream=True)) as response:
         chunk_size = 1024  # 单次请求最大值
         is_chunked = response.headers.get('transfer-encoding', '') == 'chunked'
         content_length_s = response.headers.get('content-length')
@@ -246,8 +248,7 @@ class Standard(object):
             return
         ## 检查virtualenv
         py_version = G.config.python_path[G.config.choice_python]
-        python_ = py_version['py_path']
-        pip_ = py_version['pip_path']
+        python_ = py_version
         img_ = ["-i", G.config.pypi_source] if G.config.pypi_use else []
         virtualenv = "virtualenv"
         required = find_file(self.app_folder, build['requirement'])
@@ -259,12 +260,12 @@ class Standard(object):
             return False
         try:
             self._transfer("progress_msg", "setText", "检查环境中...")
-            cmd_ = [pip_, "list"]
+            cmd_ = [python_, "-m", "pip", "list"]
             out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
             # 检查virtualenv
             if virtualenv not in out_bytes.decode():
                 self._transfer("progress_msg", "setText", "安装virtualenv中...")
-                cmd_ = [pip_, "install", virtualenv] + img_
+                cmd_ = [python_, "-m", "install", virtualenv] + img_
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
                 kw = "Successfully installed virtualenv"
                 if kw not in out_bytes.decode():
@@ -274,14 +275,17 @@ class Standard(object):
             self._transfer("progress_msg", "setText", "创建虚拟环境中...")
             if self.cancel or G.pool_done:
                 return False
-            cmd_ = [virtualenv, "-p", python_, "--no-site-packages", join_path(self.app_folder, 'venv')]
-            out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
-            if "done" not in out_bytes.decode():
-                self.widget.mainwindow.job.msg_box_signal.emit({"msg": "虚拟环境创建失败."})
-                return
+            venv = join_path(self.app_folder, 'venv')
+            if not os.path.exists(venv):
+                cmd_ = [virtualenv, "-p", python_, "--no-site-packages", venv]
+                out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
+                if "done" not in out_bytes.decode():
+                    self.widget.mainwindow.job.msg_box_signal.emit({"msg": "虚拟环境创建失败."})
+                    return
             self._transfer("progress_msg", "setText", "安装依赖中...")
             # 安装依赖
             pip = join_path(self.app_folder, 'venv', 'Scripts', 'pip.exe')
+            print(pip)
             if not os.path.exists(pip):
                 self.widget.mainwindow.job.msg_box_signal.emit({"msg": "未找到" + pip})
                 return False
@@ -290,7 +294,7 @@ class Standard(object):
                 if self.cancel or G.pool_done:
                     return False
                 self._transfer("progress_msg", "setText", line.strip())
-                cmd_ = [pip, "install", line.strip()] + img_
+                cmd_ = [pip, "install", line] + img_
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
             # 安装成功
             return True
