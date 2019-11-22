@@ -5,7 +5,8 @@ import re
 import subprocess
 import time
 import requests
-from PySide2.QtCore import QThreadPool
+from PySide2.QtCore import QThreadPool, QUrl
+from PySide2.QtNetwork import QNetworkAccessManager, QNetworkRequest
 from PySide2.QtWidgets import QAction, QMessageBox
 
 from app.lib.global_var import G
@@ -101,7 +102,16 @@ def before_install(handler):
 def before_run(handler):
     @functools.wraps(handler)
     def wrap(self):
-        pass
+        self.thread_pool.start(Worker(handler, self))
+
+    return wrap
+
+
+def before_uninstall(handler):
+    @functools.wraps(handler)
+    def wrap(self):
+        self.div.progress_msg.setText("卸载中...")
+        self.thread_pool.start(Worker(handler, self))
 
     return wrap
 
@@ -178,7 +188,7 @@ class Standard(object):
     def version_action_triggered(self, q):
         """点击版本号直接下载"""
         self.install_version = q.text()
-        self.action = Actions.INSTALL
+        self.action = Actions.DOWNLOAD
         self.action_handler()
 
     def menu_action_triggered(self, q):
@@ -203,43 +213,41 @@ class Standard(object):
         file_name = res[0]
         return file_name, postfix
 
-    # @before_download
-    # def download_handler(self):
-    #     response = requests.get(self.versions[self.install_version], stream=True, params={})
-    #     try:
-    #         response.raise_for_status()
-    #         file_name, postfix = self.response_parse(response)
-    #         self.filepath_temp = os.path.join(G.config.install_path, file_name)  # 压缩文件
-    #         self.app_folder = self.filepath_temp.replace(postfix, '')  # 解压目录
-    #     except Exception as e:
-    #         print(e)
-    #         return False
-    #     chunk_size = 1024  # 单次请求最大值
-    #     is_chunked = response.headers.get('transfer-encoding', '') == 'chunked'
-    #     content_length_s = response.headers.get('content-length')
-    #     if not is_chunked and content_length_s.isdigit():
-    #         content_size = int(content_length_s)
-    #         self._transfer("progressbar", "setRange", 0, content_size)
-    #     else:
-    #         content_size = None
-    #     with open(self.filepath_temp, "wb") as file:
-    #         s = response.iter_content(chunk_size=chunk_size)
-    #         for data in s:
-    #             if self.cancel or G.pool_done:
-    #                 return False
-    #             file.write(data)  ##
-    #             self.count += 1
-    #             ##show
-    #             if content_size:
-    #                 current = chunk_size * self.count
-    #                 self._transfer("progressbar", "setValue", current)
-    #                 self._transfer("progress_msg", "setText", str(current * 100 // content_size) + '%')
-    #             else:
-    #                 speed = format_size((chunk_size * self.count) / (time.time() - self.start_time))
-    #                 self._transfer("progress_msg", "setText", speed + "/s")
-    #     return True
-
-
+    @before_download
+    def download_handler(self):
+        response = requests.get(self.versions[self.install_version], stream=True, params={})
+        try:
+            response.raise_for_status()
+            file_name, postfix = self.response_parse(response)
+            self.filepath_temp = os.path.join(G.config.install_path, file_name)  # 压缩文件
+            self.app_folder = self.filepath_temp.replace(postfix, '')  # 解压目录
+        except Exception as e:
+            print(e)
+            return False
+        chunk_size = 1024  # 单次请求最大值
+        is_chunked = response.headers.get('transfer-encoding', '') == 'chunked'
+        content_length_s = response.headers.get('content-length')
+        if not is_chunked and content_length_s.isdigit():
+            content_size = int(content_length_s)
+            self._transfer("progressbar", "setRange", 0, content_size)
+        else:
+            content_size = None
+        with open(self.filepath_temp, "wb") as file:
+            s = response.iter_content(chunk_size=chunk_size)
+            for data in s:
+                if self.cancel or G.pool_done:
+                    return False
+                file.write(data)  ##
+                self.count += 1
+                ##show
+                if content_size:
+                    current = chunk_size * self.count
+                    self._transfer("progressbar", "setValue", current)
+                    self._transfer("progress_msg", "setText", str(current * 100 // content_size) + '%')
+                else:
+                    speed = format_size((chunk_size * self.count) / (time.time() - self.start_time))
+                    self._transfer("progress_msg", "setText", speed + "/s")
+        return True
 
     def on_download_success(self):
         self.action = Actions.DOWNLOAD
@@ -360,7 +368,8 @@ class Standard(object):
         self.action = Actions.INSTALL
         self.div.action.setText(Actions.to_zn(self.action))
 
-    def on_run(self):
+    @before_run
+    def run_handler(self):
         try:
             cmd_ = self.launch_cmd
             subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
@@ -369,17 +378,11 @@ class Standard(object):
             code = e.returncode
             self._tip({"msg": out_bytes})
 
-    def run_handler(self):
-        self.thread_pool.start(Worker(self.on_run))
-
     def upgrade_handler(self):
         pass
 
+    @before_uninstall
     def uninstall_handler(self):
-        self.div.progress_msg.setText("卸载中...")
-        self.thread_pool.start(Worker(self.on_uninstall))
-
-    def on_uninstall(self):
         if os.path.exists(self.app_folder) and os.path.isdir(self.app_folder):
             import shutil
             try:
