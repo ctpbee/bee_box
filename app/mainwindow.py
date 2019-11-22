@@ -23,7 +23,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.job = Job()
         self.layout_init()
         self.tray_init()
-        self.thread_pool = G.thread_pool = QThreadPool.globalInstance()
         self.job.msg_box_signal.connect(self.msg_box_slot)
         # 主界面
         self.widget = HomeWidget(self)

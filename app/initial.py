@@ -5,8 +5,6 @@ from app.lib.global_var import G
 
 
 def box_init():
-    if not find_py_path():
-        raise FileNotFoundError("未找到Python")
     if not os.path.exists(config_path):
         open(config_path, 'w')
         G.config.python_path = find_py_path()

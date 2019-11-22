@@ -1,10 +1,11 @@
+import functools
 import json
 import os
 import re
 import subprocess
 import time
 import requests
-from PySide2.QtCore import Signal, QThread
+from PySide2.QtCore import QThreadPool
 from PySide2.QtWidgets import QAction, QMessageBox
 
 from app.lib.global_var import G
@@ -59,6 +60,52 @@ def format_size(bytes):
         return "%.3fK" % (kb)
 
 
+def before_download(handler):
+    @functools.wraps(handler)
+    def wrap(self):
+        self.cancel = False
+        for i in G.config.installed_apps.values():
+            if i['cls_name'] == self.cls_name and self.install_version == i['install_version']:
+                self._tip({"msg": "此版本已下载"})
+                return
+        self.start_time = time.time()
+        self.count = 0
+        self.div.progressbar.setVisible(True)
+        self.div.progress_msg.setVisible(True)
+        self.div.progress_msg.setText("获取中...")
+        self.action = Actions.CANCEL
+        self.div.action.setText(Actions.to_zn(self.action))
+        self.thread_pool.start(Worker(handler, self, succ_callback=self.on_download_success,
+                                      fail_callback=self.on_download_fail))
+
+    return wrap
+
+
+def before_install(handler):
+    @functools.wraps(handler)
+    def wrap(self):
+        if not G.config.choice_python:
+            self._tip({"msg": "未指定python版本"})
+            return
+        self.cancel = False
+        self.div.progressbar.setVisible(True)
+        self.div.progress_msg.setVisible(True)
+        self.action = Actions.CANCEL
+        self.div.action.setText(Actions.to_zn(self.action))
+        self.thread_pool.start(Worker(handler, self, succ_callback=self.on_install_success,
+                                      fail_callback=self.on_install_fail))
+
+    return wrap
+
+
+def before_run(handler):
+    @functools.wraps(handler)
+    def wrap(self):
+        pass
+
+    return wrap
+
+
 class Standard(object):
     """Action
     download ---|--> install --|-->  ==  run
@@ -76,16 +123,17 @@ class Standard(object):
     app_folder = ""  # 应用安装路径
     launch_cmd = ""  # 应用启动命令
 
-
-
     def __init__(self, **kwargs):
         self.cls_name = self.__class__.__name__
         self.widget = kwargs.pop('widget')
         self.__ui_name = kwargs.pop('ui_name')
         self.action = kwargs.pop('action')
         self.app_info(**kwargs)
+        self.thread_pool = QThreadPool()
         self.div = None
         self.div_init()
+        self.count = 0
+        self.start_time = 0
 
     def app_info(self, **kwargs):
         raise NotImplementedError
@@ -102,6 +150,9 @@ class Standard(object):
 
     def _transfer(self, widget, func, *args):
         self.div.job.div_signal.emit(self.div.transfer(widget, func, *args))
+
+    def _tip(self, msg):
+        self.widget.mainwindow.job.msg_box_signal.emit({"msg": str(msg)})
 
     def div_init(self):
         self.div = AppDiv(self.widget)
@@ -152,63 +203,50 @@ class Standard(object):
         file_name = res[0]
         return file_name, postfix
 
-    def download_handler(self):
-        self.cancel = False
-        for i in G.config.installed_apps.values():
-            if i['cls_name'] == self.cls_name and self.install_version == i['install_version']:
-                self.widget.mainwindow.job.msg_box_signal.emit({"msg": "此版本已下载"})
-                return
-        self.start_time = time.time()
-        self.count = 0
-        self.div.progressbar.setVisible(True)
-        self.div.progress_msg.setVisible(True)
-        self.div.progress_msg.setText("获取中...")
-        self.action = Actions.CANCEL
-        self.div.action.setText(Actions.to_zn(self.action))
-        G.thread_pool.start(Worker(self.on_download, succ_callback=self.on_download_success,
-                                   fail_callback=self.on_download_fail))
+    # @before_download
+    # def download_handler(self):
+    #     response = requests.get(self.versions[self.install_version], stream=True, params={})
+    #     try:
+    #         response.raise_for_status()
+    #         file_name, postfix = self.response_parse(response)
+    #         self.filepath_temp = os.path.join(G.config.install_path, file_name)  # 压缩文件
+    #         self.app_folder = self.filepath_temp.replace(postfix, '')  # 解压目录
+    #     except Exception as e:
+    #         print(e)
+    #         return False
+    #     chunk_size = 1024  # 单次请求最大值
+    #     is_chunked = response.headers.get('transfer-encoding', '') == 'chunked'
+    #     content_length_s = response.headers.get('content-length')
+    #     if not is_chunked and content_length_s.isdigit():
+    #         content_size = int(content_length_s)
+    #         self._transfer("progressbar", "setRange", 0, content_size)
+    #     else:
+    #         content_size = None
+    #     with open(self.filepath_temp, "wb") as file:
+    #         s = response.iter_content(chunk_size=chunk_size)
+    #         for data in s:
+    #             if self.cancel or G.pool_done:
+    #                 return False
+    #             file.write(data)  ##
+    #             self.count += 1
+    #             ##show
+    #             if content_size:
+    #                 current = chunk_size * self.count
+    #                 self._transfer("progressbar", "setValue", current)
+    #                 self._transfer("progress_msg", "setText", str(current * 100 // content_size) + '%')
+    #             else:
+    #                 speed = format_size((chunk_size * self.count) / (time.time() - self.start_time))
+    #                 self._transfer("progress_msg", "setText", speed + "/s")
+    #     return True
 
-    def on_download(self):
-        response = requests.get(self.versions[self.install_version], stream=True, params={})
-        try:
-            response.raise_for_status()
-            file_name, postfix = self.response_parse(response)
-            self.filepath_temp = os.path.join(G.config.install_path, file_name)  # 压缩文件
-            self.app_folder = self.filepath_temp.replace(postfix, '')  # 解压目录
-        except Exception as e:
-            print(e)
-            return False
-        chunk_size = 1024  # 单次请求最大值
-        is_chunked = response.headers.get('transfer-encoding', '') == 'chunked'
-        content_length_s = response.headers.get('content-length')
-        if not is_chunked and content_length_s.isdigit():
-            content_size = int(content_length_s)
-            self._transfer("progressbar", "setRange", 0, content_size)
-        else:
-            content_size = None
-        with open(self.filepath_temp, "wb") as file:
-            s = response.iter_content(chunk_size=chunk_size)
-            for data in s:
-                if self.cancel or G.pool_done:
-                    return False
-                file.write(data)  ##
-                self.count += 1
-                ##show
-                if content_size:
-                    current = chunk_size * self.count
-                    self._transfer("progressbar", "setValue", current)
-                    self._transfer("progress_msg", "setText", str(current * 100 // content_size) + '%')
-                else:
-                    speed = format_size((chunk_size * self.count) / (time.time() - self.start_time))
-                    self._transfer("progress_msg", "setText", speed + "/s")
-        return True
+
 
     def on_download_success(self):
         self.action = Actions.DOWNLOAD
         self._transfer("progressbar", "setVisible", False)
         self._transfer("progress_msg", "setVisible", False)
         self._transfer("action", "setText", Actions.to_zn(self.action))
-        G.thread_pool.start(Worker(extract, filepath=self.filepath_temp))
+        self.thread_pool.start(Worker(extract, filepath=self.filepath_temp))
         data = {"cls_name": self.cls_name,
                 "install_version": self.install_version,
                 "action": Actions.INSTALL,
@@ -229,50 +267,54 @@ class Standard(object):
         self._transfer("progress_msg", "setVisible", False)
         self._transfer("action", "setText", Actions.to_zn(self.action))
 
-    def on_install(self):
-        # 解析 build.json
+    @before_install
+    def install_handler(self):
+        """解析 build.json"""
         path = find_file(self.app_folder, 'build.json')
         if path:
             with open(path[0], 'r')as f:
                 build = json.load(f)
-            path = find_file(self.app_folder, build['entry'])
-            if path:
-                entry = path[0]
-                record = {"launch_cmd": [join_path(self.app_folder, "venv", "Scripts", "python.exe"), entry]}
-                G.config.installed_apps[self.pack_name].update(record)
-            else:
-                self.widget.mainwindow.job.msg_box_signal.emit({"msg": "build.json中未找到entry"})
+            try:
+                entry = find_file(self.app_folder, build['entry'])[0]
+                required = find_file(self.app_folder, build['requirement'])[0]
+            except KeyError:
+                self._tip('请确保build.json中含有entry和requirement')
                 return
+            except IndexError:
+                self._tip("未找到entry文件或requirement文件")
+                return
+            record = {"launch_cmd": [join_path(self.app_folder, "venv", "Scripts", "python.exe"), entry]}
+            G.config.installed_apps[self.pack_name].update(record)
+
         else:
-            self.widget.mainwindow.job.msg_box_signal.emit({"msg": "未找到文件build.json"})
+            self._tip("未找到文件build.json")
             return
-        ## 检查virtualenv
+
         py_version = G.config.python_path[G.config.choice_python]
         python_ = py_version
         img_ = ["-i", G.config.pypi_source] if G.config.pypi_use else []
         virtualenv = "virtualenv"
-        required = find_file(self.app_folder, build['requirement'])
-        if not required:
-            self.widget.mainwindow.job.msg_box_signal.emit({"msg": "build.json中未找到requirement"})
-            return
-        required = required[0]
         if self.cancel or G.pool_done:
             return False
         try:
+            ####
             self._transfer("progress_msg", "setText", "检查环境中...")
+            ####
             cmd_ = [python_, "-m", "pip", "list"]
             out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
-            # 检查virtualenv
             if virtualenv not in out_bytes.decode():
+                ####
                 self._transfer("progress_msg", "setText", "安装virtualenv中...")
+                ####
                 cmd_ = [python_, "-m", "install", virtualenv] + img_
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
                 kw = "Successfully installed virtualenv"
                 if kw not in out_bytes.decode():
                     self._transfer("progress_msg", "setText", "安装virtualenv失败.")
                     return
-            # 安装虚拟环境
+            ####
             self._transfer("progress_msg", "setText", "创建虚拟环境中...")
+            ####
             if self.cancel or G.pool_done:
                 return False
             venv = join_path(self.app_folder, 'venv')
@@ -280,14 +322,14 @@ class Standard(object):
                 cmd_ = [virtualenv, "-p", python_, "--no-site-packages", venv]
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
                 if "done" not in out_bytes.decode():
-                    self.widget.mainwindow.job.msg_box_signal.emit({"msg": "虚拟环境创建失败."})
+                    self._tip("虚拟环境创建失败.")
                     return
+            ####
             self._transfer("progress_msg", "setText", "安装依赖中...")
-            # 安装依赖
+            ####
             pip = join_path(self.app_folder, 'venv', 'Scripts', 'pip.exe')
-            print(pip)
             if not os.path.exists(pip):
-                self.widget.mainwindow.job.msg_box_signal.emit({"msg": "未找到" + pip})
+                self._tip("未找到" + pip)
                 return False
             f = open(required, 'r').readlines()
             for line in f:
@@ -296,12 +338,11 @@ class Standard(object):
                 self._transfer("progress_msg", "setText", line.strip())
                 cmd_ = [pip, "install", line] + img_
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
-            # 安装成功
             return True
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode()  # Output generated before error
             code = e.returncode
-            self.widget.mainwindow.job.msg_box_signal.emit({"msg": out_bytes})
+            self._tip(out_bytes)
             return False
 
     def on_install_success(self):
@@ -319,18 +360,6 @@ class Standard(object):
         self.action = Actions.INSTALL
         self.div.action.setText(Actions.to_zn(self.action))
 
-    def install_handler(self):
-        if not G.config.choice_python:
-            self.widget.mainwindow.job.msg_box_signal.emit({"msg": "未指定python版本"})
-            return
-        self.cancel = False
-        self.div.progressbar.setVisible(True)
-        self.div.progress_msg.setVisible(True)
-        self.action = Actions.CANCEL
-        self.div.action.setText(Actions.to_zn(self.action))
-        G.thread_pool.start(Worker(self.on_install, succ_callback=self.on_install_success,
-                                   fail_callback=self.on_install_fail))
-
     def on_run(self):
         try:
             cmd_ = self.launch_cmd
@@ -338,17 +367,17 @@ class Standard(object):
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode('utf8')  # Output generated before error
             code = e.returncode
-            self.widget.mainwindow.job.msg_box_signal.emit({"msg": out_bytes})
+            self._tip({"msg": out_bytes})
 
     def run_handler(self):
-        G.thread_pool.start(Worker(self.on_run))
+        self.thread_pool.start(Worker(self.on_run))
 
     def upgrade_handler(self):
         pass
 
     def uninstall_handler(self):
         self.div.progress_msg.setText("卸载中...")
-        G.thread_pool.start(Worker(self.on_uninstall))
+        self.thread_pool.start(Worker(self.on_uninstall))
 
     def on_uninstall(self):
         if os.path.exists(self.app_folder) and os.path.isdir(self.app_folder):
@@ -361,10 +390,11 @@ class Standard(object):
                 G.config.installed_apps.pop(self.pack_name)
                 G.config.to_file()
             except Exception as e:
-                self.widget.mainwindow.job.msg_box_signal.emit({"msg": str(e)})
+                self._tip({"msg": str(e)})
 
     def cancel_handler(self):
         self.cancel = True
+        self.thread_pool.waitForDone(1)
         self.div.progress_msg.setText("取消中...")
 
     def action_handler(self):
