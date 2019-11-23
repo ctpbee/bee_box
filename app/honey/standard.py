@@ -136,7 +136,6 @@ class Standard(object):
     def __init__(self, **kwargs):
         self.cls_name = self.__class__.__name__
         self.widget = kwargs.pop('widget')
-        self.__ui_name = kwargs.pop('ui_name')
         self.action = kwargs.pop('action')
         self.app_info(**kwargs)
         self.thread_pool = QThreadPool()
@@ -144,6 +143,7 @@ class Standard(object):
         self.div_init()
         self.count = 0
         self.start_time = 0
+        self.cancel = False
 
     def app_info(self, **kwargs):
         raise NotImplementedError
@@ -156,7 +156,7 @@ class Standard(object):
     @property
     def ui_name(self):
         """ui中id"""
-        return self.cls_name + "_" + self.__ui_name
+        return self.cls_name + "_app"
 
     def _transfer(self, widget, func, *args):
         self.div.job.div_signal.emit(self.div.transfer(widget, func, *args))
@@ -187,8 +187,9 @@ class Standard(object):
 
     def version_action_triggered(self, q):
         """点击版本号直接下载"""
+        if self.action == Actions.CANCEL:
+            return
         self.install_version = q.text()
-        self.action = Actions.DOWNLOAD
         self.action_handler()
 
     def menu_action_triggered(self, q):
@@ -247,6 +248,7 @@ class Standard(object):
                 else:
                     speed = format_size((chunk_size * self.count) / (time.time() - self.start_time))
                     self._transfer("progress_msg", "setText", speed + "/s")
+        extract(self.filepath_temp)
         return True
 
     def on_download_success(self):
@@ -254,7 +256,6 @@ class Standard(object):
         self._transfer("progressbar", "setVisible", False)
         self._transfer("progress_msg", "setVisible", False)
         self._transfer("action", "setText", Actions.to_zn(self.action))
-        self.thread_pool.start(Worker(extract, filepath=self.filepath_temp))
         data = {"cls_name": self.cls_name,
                 "install_version": self.install_version,
                 "action": Actions.INSTALL,
@@ -398,7 +399,7 @@ class Standard(object):
     def cancel_handler(self):
         self.cancel = True
         self.thread_pool.waitForDone(1)
-        self.div.progress_msg.setText("取消中...")
+        self.div.progress_msg.setText("正在释放资源...")
 
     def action_handler(self):
         if self.action == Actions.DOWNLOAD:

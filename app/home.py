@@ -34,12 +34,12 @@ class HomeWidget(QWidget, Ui_Home):
         # 已安装
         for pack_name, cfg in G.config.installed_apps.items():
             app_cls = all_app[cfg['cls_name']]
-            app = app_cls(widget=self, ui_name="installed", **cfg)
+            app = app_cls(widget=self, **cfg)
             setattr(self, app.pack_name, app)
             self.installed_layout.addLayout(app.div.layout)
         # 所有app
         for app_cls in all_app.values():
-            app = app_cls(widget=self, ui_name="app", action=Actions.DOWNLOAD)
+            app = app_cls(widget=self, action=Actions.DOWNLOAD)
             setattr(self, app.ui_name, app)
             self.apps_layout.addLayout(app.div.layout)
 
@@ -47,6 +47,6 @@ class HomeWidget(QWidget, Ui_Home):
     def add_installed_layout_slot(self, data):
         app_cls = all_app[data['cls_name']]
         ##
-        app = app_cls(widget=self, ui_name='installed', **data)
+        app = app_cls(widget=self, **data)
         setattr(self, app.pack_name, app)
         self.installed_layout.addLayout(app.div.layout)
