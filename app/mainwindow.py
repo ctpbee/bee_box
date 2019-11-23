@@ -10,6 +10,7 @@ from app.setting import SettingWidget
 
 class Job(QObject):
     msg_box_signal = Signal(dict)
+    log_signal = Signal(str)
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -23,6 +24,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.job = Job()
         self.layout_init()
         self.tray_init()
+<<<<<<< HEAD
+=======
+        # self.thread_pool = G.thread_pool = QThreadPool.globalInstance()
+>>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
         self.job.msg_box_signal.connect(self.msg_box_slot)
         # 主界面
         self.widget = HomeWidget(self)
@@ -77,6 +82,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def closeEvent(self, event: QCloseEvent):
         if self.quit_:
             G.pool_done = True
+            self.setting_widget.close()
             event.accept()
         else:
             self.hide()
