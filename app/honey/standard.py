@@ -5,12 +5,8 @@ import re
 import subprocess
 import time
 import requests
-<<<<<<< HEAD
 from PySide2.QtCore import QThreadPool, QUrl
 from PySide2.QtNetwork import QNetworkAccessManager, QNetworkRequest
-=======
-from PySide2.QtCore import Signal, QThread, QThreadPool
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
 from PySide2.QtWidgets import QAction, QMessageBox
 
 from app.lib.global_var import G
@@ -221,25 +217,6 @@ class Standard(object):
 
     @before_download
     def download_handler(self):
-<<<<<<< HEAD
-=======
-        self.cancel = False
-        for i in G.config.installed_apps.values():
-            if i['cls_name'] == self.cls_name and self.install_version == i['install_version']:
-                self._tip("发{self.install_version}版本已下载")
-                return
-        self.start_time = time.time()
-        self.count = 0
-        self.div.progressbar.setVisible(True)
-        self.div.progress_msg.setVisible(True)
-        self.div.progress_msg.setText("获取中...")
-        self.action = Actions.CANCEL
-        self.div.action.setText(Actions.to_zn(self.action))
-        self.thread_pool.start(Worker(self.on_download, succ_callback=self.on_download_success,
-                                      fail_callback=self.on_download_fail))
-
-    def on_download(self):
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
         response = requests.get(self.versions[self.install_version], stream=True, params={})
         try:
             response.raise_for_status()
@@ -278,10 +255,6 @@ class Standard(object):
         self._transfer("progressbar", "setVisible", False)
         self._transfer("progress_msg", "setVisible", False)
         self._transfer("action", "setText", Actions.to_zn(self.action))
-<<<<<<< HEAD
-=======
-        self.thread_pool.start(Worker(extract, filepath=self.filepath_temp))
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
         data = {"cls_name": self.cls_name,
                 "install_version": self.install_version,
                 "action": Actions.INSTALL,
@@ -309,7 +282,6 @@ class Standard(object):
         if path:
             with open(path[0], 'r')as f:
                 build = json.load(f)
-<<<<<<< HEAD
             try:
                 entry = find_file(self.app_folder, build['entry'])[0]
                 required = find_file(self.app_folder, build['requirement'])[0]
@@ -318,15 +290,6 @@ class Standard(object):
                 return
             except IndexError:
                 self._tip("未找到entry文件或requirement文件")
-=======
-            path = find_file(self.app_folder, build['entry'])
-            if path:
-                entry = path[0]
-                record = {"launch_cmd": [join_path(self.app_folder, "venv", "Scripts", "python.exe"), entry]}
-                G.config.installed_apps[self.pack_name].update(record)
-            else:
-                self._tip("build.json中未找到entry")
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
                 return
             record = {"launch_cmd": [join_path(self.app_folder, "venv", "Scripts", "python.exe"), entry]}
             G.config.installed_apps[self.pack_name].update(record)
@@ -339,16 +302,9 @@ class Standard(object):
         python_ = py_version
         img_ = ["-i", G.config.pypi_source] if G.config.pypi_use else []
         virtualenv = "virtualenv"
-<<<<<<< HEAD
         if self.cancel or G.pool_done:
             return False
-=======
-        required = find_file(self.app_folder, build['requirement'])
-        if not required:
-            self._tip("build.json中未找到requirement")
-            return
-        required = required[0]
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
+
         try:
             ####
             self._transfer("progress_msg", "setText", "检查环境中...")
@@ -367,12 +323,6 @@ class Standard(object):
                     return
             ####
             self._transfer("progress_msg", "setText", "创建虚拟环境中...")
-<<<<<<< HEAD
-            ####
-            if self.cancel or G.pool_done:
-                return False
-=======
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
             venv = join_path(self.app_folder, 'venv')
             if not os.path.exists(venv):
                 cmd_ = [virtualenv, "-p", python_, "--no-site-packages", venv]
@@ -414,53 +364,21 @@ class Standard(object):
         self.action = Actions.INSTALL
         self.div.action.setText(Actions.to_zn(self.action))
 
-<<<<<<< HEAD
     @before_run
     def run_handler(self):
-=======
-    def install_handler(self):
-        if not G.config.choice_python:
-            self._tip("未指定python版本")
-            return
-        self.cancel = False
-        self.div.progressbar.setVisible(True)
-        self.div.progress_msg.setVisible(True)
-        self.action = Actions.CANCEL
-        self.div.action.setText(Actions.to_zn(self.action))
-        self.thread_pool.start(Worker(self.on_install, succ_callback=self.on_install_success,
-                                      fail_callback=self.on_install_fail))
-
-    def on_run(self):
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
         try:
             cmd_ = self.launch_cmd
             subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode('utf8')  # Output generated before error
             code = e.returncode
-<<<<<<< HEAD
             self._tip({"msg": out_bytes})
-=======
-            self._tip(out_bytes)
-        except Exception as e:
-            self._tip(e)
-
-    def run_handler(self):
-        self.thread_pool.start(Worker(self.on_run))
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
 
     def upgrade_handler(self):
         pass
 
     @before_uninstall
     def uninstall_handler(self):
-<<<<<<< HEAD
-=======
-        self.div.progress_msg.setText("卸载中...")
-        self.thread_pool.start(Worker(self.on_uninstall))
-
-    def on_uninstall(self):
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
         if os.path.exists(self.app_folder) and os.path.isdir(self.app_folder):
             import shutil
             try:
@@ -471,20 +389,12 @@ class Standard(object):
                 G.config.installed_apps.pop(self.pack_name)
                 G.config.to_file()
             except Exception as e:
-<<<<<<< HEAD
                 self._tip({"msg": str(e)})
 
     def cancel_handler(self):
         self.cancel = True
         self.thread_pool.waitForDone(1)
         self.div.progress_msg.setText("正在释放资源...")
-=======
-                self._tip(e)
-
-    def cancel_handler(self):
-        self.div.progress_msg.setText("正在释放资源...")
-        self.thread_pool.waitForDone(1)
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
 
     def action_handler(self):
         if self.action == Actions.DOWNLOAD:

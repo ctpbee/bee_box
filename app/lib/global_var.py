@@ -34,8 +34,4 @@ class Config:
 
 class G(dict):
     config = Config()
-<<<<<<< HEAD
-=======
-    # thread_pool = None
->>>>>>> 354f01cfdfcf2f79f3bc88110ad721fe6a9cf0c5
     pool_done = False

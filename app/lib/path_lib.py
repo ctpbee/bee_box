@@ -74,7 +74,11 @@ def find_py_path():
 
 
 def get_beebox_path():
-    usr_path = os.path.join(os.environ['HOMEDRIVE'] + os.environ['HOMEPATH'])
+    import platform
+    if platform.system() == 'Windows':
+        usr_path = os.path.join(os.environ['HOMEDRIVE'] + os.environ['HOMEPATH'])
+    elif platform.system() == 'Linux':
+        usr_path = os.environ['HOME']
     beebox_path = os.path.join(usr_path, '.bee_box')
     if not os.path.exists(beebox_path):
         os.mkdir(beebox_path)
