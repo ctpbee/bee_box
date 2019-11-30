@@ -6,7 +6,7 @@ import subprocess
 import time
 import requests
 from PySide2.QtCore import QThreadPool
-from PySide2.QtWidgets import QAction
+from PySide2.QtWidgets import QAction, QWidget
 
 from app.lib.global_var import G
 from app.honey.worker import Worker
@@ -132,13 +132,12 @@ class Standard(object):
     app_folder = ""  # 应用安装路径
     launch_cmd = ""  # 应用启动命令
 
-    def __init__(self, **kwargs):
+    def __init__(self, widget: QWidget, **kwargs):
         self.cls_name = self.__class__.__name__
-        self.widget = kwargs.pop('widget')
-        self.action = kwargs.pop('action')
+        self.widget = widget
+        self.action = kwargs.get("action", Actions.DOWNLOAD)
         self.thread_pool = QThreadPool()
         self.app_info(**kwargs)
-        self.thread_pool = QThreadPool()
         self.div = None
         self.div_init()
         self.count = 0
@@ -158,7 +157,7 @@ class Standard(object):
         """ui中id"""
         return self.cls_name + "_app"
 
-    def _transfer(self, widget, func, *args):
+    def _transfer(self, widget: QWidget, func, *args):
         self.div.job.div_signal.emit(self.div.transfer(widget, func, *args))
 
     def _tip(self, msg):
@@ -173,17 +172,22 @@ class Standard(object):
         if self.action == Actions.DOWNLOAD:
             for i in self.versions.keys():
                 act = QAction(i, self.widget)
-                setattr(self.div, f"act_{i.replace('.', '_')}", act)
+                setattr(self.div, f"act_{'_'.join([j for j in i if i.isalnum()])}", act)
                 self.div.menu.addAction(act)
             self.div.menu.triggered[QAction].connect(self.version_action_triggered)
+            self.div.setting.hide()
             self.div.desc.setText(self.desc)
             self.div.desc.url = self.app_url  # 可点击
+            setattr(self, self.ui_name, self)
+            self.widget.apps_layout.addLayout(self.div.layout)
         elif self.action == Actions.INSTALL or self.action == Actions.RUN:
             act = QAction(Actions.to_zn(Actions.UNINSTALL), self.widget)
             setattr(self.div, f"act_uninstall", act)
             self.div.menu.addAction(act)
             self.div.menu.triggered[QAction].connect(self.menu_action_triggered)
             self.div.desc.setText(self.install_version)
+            setattr(self, self.pack_name, self)
+            self.widget.installed_layout.addLayout(self.div.layout)
 
     def version_action_triggered(self, q):
         """点击版本号直接下载"""
@@ -194,11 +198,8 @@ class Standard(object):
 
     def menu_action_triggered(self, q):
         """卸载/更新处理"""
-        act = Actions.to_en(q.text())
-        if act == Actions.UNINSTALL:
-            self.uninstall_handler()
-        elif act == Actions.UPGRADE:
-            self.upgrade_handler()
+        self.action = Actions.to_en(q.text())
+        self.action_handler()
 
     def response_parse(self, rsp):
         ct_map = ['application/zip', 'application/rar']
@@ -316,7 +317,7 @@ class Standard(object):
                 ####
                 self._transfer("progress_msg", "setText", "安装virtualenv中...")
                 ####
-                cmd_ = [python_, "-m", "install", virtualenv] + img_
+                cmd_ = [python_, "-m", "pip", "install", virtualenv] + img_
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
                 kw = "Successfully installed virtualenv"
                 if kw not in out_bytes.decode():
@@ -407,4 +408,7 @@ class Standard(object):
             self.install_handler()
         elif self.action == Actions.RUN:
             self.run_handler()
-        # UNINSTALL 在ToolButton Trigger中触发
+        elif self.action == Actions.UNINSTALL:
+            self.uninstall_handler()
+        elif self.action == Actions.UPGRADE:
+            self.upgrade_handler()

@@ -2,9 +2,6 @@ from app.honey.standard import Standard
 
 
 class Desktop(Standard):
-    def __init__(self, **kwargs):
-        super(self.__class__, self).__init__(**kwargs)
-
     def app_info(self, **kwargs):
         ##
         self.name = kwargs.get('name', "desktop")

@@ -4,9 +4,6 @@ from app.honey.standard import Standard
 
 
 class Client(Standard):
-    def __init__(self, **kwargs):
-        super(self.__class__, self).__init__(**kwargs)
-
     def app_info(self, **kwargs):
         ##
         self.name = kwargs.get('name', "client")
@@ -21,6 +18,4 @@ class Client(Standard):
         self.app_folder = kwargs.get('app_folder', '')
         self.launch_cmd = kwargs.get('launch_cmd', '')
 
-    def download_handler(self):
 
-        requests.get()

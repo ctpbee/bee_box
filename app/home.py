@@ -17,10 +17,11 @@ class HomeJob(QObject):
 
 
 qss = """
-QWidget,#setting_btn{
-background:#000000;
-color:#ffffff
+QWidget,#setting_btn,#app_setting_btn{
+background:#ffffff;
+color:#000000
 }
+
 #line,#line_2{
 background:#ffffff;
 }
@@ -53,19 +54,19 @@ class HomeWidget(QWidget, Ui_Home):
         self.setStyleSheet(qss)
         self.mainwindow = mainwindow
         self.job = HomeJob()
+        self.ready_action()
+
         ##  path
         self.py_path_box.currentIndexChanged.connect(self.py_path_change_slot)
         ## button
         self.py_path_btn.clicked.connect(self.py_path_slot)
         self.install_btn.clicked.connect(self.install_path_slot)
+        self.setting_btn.clicked.connect(self.setting_click)
+        self.back_btn.clicked.connect(self.back_slot)
         ## pypi
         self.pypi_checkBox.stateChanged.connect(self.pypi_use_slot)
         self.change_pypi_btn.clicked.connect(self.pypi_change_slot)
-        self.setting_btn.clicked.connect(self.setting_click)
-        self.back_btn.clicked.connect(self.back_slot)
         self.job.install_signal.connect(self.add_installed_layout_slot)
-        ## app
-        self.ready_action()
 
     def setting_click(self):
         self.stackedWidget.setCurrentIndex(1)
@@ -76,25 +77,23 @@ class HomeWidget(QWidget, Ui_Home):
     def ready_action(self):
         p_ = G.config.choice_python
         if p_: self.py_version.setText(p_)
+        self.load_setting()
+        self.init_ui()
+
+    def init_ui(self):
         # 添加布局
         # 已安装
-        for pack_name, cfg in G.config.installed_apps.items():
-            app_cls = all_app[cfg['cls_name']]
-            app = app_cls(widget=self, **cfg)
-            setattr(self, app.pack_name, app)
-            self.installed_layout.addLayout(app.div.layout)
+        [all_app[cfg['cls_name']](self, **cfg) for pack_name, cfg in G.config.installed_apps.items()]
         # 所有app
-        for app_cls in all_app.values():
-            app = app_cls(widget=self, action=Actions.DOWNLOAD)
-            setattr(self, app.ui_name, app)
-            self.apps_layout.addLayout(app.div.layout)
-        ##设置
+        [app_cls(self) for app_cls in all_app.values()]
+
+    def load_setting(self):
+        self.install_path.setText(G.config.install_path)
         for i in G.config.python_path.values():
             self.py_path_box.addItem(i)
         curr_py = G.config.python_path.get(G.config.choice_python)
         if curr_py:
             self.py_path_box.setCurrentText(curr_py)
-        self.install_path.setText(G.config.install_path)
 
     @Slot(dict)
     def add_installed_layout_slot(self, data):
@@ -143,3 +142,5 @@ class HomeWidget(QWidget, Ui_Home):
         i_ = self.pypi_source.text().strip()
         if i_ and re.match(r"^(https?://)?([\da-z\.-]+)\.([a-z\.]{2,6})([/\w .-]*)*/?$", i_):
             G.config.pypi_source = i_
+        else:
+            self.pypi_source.setText(G.config.pypi_source)

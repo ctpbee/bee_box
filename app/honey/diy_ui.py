@@ -2,7 +2,7 @@ import webbrowser
 
 from PySide2.QtCore import QObject, Signal, Qt
 from PySide2.QtGui import QMouseEvent, QFont
-from PySide2.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QProgressBar, QToolButton, QMenu, QFrame
+from PySide2.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QProgressBar, QToolButton, QMenu, QFrame, QPushButton
 
 
 class AppDivJob(QObject):
@@ -43,14 +43,20 @@ class AppDiv:
         self.action = QToolButton(self.widget)
         self.action.setPopupMode(QToolButton.MenuButtonPopup)
         self.action.setMenu(self.menu)
-
+        #
+        self.setting = QPushButton(self.widget)
+        self.setting.setText("⚙")
+        self.setting.setObjectName('app_setting_btn')
+        self.setting.clicked.connect(self.setting_slot)
         ###
         self.app_layout.addWidget(self.icon)
         self.app_layout.addLayout(self.desc_layout)
         self.app_layout.addWidget(self.action)
+        self.app_layout.addWidget(self.setting)
         self.app_layout.setStretch(0, 3)
-        self.app_layout.setStretch(1, 5)
+        self.app_layout.setStretch(1, 4)
         self.app_layout.setStretch(2, 2)
+        self.app_layout.setStretch(3, 1)
         ##  4
         self.progress_layout = QHBoxLayout()
         self.progressbar = QProgressBar()
@@ -67,7 +73,7 @@ class AppDiv:
         background-color: #1B89CA;  
     }  
         """)
-        self.progressbar.setFixedHeight(10)
+        self.progressbar.setFixedHeight(8)
         self.progressbar.setTextVisible(False)
         self.progressbar.setRange(0, 0)
         self.progressbar.setVisible(False)
@@ -86,6 +92,10 @@ class AppDiv:
         widget = getattr(self, data['widget'])
         func = getattr(widget, data['func'])
         func(*data['args'])
+
+    def setting_slot(self):
+        pass
+
 
 
 class MyLabel(QLabel):
