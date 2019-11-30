@@ -1,9 +1,11 @@
-from PySide2.QtCore import Slot, QObject, Signal
-from PySide2.QtWidgets import QWidget, QFileDialog
+from PySide2.QtCore import Slot, QObject, Signal, Qt
+from PySide2.QtGui import QColor
+from PySide2.QtWidgets import QWidget, QFileDialog, QTableWidget, QTableWidgetItem, QAbstractItemView, QMenu
 from app.lib.path_lib import get_py_version, beebox_path
 import os
 import re
 
+from app.py_manage import PyManageWidget
 from app.ui.ui_home import Ui_Home
 from app.lib.global_var import G
 from app.honey import all_app, Actions
@@ -33,6 +35,11 @@ QPushButton,QToolButton{
     border-radius:5px;  
     background: #1B89CA
 }
+QPushButton:disable,QToolButton:disable{
+background:#f0f0f0;
+color:#202020
+}
+
 QPushButton:hover,QToolButton:hover{
     background: #5CACEE  
 
@@ -54,12 +61,16 @@ class HomeWidget(QWidget, Ui_Home):
         self.setStyleSheet(qss)
         self.mainwindow = mainwindow
         self.job = HomeJob()
+        self.py_manager = PyManageWidget(self)
         self.ready_action()
-
-        ##  path
-        self.py_path_box.currentIndexChanged.connect(self.py_path_change_slot)
+        ##python_table
+        self.py_path_table.horizontalHeader().setStretchLastSection(True)
+        self.py_path_table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.py_path_table.verticalHeader().setVisible(False)
+        self.py_path_table.cellDoubleClicked.connect(self.py_path_click_slot)
+        self.py_path_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         ## button
-        self.py_path_btn.clicked.connect(self.py_path_slot)
+        self.add_py_path_btn.clicked.connect(self.add_py_path_slot)
         self.install_btn.clicked.connect(self.install_path_slot)
         self.setting_btn.clicked.connect(self.setting_click)
         self.back_btn.clicked.connect(self.back_slot)
@@ -76,7 +87,9 @@ class HomeWidget(QWidget, Ui_Home):
 
     def ready_action(self):
         p_ = G.config.choice_python
-        if p_: self.py_version.setText(p_)
+        if p_:
+            self.py_version.setText(p_)
+            self.curr_py_path.setText(p_)
         self.load_setting()
         self.init_ui()
 
@@ -89,40 +102,32 @@ class HomeWidget(QWidget, Ui_Home):
 
     def load_setting(self):
         self.install_path.setText(G.config.install_path)
-        for i in G.config.python_path.values():
-            self.py_path_box.addItem(i)
-        curr_py = G.config.python_path.get(G.config.choice_python)
-        if curr_py:
-            self.py_path_box.setCurrentText(curr_py)
+        for k, v in G.config.python_path.items():
+            self.py_path_table.insertRow(0)
+            self.py_path_table.setItem(0, 0, QTableWidgetItem(str(k)))
+            self.py_path_table.setItem(0, 1, QTableWidgetItem(str(v)))
 
     @Slot(dict)
     def add_installed_layout_slot(self, data):
         app_cls = all_app[data['cls_name']]
-        ##
-        app = app_cls(widget=self, **data)
-        setattr(self, app.pack_name, app)
-        self.installed_layout.addLayout(app.div.layout)
+        app_cls(widget=self, **data)
 
-    def py_path_change_slot(self):
-        path = self.py_path_box.currentText()
-        try:
-            version = get_py_version(path)
-        except:
-            return
-        G.config.choice_python = version
-        self.py_path_box.setCurrentText(path)
-        self.py_version.setText(version)
+    def py_path_click_slot(self, row, col):
+        name = self.py_path_table.item(row, 0).text()
+        path = self.py_path_table.item(row, 1).text()
+        if name == self.curr_py_path:
+            self.py_manager.check_btn.setDisabled(True)
+        self.py_manager.name.setText(name)
+        self.py_manager.path.setText(path)
+        self.py_manager.show()
 
-    def py_path_slot(self):
-        path, _ = QFileDialog.getOpenFileName(self, '选择文件', '', 'Python (*.exe))')
-        if not path:
-            return
-        self.py_path_box.addItem(path)
-        self.py_path_box.setCurrentText(path)
-        version = get_py_version(path)
-        G.config.python_path.update({version: path})
-        G.config.choice_python = version
-        self.py_version.setText(version)
+    def add_py_path_slot(self):
+        self.py_manager.name.setText("")
+        self.py_manager.path.setText("")
+        self.py_manager.save_btn.setDisabled(True)
+        self.py_manager.check_btn.setDisabled(True)
+        self.py_manager.del_btn.hide()
+        self.py_manager.show()
 
     def install_path_slot(self):
         path = QFileDialog.getExistingDirectory(self, "安装路径", beebox_path)
