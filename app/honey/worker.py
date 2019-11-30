@@ -1,7 +1,7 @@
-from PySide2.QtCore import Slot, QRunnable, QObject, Signal
+from PySide2.QtCore import Slot, QRunnable
 
 
-class Worker(QRunnable, QObject):
+class Worker(QRunnable):
     def __init__(self, fn, *args, **kwargs):
         super(self.__class__, self).__init__()
         self.setAutoDelete(True)

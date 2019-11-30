@@ -4,8 +4,8 @@ block_cipher = None
 
 
 a = Analysis(['bee_box.py'],
-             pathex=['D:\\GIT\\bee_box',
-             "D:\\GIT\\bee_box\\venv\\Lib\\site-packages\\shiboken2"],
+             pathex=['C:\\GIT\\bee_box',
+             "C:\\GIT\\bee_box\\venv\\Lib\\site-packages\\shiboken2"],
              binaries=[],
              datas=[],
              hiddenimports=[],
@@ -28,7 +28,7 @@ exe = EXE(pyz,
           strip=False,
           upx=True,
           console=False,
-          icon='D:\\GIT\\bee_box\\beebox.ico')
+          icon='C:\\GIT\\bee_box\\beebox.ico')
 coll = COLLECT(exe,
                a.binaries,
                a.zipfiles,

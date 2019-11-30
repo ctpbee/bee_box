@@ -5,12 +5,11 @@ import re
 import subprocess
 import time
 import requests
-from PySide2.QtCore import QThreadPool, QUrl
-from PySide2.QtNetwork import QNetworkAccessManager, QNetworkRequest
-from PySide2.QtWidgets import QAction, QMessageBox
+from PySide2.QtCore import QThreadPool
+from PySide2.QtWidgets import QAction
 
 from app.lib.global_var import G
-from app.lib.worker import Worker
+from app.honey.worker import Worker
 from app.honey.diy_ui import AppDiv
 from app.lib.helper import extract
 from app.lib.path_lib import find_file, join_path
@@ -237,6 +236,8 @@ class Standard(object):
         with open(self.filepath_temp, "wb") as file:
             s = response.iter_content(chunk_size=chunk_size)
             for data in s:
+                if self.cancel or G.pool_done:
+                    return False
                 file.write(data)  ##
                 self.count += 1
                 ##show
@@ -383,6 +384,7 @@ class Standard(object):
             import shutil
             try:
                 shutil.rmtree(self.app_folder)
+                self.div.layout.deleteLater()
                 for name, attr in self.div.__dict__.items():
                     if name != 'widget' and name != 'job':
                         attr.deleteLater()
