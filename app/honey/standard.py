@@ -5,7 +5,7 @@ import re
 import subprocess
 import time
 import requests
-from PySide2.QtCore import QThreadPool, QProcess, QStringListModel
+from PySide2.QtCore import QThreadPool
 from PySide2.QtWidgets import QAction, QWidget
 
 from app.lib.global_var import G
@@ -66,7 +66,7 @@ def before_download(handler):
         self.cancel = False
         for i in G.config.installed_apps.values():
             if i['cls_name'] == self.cls_name and self.install_version == i['install_version']:
-                self._tip({"msg": "此版本已下载"})
+                self._tip("此版本已下载")
                 return
         self.start_time = time.time()
         self.count = 0
