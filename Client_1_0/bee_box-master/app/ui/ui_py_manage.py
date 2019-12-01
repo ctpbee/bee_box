@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'py_manage.ui',
 # licensing of 'py_manage.ui' applies.
 #
-# Created: Sun Dec  1 12:54:42 2019
+# Created: Sat Nov 30 22:10:39 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,7 +13,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(377, 150)
+        Form.resize(377, 148)
         self.formLayout = QtWidgets.QFormLayout(Form)
         self.formLayout.setObjectName("formLayout")
         self.label = QtWidgets.QLabel(Form)
@@ -27,8 +27,8 @@ class Ui_Form(object):
         self.formLayout.setWidget(1, QtWidgets.QFormLayout.LabelRole, self.label_3)
         self.horizontalLayout = QtWidgets.QHBoxLayout()
         self.horizontalLayout.setObjectName("horizontalLayout")
-        self.path = QtWidgets.QLineEdit(Form)
-        self.path.setReadOnly(True)
+        self.path = QtWidgets.QLabel(Form)
+        self.path.setText("")
         self.path.setObjectName("path")
         self.horizontalLayout.addWidget(self.path)
         self.path_btn = QtWidgets.QToolButton(Form)

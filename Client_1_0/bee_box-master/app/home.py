@@ -61,6 +61,7 @@ class HomeWidget(QWidget, Ui_Home):
         self.setStyleSheet(qss)
         self.mainwindow = mainwindow
         self.job = HomeJob()
+        self.py_manager = PyManageWidget(self)
         self.ready_action()
         ##python_table
         self.py_path_table.horizontalHeader().setStretchLastSection(True)
@@ -109,20 +110,18 @@ class HomeWidget(QWidget, Ui_Home):
     @Slot(dict)
     def add_installed_layout_slot(self, data):
         app_cls = all_app[data['cls_name']]
-        app_cls(self, **data)
+        app_cls(widget=self, **data)
 
     def py_path_click_slot(self, row, col):
         name = self.py_path_table.item(row, 0).text()
         path = self.py_path_table.item(row, 1).text()
-        self.py_manager = PyManageWidget(self)
-        if name == G.config.choice_python:
+        if name == self.curr_py_path:
             self.py_manager.check_btn.setDisabled(True)
         self.py_manager.name.setText(name)
         self.py_manager.path.setText(path)
         self.py_manager.show()
 
     def add_py_path_slot(self):
-        self.py_manager = PyManageWidget(self)
         self.py_manager.name.setText("")
         self.py_manager.path.setText("")
         self.py_manager.save_btn.setDisabled(True)

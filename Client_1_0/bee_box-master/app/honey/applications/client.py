@@ -8,9 +8,10 @@ class Client(Standard):
         ##
         self.name = kwargs.get('name', "client")
         self.desc = kwargs.get('desc', 'ctpbee_client')
-        self.icon = kwargs.get('icon', ":/icon/icon/bee_temp_grey.png")
+        self.icon = kwargs.get('icon', ":/icon/icon/be2e.png")
         self.versions = kwargs.get('versions',
-                                   {"1.0": "https://github.com/ctpbee/bee_box/archive/master.zip"}
+                                   {"1.0": ["https://github.com/ctpbee/ctpbee_backend/archive/master.zip",
+                                            "https://github.com/ctpbee/ctpbee_frontend/archive/master.zip"]}
                                    )
         self.app_url = kwargs.get('app_url', "https://github.com/ctpbee/ctpbee_backend")
         self.install_version = kwargs.get('install_version', "1.0")

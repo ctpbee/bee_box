@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MainWindow</class>
+ <widget class="QMainWindow" name="MainWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>433</width>
+    <height>662</height>
+   </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>433</width>
+    <height>662</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>433</width>
+    <height>662</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>bee box</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../resource/bee_box.qrc">
+    <normaloff>:/icon/icon/CTPBEE.png</normaloff>:/icon/icon/CTPBEE.png</iconset>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QVBoxLayout" name="verticalLayout"/>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../resource/bee_box.qrc"/>
+ </resources>
+ <connections/>
+</ui>

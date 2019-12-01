@@ -5,13 +5,13 @@ import re
 import subprocess
 import time
 import requests
-from PySide2.QtCore import QThreadPool, QProcess, QStringListModel
+from PySide2.QtCore import QThreadPool
 from PySide2.QtWidgets import QAction, QWidget
 
 from app.lib.global_var import G
 from app.honey.worker import Worker
 from app.honey.diy_ui import AppDiv
-from app.lib.helper import extract, diff_pip
+from app.lib.helper import extract
 from app.lib.path_lib import find_file, join_path
 
 
@@ -70,7 +70,8 @@ def before_download(handler):
                 return
         self.start_time = time.time()
         self.count = 0
-        self._progress_show()
+        self.div.progressbar.setVisible(True)
+        self.div.progress_msg.setVisible(True)
         self.div.progress_msg.setText("获取中...")
         self.action = Actions.CANCEL
         self.div.action.setText(Actions.to_zn(self.action))
@@ -83,14 +84,14 @@ def before_download(handler):
 def before_install(handler):
     @functools.wraps(handler)
     def wrap(self):
-        # if not G.config.choice_python:
-        #     self._tip({"msg": "未指定python版本"})
-        #     return
-        # self.cancel = False
-        # self.div.progressbar.setVisible(True)
-        # self.div.progress_msg.setVisible(True)
-        # self.action = Actions.CANCEL
-        # self.div.action.setText(Actions.to_zn(self.action))
+        if not G.config.choice_python:
+            self._tip({"msg": "未指定python版本"})
+            return
+        self.cancel = False
+        self.div.progressbar.setVisible(True)
+        self.div.progress_msg.setVisible(True)
+        self.action = Actions.CANCEL
+        self.div.action.setText(Actions.to_zn(self.action))
         self.thread_pool.start(Worker(handler, self, succ_callback=self.on_install_success,
                                       fail_callback=self.on_install_fail))
 
@@ -129,16 +130,15 @@ class Standard(object):
     # installed
     install_version = ""  # 安装版本
     app_folder = ""  # 应用安装路径
-    entry = ""  # 启动文件
-    requirement = ""  # 依赖
+    launch_cmd = ""  # 应用启动命令
 
-    def __init__(self, parent: QWidget, **kwargs):
+    def __init__(self, widget: QWidget, **kwargs):
         self.cls_name = self.__class__.__name__
-        self.parent = parent
+        self.widget = widget
         self.action = kwargs.get("action", Actions.DOWNLOAD)
         self.thread_pool = QThreadPool()
         self.app_info(**kwargs)
-        self.div: AppDiv
+        self.div = None
         self.div_init()
         self.count = 0
         self.start_time = 0
@@ -157,44 +157,37 @@ class Standard(object):
         """ui中id"""
         return self.cls_name + "_app"
 
-    def _transfer(self, parent, func, *args):
-        self.div.job.div_signal.emit(self.div.transfer(parent, func, *args))
-
-    def _progress_hide(self):
-        self._transfer("progressbar", "setVisible", False)
-        self._transfer("progress_msg", "setVisible", False)
-
-    def _progress_show(self):
-        self._transfer("progressbar", "setVisible", True)
-        self._transfer("progress_msg", "setVisible", True)
+    def _transfer(self, widget: QWidget, func, *args):
+        self.div.job.div_signal.emit(self.div.transfer(widget, func, *args))
 
     def _tip(self, msg):
-        self.parent.mainwindow.job.msg_box_signal.emit({"msg": str(msg)})
+        self.widget.mainwindow.job.msg_box_signal.emit({"msg": str(msg)})
 
     def div_init(self):
-        self.div = AppDiv(self.parent)
+        self.div = AppDiv(self.widget)
         self.div.icon.setStyleSheet(f"image: url({self.icon});")
         self.div.name.setText(self.name)
         self.div.action.setText(Actions.to_zn(self.action))
         self.div.action.clicked.connect(self.action_handler)
         if self.action == Actions.DOWNLOAD:
             for i in self.versions.keys():
-                act = QAction(i, self.parent)
+                act = QAction(i, self.widget)
                 setattr(self.div, f"act_{'_'.join([j for j in i if i.isalnum()])}", act)
                 self.div.menu.addAction(act)
             self.div.menu.triggered[QAction].connect(self.version_action_triggered)
+            self.div.setting.hide()
             self.div.desc.setText(self.desc)
             self.div.desc.url = self.app_url  # 可点击
-            setattr(self.parent, self.ui_name, self)
-            self.parent.apps_layout.addLayout(self.div.layout)
-        elif self.action == Actions.RUN:
-            act = QAction(Actions.to_zn(Actions.UNINSTALL), self.parent)
+            setattr(self, self.ui_name, self)
+            self.widget.apps_layout.addLayout(self.div.layout)
+        elif self.action == Actions.INSTALL or self.action == Actions.RUN:
+            act = QAction(Actions.to_zn(Actions.UNINSTALL), self.widget)
             setattr(self.div, f"act_uninstall", act)
             self.div.menu.addAction(act)
             self.div.menu.triggered[QAction].connect(self.menu_action_triggered)
             self.div.desc.setText(self.install_version)
-            setattr(self.parent, self.pack_name, self)
-            self.parent.installed_layout.addLayout(self.div.layout)
+            setattr(self, self.pack_name, self)
+            self.widget.installed_layout.addLayout(self.div.layout)
 
     def version_action_triggered(self, q):
         """点击版本号直接下载"""
@@ -208,15 +201,28 @@ class Standard(object):
         self.action = Actions.to_en(q.text())
         self.action_handler()
 
+    def response_parse(self, rsp):
+        ct_map = ['application/zip', 'application/rar']
+        ct = rsp.headers.get('Content-Type')
+        if ct not in ct_map:
+            raise TypeError
+        cd = rsp.headers.get('Content-Disposition')
+        res = re.findall('(?<=filename=)(.*)', cd)
+        postfix = re.findall('\.zip|\.rar', cd)
+        if not res or not postfix:
+            raise Exception
+        postfix = postfix[0]
+        file_name = res[0]
+        return file_name, postfix
+
     @before_download
     def download_handler(self):
-        url = self.versions[self.install_version]
-        postfix = os.path.splitext(url)[-1]
-        self.app_folder = os.path.join(G.config.install_path, self.pack_name)
-        self.file_temp = self.app_folder + postfix  # 压缩文件
-        response = requests.get(url, stream=True, params={})
+        response = requests.get(self.versions[self.install_version], stream=True, params={})
         try:
             response.raise_for_status()
+            file_name, postfix = self.response_parse(response)
+            self.filepath_temp = os.path.join(G.config.install_path, file_name)  # 压缩文件
+            self.app_folder = self.filepath_temp.replace(postfix, '')  # 解压目录
         except Exception as e:
             print(e)
             return False
@@ -228,7 +234,7 @@ class Standard(object):
             self._transfer("progressbar", "setRange", 0, content_size)
         else:
             content_size = None
-        with open(self.file_temp, "wb") as file:
+        with open(self.filepath_temp, "wb") as file:
             s = response.iter_content(chunk_size=chunk_size)
             for data in s:
                 if self.cancel or G.pool_done:
@@ -243,31 +249,32 @@ class Standard(object):
                 else:
                     speed = format_size((chunk_size * self.count) / (time.time() - self.start_time))
                     self._transfer("progress_msg", "setText", speed + "/s")
+        extract(self.filepath_temp)
         return True
 
     def on_download_success(self):
-        extract(self.file_temp)  # 解压
         self.action = Actions.DOWNLOAD
-        self._progress_hide()
+        self._transfer("progressbar", "setVisible", False)
+        self._transfer("progress_msg", "setVisible", False)
         self._transfer("action", "setText", Actions.to_zn(self.action))
         data = {"cls_name": self.cls_name,
                 "install_version": self.install_version,
-                "action": Actions.RUN,
+                "action": Actions.INSTALL,
                 "app_folder": self.app_folder,
-                "entry": "",
-                "requirement": ""
+                "launch_cmd": ""
                 }
         record = {self.pack_name: data}
         G.config.installed_apps.update(record)
         G.config.to_file()
-        self.div.add_installed_layout(data)
+        self.widget.job.install_signal.emit(data)
 
     def on_download_fail(self):
         """隐藏进度条"""
-        self._progress_hide()
-        if os.path.exists(self.file_temp) and os.path.isfile(self.file_temp):
-            os.remove(self.file_temp)
+        if os.path.exists(self.filepath_temp) and os.path.isfile(self.filepath_temp):
+            os.remove(self.filepath_temp)
         self.action = Actions.DOWNLOAD
+        self._transfer("progressbar", "setVisible", False)
+        self._transfer("progress_msg", "setVisible", False)
         self._transfer("action", "setText", Actions.to_zn(self.action))
 
     @before_install
@@ -345,7 +352,8 @@ class Standard(object):
             return False
 
     def on_install_success(self):
-        self._progress_hide()
+        self._transfer("progress_msg", "setVisible", False)
+        self._transfer("progressbar", "setVisible", False)
         self.action = Actions.RUN
         record = {"action": Actions.RUN}
         G.config.installed_apps[self.pack_name].update(record)
@@ -353,80 +361,42 @@ class Standard(object):
         self._transfer("action", "setText", Actions.to_zn(self.action))
 
     def on_install_fail(self):
-        self._progress_hide()
+        self._transfer("progress_msg", "setVisible", False)
+        self._transfer("progressbar", "setVisible", False)
         self.action = Actions.INSTALL
         self.div.action.setText(Actions.to_zn(self.action))
-
-    def get_build(self):
-        """
-
-        :return:  path 路径
-        """
-        path = find_file(self.app_folder, 'build.json')
-        if path:
-            try:
-                with open(path[0], 'r')as f:
-                    build = json.load(f)
-                entry = find_file(self.app_folder, build['entry'])[0]
-                requirement = find_file(self.app_folder, build['requirement'])[0]
-            except KeyError:
-                self._tip('请确保build.json中含有entry和requirement')
-                return
-            except IndexError:
-                self._tip("未找到entry文件或requirement文件")
-                return
-            except json.JSONDecodeError:
-                self._tip("build.json 有错误")
-                return
-            return entry, requirement
-        else:
-            self._tip("未找到文件build.json")
-            return
 
     @before_run
     def run_handler(self):
         try:
-            entry, requirement = self.get_build()
-            py_ = G.config.python_path[G.config.choice_python]
-            ##检测依赖
-            output = subprocess.check_output([py_, "-m", 'pip', "freeze"]).decode()
-            output = output.splitlines()
-            with open(requirement, 'r') as f:
-                requirement = f.read().splitlines()
-            dissatisfy, version_less = diff_pip(output, requirement)
-            if dissatisfy:
-                self._tip(msg="\n".join(dissatisfy))
-                return
-            ##run
-            cmd = [py_, entry]
-            output = subprocess.check_output(cmd).decode()
+            cmd_ = self.launch_cmd
+            subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode('utf8')  # Output generated before error
             code = e.returncode
-            self._tip(out_bytes)
-        except TypeError:
-            pass
+            self._tip({"msg": out_bytes})
 
     def upgrade_handler(self):
         pass
 
     @before_uninstall
     def uninstall_handler(self):
-        import shutil
-        try:
-            if os.path.exists(self.app_folder) and os.path.isdir(self.app_folder):
+        if os.path.exists(self.app_folder) and os.path.isdir(self.app_folder):
+            import shutil
+            try:
                 shutil.rmtree(self.app_folder)
-        except Exception as e:
-            self._tip({"msg": str(e)})
-        finally:
-            for name, attr in self.div.__dict__.items():
-                if name != 'widget' and name != 'job':
-                    attr.deleteLater()
-            G.config.installed_apps.pop(self.pack_name, None)
-            G.config.to_file()
+                self.div.layout.deleteLater()
+                for name, attr in self.div.__dict__.items():
+                    if name != 'widget' and name != 'job':
+                        attr.deleteLater()
+                G.config.installed_apps.pop(self.pack_name)
+                G.config.to_file()
+            except Exception as e:
+                self._tip({"msg": str(e)})
 
     def cancel_handler(self):
         self.cancel = True
+        self.thread_pool.waitForDone(1)
         self.div.progress_msg.setText("正在释放资源...")
 
     def action_handler(self):
