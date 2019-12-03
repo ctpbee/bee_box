@@ -1,52 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>Form</class>
- <widget class="QWidget" name="Form">
+ <class>Modify</class>
+ <widget class="QWidget" name="Modify">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>910</width>
-    <height>578</height>
+    <width>424</width>
+    <height>130</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Python路径</string>
+   <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_3" stretch="0,9,0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
       <widget class="QLabel" name="label">
        <property name="text">
-        <string>Python解释器</string>
+        <string>名称</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QComboBox" name="py_box"/>
+      <widget class="QLineEdit" name="name"/>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="text">
+        <string>路径</string>
+       </property>
+      </widget>
      </item>
      <item>
-      <widget class="QToolButton" name="py_setting_btn">
+      <widget class="QLineEdit" name="path"/>
+     </item>
+     <item>
+      <widget class="QToolButton" name="path_btn">
        <property name="text">
-        <string>⚙</string>
+        <string>...</string>
        </property>
       </widget>
      </item>
     </layout>
    </item>
    <item>
-    <widget class="QLabel" name="path">
-     <property name="text">
-      <string/>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QListWidget" name="pip_list"/>
-   </item>
-   <item>
-    <layout class="QHBoxLayout" name="horizontalLayout">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
       <spacer name="horizontalSpacer">
        <property name="orientation">
@@ -61,9 +65,9 @@
       </spacer>
      </item>
      <item>
-      <widget class="QPushButton" name="ok_btn">
+      <widget class="QPushButton" name="save_btn">
        <property name="text">
-        <string>确定</string>
+        <string>保存</string>
        </property>
       </widget>
      </item>
@@ -75,6 +79,19 @@
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

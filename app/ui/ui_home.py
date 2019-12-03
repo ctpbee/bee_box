@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'home.ui',
 # licensing of 'home.ui' applies.
 #
-# Created: Sat Nov 30 21:13:44 2019
+# Created: Tue Dec  3 17:02:58 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -128,32 +128,12 @@ class Ui_Home(object):
         self.page.setObjectName("page")
         self.verticalLayout_7 = QtWidgets.QVBoxLayout(self.page)
         self.verticalLayout_7.setObjectName("verticalLayout_7")
-        self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
-        self.horizontalLayout_4.setObjectName("horizontalLayout_4")
-        self.label_3 = QtWidgets.QLabel(self.page)
-        self.label_3.setObjectName("label_3")
-        self.horizontalLayout_4.addWidget(self.label_3)
-        self.curr_py_path = QtWidgets.QLabel(self.page)
-        self.curr_py_path.setObjectName("curr_py_path")
-        self.horizontalLayout_4.addWidget(self.curr_py_path)
-        self.add_py_path_btn = QtWidgets.QToolButton(self.page)
-        self.add_py_path_btn.setObjectName("add_py_path_btn")
-        self.horizontalLayout_4.addWidget(self.add_py_path_btn)
-        self.horizontalLayout_4.setStretch(1, 9)
-        self.verticalLayout_7.addLayout(self.horizontalLayout_4)
-        self.py_path_table = QtWidgets.QTableWidget(self.page)
-        self.py_path_table.setObjectName("py_path_table")
-        self.py_path_table.setColumnCount(2)
-        self.py_path_table.setRowCount(0)
-        item = QtWidgets.QTableWidgetItem()
-        self.py_path_table.setHorizontalHeaderItem(0, item)
-        item = QtWidgets.QTableWidgetItem()
-        self.py_path_table.setHorizontalHeaderItem(1, item)
-
-        self.verticalLayout_7.addWidget(self.py_path_table)
+        self.py_manage_layout = QtWidgets.QVBoxLayout()
+        self.py_manage_layout.setObjectName("py_manage_layout")
+        self.verticalLayout_7.addLayout(self.py_manage_layout)
         self.toolBox.addItem(self.page, "")
         self.page_2 = QtWidgets.QWidget()
-        self.page_2.setGeometry(QtCore.QRect(0, 0, 188, 90))
+        self.page_2.setGeometry(QtCore.QRect(0, 0, 394, 511))
         self.page_2.setObjectName("page_2")
         self.verticalLayout_9 = QtWidgets.QVBoxLayout(self.page_2)
         self.verticalLayout_9.setObjectName("verticalLayout_9")
@@ -178,7 +158,7 @@ class Ui_Home(object):
         self.verticalLayout_9.addItem(spacerItem3)
         self.toolBox.addItem(self.page_2, "")
         self.page_3 = QtWidgets.QWidget()
-        self.page_3.setGeometry(QtCore.QRect(0, 0, 121, 88))
+        self.page_3.setGeometry(QtCore.QRect(0, 0, 394, 511))
         self.page_3.setObjectName("page_3")
         self.verticalLayout_8 = QtWidgets.QVBoxLayout(self.page_3)
         self.verticalLayout_8.setObjectName("verticalLayout_8")
@@ -210,11 +190,6 @@ class Ui_Home(object):
         self.py_version.setText(QtWidgets.QApplication.translate("Home", "未选择", None, -1))
         self.setting_btn.setText(QtWidgets.QApplication.translate("Home", "⚙", None, -1))
         self.back_btn.setText(QtWidgets.QApplication.translate("Home", "<<返回", None, -1))
-        self.label_3.setText(QtWidgets.QApplication.translate("Home", "当前:", None, -1))
-        self.curr_py_path.setText(QtWidgets.QApplication.translate("Home", "无", None, -1))
-        self.add_py_path_btn.setText(QtWidgets.QApplication.translate("Home", "➕ ", None, -1))
-        self.py_path_table.horizontalHeaderItem(0).setText(QtWidgets.QApplication.translate("Home", "name", None, -1))
-        self.py_path_table.horizontalHeaderItem(1).setText(QtWidgets.QApplication.translate("Home", "path", None, -1))
         self.toolBox.setItemText(self.toolBox.indexOf(self.page), QtWidgets.QApplication.translate("Home", "Python路径", None, -1))
         self.pypi_source.setText(QtWidgets.QApplication.translate("Home", "https://pypi.douban.com/simple", None, -1))
         self.change_pypi_btn.setText(QtWidgets.QApplication.translate("Home", "修改", None, -1))

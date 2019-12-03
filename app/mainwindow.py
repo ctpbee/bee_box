@@ -91,22 +91,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         else:
             self.hide()
             event.ignore()
-    #
-    # def mousePressEvent(self, event):
-    #     if event.button() == Qt.LeftButton:
-    #         self.m_flag = True
-    #         self.r_flag = False
-    #         self.m_Position = event.globalPos() - self.pos()  # 获取鼠标相对窗口的位置
-    #         event.accept()
-    #
-    # def mouseReleaseEvent(self, event):
-    #     self.r_flag = True
-    #     event.accept()
-    #
-    # def mouseMoveEvent(self, QMouseEvent):
-    #     try:
-    #         if Qt.LeftButton and self.m_flag and not self.r_flag:
-    #             self.move(QMouseEvent.globalPos() - self.m_Position)  # 更改窗口位置
-    #             QMouseEvent.accept()
-    #     except:
-    #         pass
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton:
+            self.m_flag = True
+            self.r_flag = False
+            self.m_Position = event.globalPos() - self.pos()  # 获取鼠标相对窗口的位置
+            event.accept()
+
+    def mouseReleaseEvent(self, event):
+        self.r_flag = True
+        event.accept()
+
+    def mouseMoveEvent(self, QMouseEvent):
+        try:
+            if Qt.LeftButton and self.m_flag and not self.r_flag:
+                self.move(QMouseEvent.globalPos() - self.m_Position)  # 更改窗口位置
+                QMouseEvent.accept()
+        except:
+            pass

@@ -61,15 +61,7 @@ class HomeWidget(QWidget, Ui_Home):
         self.setStyleSheet(qss)
         self.mainwindow = mainwindow
         self.job = HomeJob()
-        self.ready_action()
-        ##python_table
-        self.py_path_table.horizontalHeader().setStretchLastSection(True)
-        self.py_path_table.setSelectionBehavior(QAbstractItemView.SelectRows)
-        self.py_path_table.verticalHeader().setVisible(False)
-        self.py_path_table.cellDoubleClicked.connect(self.py_path_click_slot)
-        self.py_path_table.setEditTriggers(QAbstractItemView.NoEditTriggers)
         ## button
-        self.add_py_path_btn.clicked.connect(self.add_py_path_slot)
         self.install_btn.clicked.connect(self.install_path_slot)
         self.setting_btn.clicked.connect(self.setting_click)
         self.back_btn.clicked.connect(self.back_slot)
@@ -77,6 +69,7 @@ class HomeWidget(QWidget, Ui_Home):
         self.pypi_checkBox.stateChanged.connect(self.pypi_use_slot)
         self.change_pypi_btn.clicked.connect(self.pypi_change_slot)
         self.job.install_signal.connect(self.add_installed_layout_slot)
+        self.ready_action()
 
     def setting_click(self):
         self.stackedWidget.setCurrentIndex(1)
@@ -88,8 +81,7 @@ class HomeWidget(QWidget, Ui_Home):
         p_ = G.config.choice_python
         if p_:
             self.py_version.setText(p_)
-            self.curr_py_path.setText(p_)
-        self.load_setting()
+        # self.load_setting()
         self.init_ui()
 
     def init_ui(self):
@@ -98,6 +90,10 @@ class HomeWidget(QWidget, Ui_Home):
         [all_app[cfg['cls_name']](self, **cfg) for pack_name, cfg in G.config.installed_apps.items()]
         # 所有app
         [app_cls(self) for app_cls in all_app.values()]
+        # py_manage
+        self.py_manager = PyManageWidget(self)
+        self.py_manager.resize(self.mainwindow.size())
+        self.py_manage_layout.addWidget(self.py_manager)
 
     def load_setting(self):
         self.install_path.setText(G.config.install_path)
@@ -110,25 +106,6 @@ class HomeWidget(QWidget, Ui_Home):
     def add_installed_layout_slot(self, data):
         app_cls = all_app[data['cls_name']]
         app_cls(self, **data)
-
-    def py_path_click_slot(self, row, col):
-        name = self.py_path_table.item(row, 0).text()
-        path = self.py_path_table.item(row, 1).text()
-        self.py_manager = PyManageWidget(self)
-        if name == G.config.choice_python:
-            self.py_manager.check_btn.setDisabled(True)
-        self.py_manager.name.setText(name)
-        self.py_manager.path.setText(path)
-        self.py_manager.show()
-
-    def add_py_path_slot(self):
-        self.py_manager = PyManageWidget(self)
-        self.py_manager.name.setText("")
-        self.py_manager.path.setText("")
-        self.py_manager.save_btn.setDisabled(True)
-        self.py_manager.check_btn.setDisabled(True)
-        self.py_manager.del_btn.hide()
-        self.py_manager.show()
 
     def install_path_slot(self):
         path = QFileDialog.getExistingDirectory(self, "安装路径", beebox_path)
