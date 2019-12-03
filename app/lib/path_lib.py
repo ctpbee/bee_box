@@ -95,5 +95,13 @@ def get_install_path():
     return install_path
 
 
+def get_venv_path():
+    get_venv_path = os.path.join(beebox_path, 'venvs')
+    if not os.path.exists(get_venv_path):
+        os.mkdir(get_venv_path)
+    return get_venv_path
+
+
 install_path = get_install_path()
 config_path = os.path.join(beebox_path, '.config.json')
+venv_path = get_venv_path()

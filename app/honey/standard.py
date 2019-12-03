@@ -273,69 +273,14 @@ class Standard(object):
     @before_install
     def install_handler(self):
         """解析 build.json"""
-        path = find_file(self.app_folder, 'build.json')
-        if path:
-            with open(path[0], 'r')as f:
-                build = json.load(f)
-            try:
-                entry = find_file(self.app_folder, build['entry'])[0]
-                required = find_file(self.app_folder, build['requirement'])[0]
-            except KeyError:
-                self._tip('请确保build.json中含有entry和requirement')
-                return
-            except IndexError:
-                self._tip("未找到entry文件或requirement文件")
-                return
-            record = {"launch_cmd": [join_path(self.app_folder, "venv", "Scripts", "python.exe"), entry]}
-            G.config.installed_apps[self.pack_name].update(record)
-
-        else:
-            self._tip("未找到文件build.json")
-            return
-
-        py_version = G.config.python_path[G.config.choice_python]
-        python_ = py_version
-        img_ = ["-i", G.config.pypi_source] if G.config.pypi_use else []
-        virtualenv = "virtualenv"
-        if self.cancel or G.pool_done:
-            return False
-
         try:
-            ####
-            self._transfer("progress_msg", "setText", "检查环境中...")
-            ####
-            cmd_ = [python_, "-m", "pip", "list"]
-            out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
-            if virtualenv not in out_bytes.decode():
-                ####
-                self._transfer("progress_msg", "setText", "安装virtualenv中...")
-                ####
-                cmd_ = [python_, "-m", "pip", "install", virtualenv] + img_
-                out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
-                kw = "Successfully installed virtualenv"
-                if kw not in out_bytes.decode():
-                    self._transfer("progress_msg", "setText", "安装virtualenv失败.")
-                    return
-            ####
-            self._transfer("progress_msg", "setText", "创建虚拟环境中...")
-            venv = join_path(self.app_folder, 'venv')
-            if not os.path.exists(venv):
-                cmd_ = [virtualenv, "-p", python_, "--no-site-packages", venv]
-                out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
-                if "done" not in out_bytes.decode():
-                    self._tip("虚拟环境创建失败.")
-                    return
-            ####
-            self._transfer("progress_msg", "setText", "安装依赖中...")
-            ####
-            pip = join_path(self.app_folder, 'venv', 'Scripts', 'pip.exe')
-            if not os.path.exists(pip):
-                self._tip("未找到" + pip)
-                return False
+            _, required = self.get_build()
+            img_ = ["-i", G.config.pypi_source] if G.config.pypi_use else []
+            py_ = G.config.choice_python
             f = open(required, 'r').readlines()
             for line in f:
                 self._transfer("progress_msg", "setText", line.strip())
-                cmd_ = [pip, "install", line] + img_
+                cmd_ = [py_, "-m", "pip", "install", line] + img_
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
             return True
         except subprocess.CalledProcessError as e:
@@ -359,7 +304,6 @@ class Standard(object):
 
     def get_build(self):
         """
-
         :return:  path 路径
         """
         path = find_file(self.app_folder, 'build.json')
@@ -370,18 +314,14 @@ class Standard(object):
                 entry = find_file(self.app_folder, build['entry'])[0]
                 requirement = find_file(self.app_folder, build['requirement'])[0]
             except KeyError:
-                self._tip('请确保build.json中含有entry和requirement')
-                return
+                raise Exception('请确保build.json中含有entry和requirement')
             except IndexError:
-                self._tip("未找到entry文件或requirement文件")
-                return
+                raise Exception("未找到entry文件或requirement文件")
             except json.JSONDecodeError:
-                self._tip("build.json 有错误")
-                return
+                raise Exception("build.json 有错误")
             return entry, requirement
         else:
-            self._tip("未找到文件build.json")
-            return
+            raise Exception("未找到文件build.json")
 
     @before_run
     def run_handler(self):
@@ -406,6 +346,8 @@ class Standard(object):
             self._tip(out_bytes)
         except TypeError:
             pass
+        except Exception as e:
+            self._tip(str(e))
 
     def upgrade_handler(self):
         pass

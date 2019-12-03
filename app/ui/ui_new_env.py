@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'new_env.ui',
 # licensing of 'new_env.ui' applies.
 #
-# Created: Tue Dec  3 17:00:06 2019
+# Created: Tue Dec  3 19:00:33 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -25,11 +25,11 @@ class Ui_NewEnv(object):
         self.name.setObjectName("name")
         self.horizontalLayout.addWidget(self.name)
         self.verticalLayout_2.addLayout(self.horizontalLayout)
-        self.radioButton = QtWidgets.QRadioButton(NewEnv)
-        self.radioButton.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.radioButton.setChecked(True)
-        self.radioButton.setObjectName("radioButton")
-        self.verticalLayout_2.addWidget(self.radioButton)
+        self.env_radio = QtWidgets.QRadioButton(NewEnv)
+        self.env_radio.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.env_radio.setChecked(True)
+        self.env_radio.setObjectName("env_radio")
+        self.verticalLayout_2.addWidget(self.env_radio)
         self.verticalLayout = QtWidgets.QVBoxLayout()
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
@@ -55,23 +55,21 @@ class Ui_NewEnv(object):
         self.horizontalLayout_2.setStretch(1, 9)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.verticalLayout_2.addLayout(self.verticalLayout)
-        self.radioButton_2 = QtWidgets.QRadioButton(NewEnv)
-        self.radioButton_2.setLayoutDirection(QtCore.Qt.LeftToRight)
-        self.radioButton_2.setObjectName("radioButton_2")
-        self.verticalLayout_2.addWidget(self.radioButton_2)
+        self.exit_radio = QtWidgets.QRadioButton(NewEnv)
+        self.exit_radio.setLayoutDirection(QtCore.Qt.LeftToRight)
+        self.exit_radio.setObjectName("exit_radio")
+        self.verticalLayout_2.addWidget(self.exit_radio)
         self.horizontalLayout_4 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_4.setObjectName("horizontalLayout_4")
         self.label_4 = QtWidgets.QLabel(NewEnv)
         self.label_4.setObjectName("label_4")
         self.horizontalLayout_4.addWidget(self.label_4)
-        self.exis_path = QtWidgets.QLabel(NewEnv)
-        self.exis_path.setText("")
+        self.exis_path = QtWidgets.QLineEdit(NewEnv)
         self.exis_path.setObjectName("exis_path")
         self.horizontalLayout_4.addWidget(self.exis_path)
         self.exit_path_btn = QtWidgets.QToolButton(NewEnv)
         self.exit_path_btn.setObjectName("exit_path_btn")
         self.horizontalLayout_4.addWidget(self.exit_path_btn)
-        self.horizontalLayout_4.setStretch(1, 9)
         self.verticalLayout_2.addLayout(self.horizontalLayout_4)
         self.horizontalLayout_5 = QtWidgets.QHBoxLayout()
         self.horizontalLayout_5.setObjectName("horizontalLayout_5")
@@ -91,11 +89,11 @@ class Ui_NewEnv(object):
     def retranslateUi(self, NewEnv):
         NewEnv.setWindowTitle(QtWidgets.QApplication.translate("NewEnv", "Form", None, -1))
         self.label.setText(QtWidgets.QApplication.translate("NewEnv", "名称", None, -1))
-        self.radioButton.setText(QtWidgets.QApplication.translate("NewEnv", "新的虚拟环境", None, -1))
+        self.env_radio.setText(QtWidgets.QApplication.translate("NewEnv", "新的虚拟环境", None, -1))
         self.label_3.setText(QtWidgets.QApplication.translate("NewEnv", "位置", None, -1))
         self.path_btn.setText(QtWidgets.QApplication.translate("NewEnv", "...", None, -1))
         self.label_2.setText(QtWidgets.QApplication.translate("NewEnv", "基于", None, -1))
-        self.radioButton_2.setText(QtWidgets.QApplication.translate("NewEnv", "选取外部环境", None, -1))
+        self.exit_radio.setText(QtWidgets.QApplication.translate("NewEnv", "选取外部环境", None, -1))
         self.label_4.setText(QtWidgets.QApplication.translate("NewEnv", "位置", None, -1))
         self.exit_path_btn.setText(QtWidgets.QApplication.translate("NewEnv", "...", None, -1))
         self.ok_btn.setText(QtWidgets.QApplication.translate("NewEnv", "确定", None, -1))

@@ -236,11 +236,28 @@ color: rgb(254, 226, 2);</string>
           </property>
           <layout class="QVBoxLayout" name="verticalLayout_4">
            <item>
-            <widget class="QPushButton" name="back_btn">
-             <property name="text">
-              <string>&lt;&lt;返回</string>
-             </property>
-            </widget>
+            <layout class="QHBoxLayout" name="horizontalLayout_2">
+             <item>
+              <widget class="QPushButton" name="back_btn">
+               <property name="text">
+                <string>&lt;&lt;返回</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <spacer name="horizontalSpacer_2">
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <property name="sizeHint" stdset="0">
+                <size>
+                 <width>40</width>
+                 <height>20</height>
+                </size>
+               </property>
+              </spacer>
+             </item>
+            </layout>
            </item>
            <item>
             <widget class="QToolBox" name="toolBox">
@@ -253,7 +270,7 @@ color: rgb(254, 226, 2);</string>
                 <x>0</x>
                 <y>0</y>
                 <width>394</width>
-                <height>511</height>
+                <height>509</height>
                </rect>
               </property>
               <attribute name="label">
@@ -261,7 +278,24 @@ color: rgb(254, 226, 2);</string>
               </attribute>
               <layout class="QVBoxLayout" name="verticalLayout_7">
                <item>
-                <layout class="QVBoxLayout" name="py_manage_layout"/>
+                <widget class="QToolButton" name="py_manage_btn">
+                 <property name="text">
+                  <string>⚙</string>
+                 </property>
+                </widget>
+               </item>
+               <item>
+                <spacer name="verticalSpacer_3">
+                 <property name="orientation">
+                  <enum>Qt::Vertical</enum>
+                 </property>
+                 <property name="sizeHint" stdset="0">
+                  <size>
+                   <width>20</width>
+                   <height>40</height>
+                  </size>
+                 </property>
+                </spacer>
                </item>
               </layout>
              </widget>
@@ -271,7 +305,7 @@ color: rgb(254, 226, 2);</string>
                 <x>0</x>
                 <y>0</y>
                 <width>394</width>
-                <height>511</height>
+                <height>509</height>
                </rect>
               </property>
               <attribute name="label">
@@ -343,7 +377,7 @@ color: rgb(254, 226, 2);</string>
                 <x>0</x>
                 <y>0</y>
                 <width>394</width>
-                <height>511</height>
+                <height>509</height>
                </rect>
               </property>
               <attribute name="label">

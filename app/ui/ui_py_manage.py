@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'py_manage.ui',
 # licensing of 'py_manage.ui' applies.
 #
-# Created: Tue Dec  3 17:38:56 2019
+# Created: Tue Dec  3 19:48:19 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,7 +13,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
-        Form.resize(910, 578)
+        Form.resize(702, 578)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
@@ -43,9 +43,6 @@ class Ui_Form(object):
         self.ok_btn = QtWidgets.QPushButton(Form)
         self.ok_btn.setObjectName("ok_btn")
         self.horizontalLayout.addWidget(self.ok_btn)
-        self.cancel_btn = QtWidgets.QPushButton(Form)
-        self.cancel_btn.setObjectName("cancel_btn")
-        self.horizontalLayout.addWidget(self.cancel_btn)
         self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(Form)
@@ -55,6 +52,5 @@ class Ui_Form(object):
         Form.setWindowTitle(QtWidgets.QApplication.translate("Form", "Python路径", None, -1))
         self.label.setText(QtWidgets.QApplication.translate("Form", "Python解释器", None, -1))
         self.py_setting_btn.setText(QtWidgets.QApplication.translate("Form", "⚙", None, -1))
-        self.ok_btn.setText(QtWidgets.QApplication.translate("Form", "确定", None, -1))
-        self.cancel_btn.setText(QtWidgets.QApplication.translate("Form", "取消", None, -1))
+        self.ok_btn.setText(QtWidgets.QApplication.translate("Form", "设为当前解释器", None, -1))
 

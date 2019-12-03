@@ -65,6 +65,7 @@ class HomeWidget(QWidget, Ui_Home):
         self.install_btn.clicked.connect(self.install_path_slot)
         self.setting_btn.clicked.connect(self.setting_click)
         self.back_btn.clicked.connect(self.back_slot)
+        self.py_manage_btn.clicked.connect(self.py_manage_slot)
         ## pypi
         self.pypi_checkBox.stateChanged.connect(self.pypi_use_slot)
         self.change_pypi_btn.clicked.connect(self.pypi_change_slot)
@@ -91,9 +92,7 @@ class HomeWidget(QWidget, Ui_Home):
         # 所有app
         [app_cls(self) for app_cls in all_app.values()]
         # py_manage
-        self.py_manager = PyManageWidget(self)
-        self.py_manager.resize(self.mainwindow.size())
-        self.py_manage_layout.addWidget(self.py_manager)
+
 
     def load_setting(self):
         self.install_path.setText(G.config.install_path)
@@ -101,6 +100,12 @@ class HomeWidget(QWidget, Ui_Home):
             self.py_path_table.insertRow(0)
             self.py_path_table.setItem(0, 0, QTableWidgetItem(str(k)))
             self.py_path_table.setItem(0, 1, QTableWidgetItem(str(v)))
+
+    def py_manage_slot(self):
+        self.py_manage = PyManageWidget(self)
+        self.py_manage.show()
+
+
 
     @Slot(dict)
     def add_installed_layout_slot(self, data):

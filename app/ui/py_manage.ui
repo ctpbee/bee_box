@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>910</width>
+    <width>702</width>
     <height>578</height>
    </rect>
   </property>
@@ -63,14 +63,7 @@
      <item>
       <widget class="QPushButton" name="ok_btn">
        <property name="text">
-        <string>确定</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="cancel_btn">
-       <property name="text">
-        <string>取消</string>
+        <string>设为当前解释器</string>
        </property>
       </widget>
      </item>
