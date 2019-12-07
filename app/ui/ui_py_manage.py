@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'py_manage.ui',
 # licensing of 'py_manage.ui' applies.
 #
-# Created: Tue Dec  3 19:48:19 2019
+# Created: Sat Dec  7 18:20:13 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -36,14 +36,6 @@ class Ui_Form(object):
         self.pip_list = QtWidgets.QListWidget(Form)
         self.pip_list.setObjectName("pip_list")
         self.verticalLayout.addWidget(self.pip_list)
-        self.horizontalLayout = QtWidgets.QHBoxLayout()
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        spacerItem = QtWidgets.QSpacerItem(40, 20, QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
-        self.horizontalLayout.addItem(spacerItem)
-        self.ok_btn = QtWidgets.QPushButton(Form)
-        self.ok_btn.setObjectName("ok_btn")
-        self.horizontalLayout.addWidget(self.ok_btn)
-        self.verticalLayout.addLayout(self.horizontalLayout)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -52,5 +44,4 @@ class Ui_Form(object):
         Form.setWindowTitle(QtWidgets.QApplication.translate("Form", "Python路径", None, -1))
         self.label.setText(QtWidgets.QApplication.translate("Form", "Python解释器", None, -1))
         self.py_setting_btn.setText(QtWidgets.QApplication.translate("Form", "⚙", None, -1))
-        self.ok_btn.setText(QtWidgets.QApplication.translate("Form", "设为当前解释器", None, -1))
 

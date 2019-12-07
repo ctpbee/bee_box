@@ -213,7 +213,7 @@ class Standard(object):
         url = self.versions[self.install_version]
         postfix = os.path.splitext(url)[-1]
         self.app_folder = os.path.join(G.config.install_path, self.pack_name)
-        self.file_temp = self.app_folder + postfix  # 压缩文件
+        self.file_temp = self.app_folder + postfix  # 压缩文件路径
         response = requests.get(url, stream=True, params={})
         try:
             response.raise_for_status()
@@ -252,7 +252,7 @@ class Standard(object):
         self._transfer("action", "setText", Actions.to_zn(self.action))
         data = {"cls_name": self.cls_name,
                 "install_version": self.install_version,
-                "action": Actions.RUN,
+                "action": Actions.INSTALL,
                 "app_folder": self.app_folder,
                 "entry": "",
                 "requirement": ""
@@ -273,6 +273,7 @@ class Standard(object):
     @before_install
     def install_handler(self):
         """解析 build.json"""
+
         try:
             _, required = self.get_build()
             img_ = ["-i", G.config.pypi_source] if G.config.pypi_use else []
@@ -327,7 +328,7 @@ class Standard(object):
     def run_handler(self):
         try:
             entry, requirement = self.get_build()
-            py_ = G.config.python_path[G.config.choice_python]
+            py_ = G.config.installed_apps.get(self.pack_name).get('launch_py')
             ##检测依赖
             output = subprocess.check_output([py_, "-m", 'pip', "freeze"]).decode()
             output = output.splitlines()
@@ -362,7 +363,7 @@ class Standard(object):
             self._tip({"msg": str(e)})
         finally:
             for name, attr in self.div.__dict__.items():
-                if name != 'widget' and name != 'job':
+                if name not in self.div.not_widget:
                     attr.deleteLater()
             G.config.installed_apps.pop(self.pack_name, None)
             G.config.to_file()

@@ -2,7 +2,7 @@ import webbrowser
 
 from PySide2.QtCore import QObject, Signal, Qt
 from PySide2.QtGui import QMouseEvent, QFont
-from PySide2.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QProgressBar, QToolButton, QMenu, QFrame, QPushButton
+from PySide2.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QProgressBar, QToolButton, QMenu
 
 
 class AppDivJob(QObject):
@@ -23,6 +23,7 @@ class AppDiv:
     |  -------progressbar------------    ----progressmsg-- |
     +------------------------------------------------------+
     """
+    not_widget = ['not_widget', 'job', 'widget']
 
     def __init__(self, widget):
         self.widget = widget
@@ -53,19 +54,6 @@ class AppDiv:
         ##  4
         self.progress_layout = QHBoxLayout()
         self.progressbar = QProgressBar()
-        self.progressbar.setStyleSheet("""
-        QProgressBar {  
-    border-radius: 5px;  
-    text-align: center;  
-    border: 1px solid #5CACEE;  
-    }  
-      
-    QProgressBar::chunk {  
-        width: 2px;   
-        margin: 0.5px;  
-        background-color: #1B89CA;  
-    }  
-        """)
         self.progressbar.setFixedHeight(8)
         self.progressbar.setTextVisible(False)
         self.progressbar.setRange(0, 0)

@@ -4,7 +4,6 @@ from app.lib.path_lib import config_path
 
 class Config:
     python_path = {}
-    choice_python = ""
     install_path = ""
     installed_apps = {}
     pypi_source = ""
