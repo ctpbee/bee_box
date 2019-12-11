@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>668</height>
+    <width>601</width>
+    <height>537</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -28,11 +28,6 @@
         <layout class="QVBoxLayout" name="py_manage_layout"/>
        </item>
       </layout>
-     </widget>
-     <widget class="QWidget" name="tab_4">
-      <attribute name="title">
-       <string>应用管理</string>
-      </attribute>
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">

@@ -4,7 +4,8 @@ import subprocess
 
 from PySide2.QtCore import QThreadPool, QObject, Signal
 from PySide2.QtGui import QCloseEvent
-from PySide2.QtWidgets import QWidget, QFileDialog, QTableWidgetItem, QAbstractItemView, QMessageBox, QTableWidget
+from PySide2.QtWidgets import QWidget, QFileDialog, QTableWidgetItem, QAbstractItemView, QMessageBox, QTableWidget, \
+    QDialog
 
 from app.lib.global_var import G
 from app.lib.path_lib import get_py_version, join_path, venv_path
@@ -16,16 +17,24 @@ from app.honey.worker import Worker
 
 
 class PyManageWidget(QWidget, Ui_Form):
-    def __init__(self, home):
+    """python解释器以及pip包"""
+
+    def __init__(self, home, app_name=None):
         super(self.__class__, self).__init__()
         self.setupUi(self)
         self.home = home
         # btn
         self.py_setting_btn.clicked.connect(self.py_setting_slot)
+        self.set_app_py.clicked.connect(self.set_app_py_slot)
         #
         self.py_box.currentTextChanged.connect(self.py_change_slot)
         #
         self.load_py()
+        if not app_name:
+            self.app_name.hide()
+            self.set_app_py.hide()
+        else:
+            self.app_name.setText(app_name)
 
     def load_py(self):
         self.py_box.clear()
@@ -38,9 +47,14 @@ class PyManageWidget(QWidget, Ui_Form):
         for i in output.splitlines():
             self.pip_list.addItem(i)
 
+    def set_app_py_slot(self):
+        py_ = self.path.text()
+        G.config.installed_apps[self.app_name.text()].update({"py_": py_})
+        G.config.to_file()
+
     def py_setting_slot(self):
         self.interpreter = InterpreterWidget(self)
-        self.interpreter.show()
+        self.interpreter.exec_()
 
     def py_change_slot(self, name):
         if name.strip():
@@ -49,7 +63,9 @@ class PyManageWidget(QWidget, Ui_Form):
             self.load_pip(path)
 
 
-class InterpreterWidget(QWidget, Ui_Interpreters):
+class InterpreterWidget(QDialog, Ui_Interpreters):
+    """所有解释器list 列表"""
+
     def __init__(self, parent_widget):
         super(self.__class__, self).__init__()
         self.setupUi(self)
@@ -74,7 +90,7 @@ class InterpreterWidget(QWidget, Ui_Interpreters):
 
     def add_btn_slot(self):
         self.new_env = NewEnvWidget(self)
-        self.new_env.show()
+        self.new_env.exec_()
 
     def del_btn_slot(self):
         row = self.py_table.currentRow()
@@ -93,7 +109,7 @@ class InterpreterWidget(QWidget, Ui_Interpreters):
         name = self.py_table.item(row, 0).text()
         path = self.py_table.item(row, 1).text()
         self.modify_env = ModifyEnvWidget(self, name, path)
-        self.modify_env.show()
+        self.modify_env.exec_()
 
     def closeEvent(self, event):
         self.parent_widget.load_py()
@@ -107,7 +123,9 @@ class NewEnvObject(QObject):
         super(self.__class__, self).__init__()
 
 
-class NewEnvWidget(QWidget, Ui_NewEnv):
+class NewEnvWidget(QDialog, Ui_NewEnv):
+    """新建虚拟环境  或  导入外部环境"""
+
     def __init__(self, parent_widget):
         super(self.__class__, self).__init__()
         self.setupUi(self)
@@ -214,7 +232,9 @@ class NewEnvWidget(QWidget, Ui_NewEnv):
         event.accept()
 
 
-class ModifyEnvWidget(QWidget, Ui_Modify):
+class ModifyEnvWidget(QDialog, Ui_Modify):
+    """ 修改名称或解释器路径"""
+
     def __init__(self, parent_widget, name, path):
         super(self.__class__, self).__init__()
         self.setupUi(self)

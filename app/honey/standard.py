@@ -6,13 +6,14 @@ import subprocess
 import time
 import requests
 from PySide2.QtCore import QThreadPool
-from PySide2.QtWidgets import QAction, QWidget
+from PySide2.QtWidgets import QAction, QWidget, QMessageBox
 
 from app.lib.global_var import G
 from app.honey.worker import Worker
 from app.honey.diy_ui import AppDiv
 from app.lib.helper import extract, diff_pip
 from app.lib.path_lib import find_file, join_path
+from app.py_manage import PyManageWidget
 
 
 class Actions(dict):
@@ -100,8 +101,10 @@ def before_run(handler):
 def before_uninstall(handler):
     @functools.wraps(handler)
     def wrap(self):
-        self.div.progress_msg.setText("卸载中...")
-        self.thread_pool.start(Worker(handler, self))
+        replay = QMessageBox.information(self.parent, "提示", "确定删除吗?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if replay == QMessageBox.Yes:
+            self.div.progress_msg.setText("卸载中...")
+            self.thread_pool.start(Worker(handler, self))
 
     return wrap
 
@@ -118,23 +121,34 @@ class Standard(object):
     icon = ""  # 应用图标
     app_url = ""  # 应用地址
     versions = {}  # 应用版本及下载地址
+    lasted_ver = ""  # 最新版本
+
     # installed
-    install_version = ""  # 安装版本
+    install_version = ""  # 选择安装的版本
     app_folder = ""  # 应用安装路径
     entry = ""  # 启动文件
-    requirement = ""  # 依赖
+    py_ = ""  # 解释器
 
     def __init__(self, parent: QWidget, **kwargs):
         self.cls_name = self.__class__.__name__
         self.parent = parent
         self.action = kwargs.get("action", Actions.DOWNLOAD)
         self.thread_pool = QThreadPool()
-        self.app_info(**kwargs)
+        self.check(**kwargs)
         self.div: AppDiv
         self.div_init()
         self.count = 0
         self.start_time = 0
         self.cancel = False
+
+    def check(self, **kwargs):
+        """检查已下载应用参数"""
+
+        self.install_version = kwargs.get("install_version")  # 安装版本
+        self.app_folder = kwargs.get("app_folder")  # 应用安装路径
+        self.entry = kwargs.get("entry")  # 启动文件
+        self.py_ = kwargs.get("py_")  # 解释器
+        self.app_info(**kwargs)
 
     def app_info(self, **kwargs):
         raise NotImplementedError
@@ -180,9 +194,12 @@ class Standard(object):
             setattr(self.parent, self.ui_name, self)
             self.parent.apps_layout.addLayout(self.div.layout)
         elif self.action == Actions.RUN or self.action == Actions.INSTALL:
-            act = QAction(Actions.to_zn(Actions.UNINSTALL), self.parent)
-            setattr(self.div, f"act_uninstall", act)
-            self.div.menu.addAction(act)
+            act_uninstall = QAction(Actions.to_zn(Actions.UNINSTALL), self.parent)
+            act_setting = QAction("设置", self.parent)
+            setattr(self.div, f"act_uninstall", act_uninstall)
+            setattr(self.div, f"act_setting", act_setting)
+            self.div.menu.addAction(act_uninstall)
+            self.div.menu.addAction(act_setting)
             self.div.menu.triggered[QAction].connect(self.menu_action_triggered)
             self.div.desc.setText(self.install_version)
             setattr(self.parent, self.pack_name, self)
@@ -197,12 +214,17 @@ class Standard(object):
 
     def menu_action_triggered(self, q):
         """卸载/更新处理"""
-        self.action = Actions.to_en(q.text())
-        self.action_handler()
+        act = q.text()
+        if act == "设置":
+            self.py_manage = PyManageWidget(self.parent, self.pack_name)
+            self.py_manage.show()
+        elif Actions.to_en(act) == Actions.UNINSTALL:
+            self.action = Actions.UNINSTALL
+            self.action_handler()
 
     @before_download
     def download_handler(self):
-        url = self.versions[self.install_version]
+        url = self.versions[self.install_version or self.lasted_ver]
         postfix = os.path.splitext(url)[-1]  # .zip
         self.app_folder = os.path.join(G.config.install_path, self.pack_name)
         file_temp = self.app_folder + postfix  # 压缩文件路径
@@ -252,11 +274,10 @@ class Standard(object):
                 "install_version": self.install_version,
                 "action": Actions.INSTALL,
                 "app_folder": self.app_folder,
+                "py_": "",
                 "entry": "",
-                "requirement": ""
                 }
-        record = {self.pack_name: data}
-        G.config.installed_apps.update(record)
+        G.config.installed_apps.update({self.pack_name: data})
         G.config.to_file()
         self.div.add_installed_layout(data)
 
@@ -269,15 +290,13 @@ class Standard(object):
     @before_install
     def install_handler(self):
         """解析 build.json"""
-
         try:
-            _, required = self.get_build()
-            img_ = ["-i", G.config.pypi_source] if G.config.pypi_use else []
-            py_ = G.config.choice_python
+            self.entry, required = self.get_build()
+            img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
             f = open(required, 'r').readlines()
             for line in f:
                 self._transfer("progress_msg", "setText", line.strip())
-                cmd_ = [py_, "-m", "pip", "install", line] + img_
+                cmd_ = [self.py_, "-m", "pip", "install", line] + img_
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
             return True
         except subprocess.CalledProcessError as e:
@@ -289,7 +308,7 @@ class Standard(object):
     def on_install_success(self):
         self._progress_hide()
         self.action = Actions.RUN
-        record = {"action": Actions.RUN}
+        record = {"action": Actions.RUN, 'entry': self.entry}
         G.config.installed_apps[self.pack_name].update(record)
         G.config.to_file()
         self._transfer("action", "setText", Actions.to_zn(self.action))
@@ -324,7 +343,7 @@ class Standard(object):
     def run_handler(self):
         try:
             entry, requirement = self.get_build()
-            py_ = G.config.installed_apps.get(self.pack_name).get('launch_py')
+            py_ = G.config.installed_apps[self.pack_name]['py_']
             ##检测依赖
             output = subprocess.check_output([py_, "-m", 'pip', "freeze"]).decode()
             output = output.splitlines()

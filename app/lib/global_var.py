@@ -11,7 +11,6 @@ class Config:
 
     def __setattr__(self, key, value):
         self.__dict__[key] = value
-        self.to_file()
 
     def update(self, data: dict):
         for k, v in data.items():

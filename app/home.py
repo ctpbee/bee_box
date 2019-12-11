@@ -1,3 +1,4 @@
+from PySide2 import QtGui
 from PySide2.QtCore import Slot, QObject, Signal
 from PySide2.QtWidgets import QWidget
 from app.ui.ui_home import Ui_Home
@@ -81,3 +82,10 @@ class HomeWidget(QWidget, Ui_Home):
     def add_installed_layout_slot(self, data):
         app_cls = all_app[data['cls_name']]
         app_cls(self, **data)
+
+    def closeEvent(self, event: QtGui.QCloseEvent):
+        try:
+            self.setting_widget.close()
+        except:
+            pass
+        event.accept()

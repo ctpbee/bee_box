@@ -86,7 +86,10 @@ class MainWindow(QMainWindow, Ui_MainWindow):
     def closeEvent(self, event: QCloseEvent):
         if self.quit_:
             G.pool_done = True
-            self.setting_widget.close()
+            try:
+                self.widget.close()
+            except:
+                pass
             event.accept()
         else:
             self.hide()
