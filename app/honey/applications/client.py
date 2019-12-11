@@ -13,8 +13,7 @@ class Client(Standard):
                                    {"1.0": "https://github.com/ctpbee/bee_box/archive/master.zip"}
                                    )
         self.app_url = kwargs.get('app_url', "https://github.com/ctpbee/ctpbee_backend")
-        self.install_version = kwargs.get('install_version', "1.0")
-        self.app_folder = kwargs.get('app_folder', '')
-        self.launch_cmd = kwargs.get('launch_cmd', '')
+        self.lasted_ver = "1.0"
+
 
 

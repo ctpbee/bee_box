@@ -343,7 +343,13 @@ class Standard(object):
     def run_handler(self):
         try:
             entry, requirement = self.get_build()
+        except Exception as e:
+            return self._tip(str(e))
+        try:
             py_ = G.config.installed_apps[self.pack_name]['py_']
+        except Exception:
+            return self._tip("未选择Python解释器")
+        try:
             ##检测依赖
             output = subprocess.check_output([py_, "-m", 'pip', "freeze"]).decode()
             output = output.splitlines()
@@ -360,10 +366,6 @@ class Standard(object):
             out_bytes = e.output.decode('utf8')  # Output generated before error
             code = e.returncode
             self._tip(out_bytes)
-        except TypeError:
-            pass
-        except Exception as e:
-            self._tip(str(e))
 
     def upgrade_handler(self):
         pass
