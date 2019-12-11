@@ -54,7 +54,7 @@ class AppDiv:
         ##  4
         self.progress_layout = QHBoxLayout()
         self.progressbar = QProgressBar()
-        self.progressbar.setFixedHeight(8)
+        self.progressbar.setFixedHeight(5)
         self.progressbar.setTextVisible(False)
         self.progressbar.setRange(0, 0)
         self.progressbar.setVisible(False)

@@ -83,14 +83,6 @@ def before_download(handler):
 def before_install(handler):
     @functools.wraps(handler)
     def wrap(self):
-        # if not G.config.choice_python:
-        #     self._tip({"msg": "未指定python版本"})
-        #     return
-        # self.cancel = False
-        # self.div.progressbar.setVisible(True)
-        # self.div.progress_msg.setVisible(True)
-        # self.action = Actions.CANCEL
-        # self.div.action.setText(Actions.to_zn(self.action))
         self.thread_pool.start(Worker(handler, self, succ_callback=self.on_install_success,
                                       fail_callback=self.on_install_fail))
 
@@ -187,7 +179,7 @@ class Standard(object):
             self.div.desc.url = self.app_url  # 可点击
             setattr(self.parent, self.ui_name, self)
             self.parent.apps_layout.addLayout(self.div.layout)
-        elif self.action == Actions.RUN:
+        elif self.action == Actions.RUN or self.action == Actions.INSTALL:
             act = QAction(Actions.to_zn(Actions.UNINSTALL), self.parent)
             setattr(self.div, f"act_uninstall", act)
             self.div.menu.addAction(act)
@@ -211,42 +203,48 @@ class Standard(object):
     @before_download
     def download_handler(self):
         url = self.versions[self.install_version]
-        postfix = os.path.splitext(url)[-1]
+        postfix = os.path.splitext(url)[-1]  # .zip
         self.app_folder = os.path.join(G.config.install_path, self.pack_name)
-        self.file_temp = self.app_folder + postfix  # 压缩文件路径
-        response = requests.get(url, stream=True, params={})
+        file_temp = self.app_folder + postfix  # 压缩文件路径
+        ##
+        if os.path.exists(file_temp):
+            local_file = os.path.getsize(file_temp)
+            headers = {'Range': 'bytes=%d-' % local_file}
+            mode = 'ab'
+        else:
+            local_file = 0
+            headers = {}
+            mode = 'wb'
+        # download
+        response = requests.get(url, stream=True, headers=headers)
         try:
             response.raise_for_status()
         except Exception as e:
-            print(e)
             return False
-        chunk_size = 1024  # 单次请求最大值
-        is_chunked = response.headers.get('transfer-encoding', '') == 'chunked'
-        content_length_s = response.headers.get('content-length')
-        if not is_chunked and content_length_s.isdigit():
-            content_size = int(content_length_s)
-            self._transfer("progressbar", "setRange", 0, content_size)
-        else:
-            content_size = None
-        with open(self.file_temp, "wb") as file:
-            s = response.iter_content(chunk_size=chunk_size)
-            for data in s:
-                if self.cancel or G.pool_done:
+        content_size = response.headers.get('Content-Length', 0)
+        self._transfer("progressbar", "setRange", 0, content_size)
+        # save
+        with open(file_temp, mode) as file:
+            chunk_size = 1024
+            for data in response.iter_content(chunk_size=chunk_size):
+                if data and self.cancel or G.pool_done:
                     return False
                 file.write(data)  ##
                 self.count += 1
                 ##show
+                current = chunk_size * self.count + local_file
+
                 if content_size:
-                    current = chunk_size * self.count
                     self._transfer("progressbar", "setValue", current)
                     self._transfer("progress_msg", "setText", str(current * 100 // content_size) + '%')
                 else:
-                    speed = format_size((chunk_size * self.count) / (time.time() - self.start_time))
+                    speed = format_size(current / (time.time() - self.start_time))
                     self._transfer("progress_msg", "setText", speed + "/s")
+
+        extract(file_temp)  # 解压
         return True
 
     def on_download_success(self):
-        extract(self.file_temp)  # 解压
         self.action = Actions.DOWNLOAD
         self._progress_hide()
         self._transfer("action", "setText", Actions.to_zn(self.action))
@@ -265,8 +263,6 @@ class Standard(object):
     def on_download_fail(self):
         """隐藏进度条"""
         self._progress_hide()
-        if os.path.exists(self.file_temp) and os.path.isfile(self.file_temp):
-            os.remove(self.file_temp)
         self.action = Actions.DOWNLOAD
         self._transfer("action", "setText", Actions.to_zn(self.action))
 
