@@ -1,6 +1,7 @@
 import os
 import re
 
+from PySide2 import QtGui
 from PySide2.QtCore import Slot
 from PySide2.QtWidgets import QWidget, QTableWidgetItem, QFileDialog
 
@@ -49,3 +50,7 @@ class SettingWidget(QWidget, Ui_Setting):
             G.config.to_file()
         else:
             self.pypi_source.setText(G.config.pypi_source)
+
+    def closeEvent(self, event: QtGui.QCloseEvent):
+        self.py_manage.window_cleanup()
+        event.accept()

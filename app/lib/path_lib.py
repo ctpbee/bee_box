@@ -1,5 +1,6 @@
 import os
 import re
+import subprocess
 import platform
 
 platform_ = platform.system()
@@ -40,21 +41,22 @@ def find_file(path, file):
 def get_py_version(path):
     try:
         cmd = f"{path} --version"
-        v = os.popen(cmd).read().replace('\n', '').replace('\r', '').lower()
-        return v
-    except:
-        return ""
+        v = subprocess.check_output(cmd)
+        return v.decode().strip() + "(Base)"
+    except Exception as e:
+        print(e)
+    return 'Python(Base)'
 
 
 def get_pip_version(path):
     try:
         cmd = f"{path} -V"
-        v = os.popen(cmd).read().replace('\n', '').replace('\r', '').lower()
+        v = subprocess.check_output(cmd).decode()
         r = re.findall('\((.*)\)', v)
         if r:
             return r[0]
-    except:
-        return ""
+    except Exception as e:
+        print(e)
 
 
 def find_py_path():
@@ -68,6 +70,10 @@ def find_py_path():
                 if os.path.isfile(py_path):
                     if re.match(pattern3, item):
                         v = get_py_version(py_path)
+                        c = 1
+                        while v in res:
+                            v += str(c)
+                            c += 1
                         res[v] = py_path
                         break
     return res

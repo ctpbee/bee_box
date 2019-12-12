@@ -46,11 +46,9 @@ class HomeWidget(QWidget, Ui_Home):
         app_cls = all_app[data['cls_name']]
         app_cls(self, **data)
 
-
     def closeEvent(self, event: QtGui.QCloseEvent):
         try:
             self.setting_widget.close()
-            self.setting_widget.deleteLater()
         except:
             pass
         event.accept()

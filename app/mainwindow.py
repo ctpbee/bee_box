@@ -57,7 +57,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tray.setContextMenu(menu)
         self.tray.activated.connect(self.iconActivated)
         self.tray.show()
-        self.tray.setToolTip("~ bee box")
+        self.tray.setToolTip("🍯~ bee box")
 
     def home_handler(self):
         self.widget = HomeWidget(self)
@@ -79,7 +79,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             G.pool_done = True
             try:
                 self.widget.close()
-                self.widget.deleteLater()
             except:
                 pass
             event.accept()

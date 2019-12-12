@@ -3,6 +3,7 @@ import re
 import subprocess
 import sys
 
+from PySide2 import QtGui
 from PySide2.QtCore import QThreadPool, QObject, Signal, Slot
 from PySide2.QtGui import QCloseEvent
 from PySide2.QtWidgets import QWidget, QFileDialog, QTableWidgetItem, QAbstractItemView, QMessageBox, QTableWidget, \
@@ -30,6 +31,7 @@ class PyManageWidget(QWidget, Ui_Form):
         self.py_setting_btn.clicked.connect(self.py_setting_slot)
         self.set_app_py.clicked.connect(self.set_app_py_slot)
         #
+        self.interpreter = InterpreterWidget(self)
         self.py_box.currentTextChanged.connect(self.py_change_slot)
         #
         self.load_py()
@@ -68,7 +70,6 @@ class PyManageWidget(QWidget, Ui_Form):
         TipDialog("设置成功")
 
     def py_setting_slot(self):
-        self.interpreter = InterpreterWidget(self)
         self.interpreter.exec_()
 
     def py_change_slot(self, name):
@@ -76,6 +77,10 @@ class PyManageWidget(QWidget, Ui_Form):
             path = G.config.python_path[name]
             self.path.setText(path)
             self.load_pip(path)
+
+    def window_cleanup(self):
+        self.interpreter.window_cleanup()
+        self.close()
 
 
 class InterpreterWidget(QDialog, Ui_Interpreters):
@@ -88,7 +93,9 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         self.py_table.horizontalHeader().setStretchLastSection(True)  # 最后一列自适应表格宽度
         self.py_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.py_table.setEditTriggers(QTableWidget.NoEditTriggers)  # 单元格不可编辑
-
+        #
+        self.new_env = NewEnvWidget(self)
+        self.modify_env = None
         # btn
         self.add_btn.clicked.connect(self.add_btn_slot)
         self.del_btn.clicked.connect(self.del_btn_slot)
@@ -104,7 +111,6 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
             self.py_table.setItem(0, 1, QTableWidgetItem(str(v)))
 
     def add_btn_slot(self):
-        self.new_env = NewEnvWidget(self)
         self.new_env.exec_()
 
     def del_btn_slot(self):
@@ -127,8 +133,15 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         self.modify_env.exec_()
 
     def closeEvent(self, event):
-        self.parent_widget.load_py()
         event.accept()
+        self.parent_widget.load_py()
+
+    def window_cleanup(self):
+        if self.new_env:
+            self.new_env.window_cleanup()
+        if self.modify_env:
+            self.modify_env.window_cleanup()
+        self.close()
 
 
 class NewEnvWidget(QDialog, Ui_NewEnv):
@@ -240,6 +253,9 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         self.parent_widget.load_py()
         event.accept()
 
+    def window_cleanup(self):
+        self.close()
+
 
 class ModifyEnvWidget(QDialog, Ui_Modify):
     """ 修改名称或解释器路径"""
@@ -275,3 +291,7 @@ class ModifyEnvWidget(QDialog, Ui_Modify):
     def closeEvent(self, event):
         self.parent_widget.load_py()
         event.accept()
+
+    def window_cleanup(self):
+        self.close()
+

@@ -30,14 +30,15 @@ class InitialWidget(QWidget, Ui_Form):
         self.mainwindow = mainwindow
         self.thread = QThread()
         self.job = InitJob()
+        self.job.sig_progress.connect(self.show_progress)
         self.job.moveToThread(self.thread)
         self.thread.started.connect(self.job.box_init)
         self.thread.start()
-        self.job.sig_progress.connect(self.show_progress)
 
     def show_progress(self, pro, msg):
         if pro == 100:
             self.mainwindow.home_handler()
+            self.deleteLater()
             return
         self.progressBar.setValue(pro)
         self.msg.setText(msg)
@@ -58,6 +59,10 @@ class InitJob(QObject):
             G.config.to_file()
         else:
             self.sig_progress.emit(5, "正在加载配置..")
-            with open(config_path, 'r')as fp:
-                G.config.update(json.load(fp))
+            try:
+                with open(config_path, 'r')as fp:
+                    G.config.update(json.load(fp))
+            except Exception as e:
+                os.remove(config_path)
+                self.box_init()
         self.sig_progress.emit(100, "初始化完成")
