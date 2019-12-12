@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'py_manage.ui',
 # licensing of 'py_manage.ui' applies.
 #
-# Created: Wed Dec 11 20:15:58 2019
+# Created: Thu Dec 12 08:43:05 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -42,10 +42,18 @@ class Ui_Form(object):
         self.app_name.setText("")
         self.app_name.setObjectName("app_name")
         self.horizontalLayout.addWidget(self.app_name)
+        self.label_3 = QtWidgets.QLabel(Form)
+        self.label_3.setObjectName("label_3")
+        self.horizontalLayout.addWidget(self.label_3)
+        self.cur_py = QtWidgets.QLabel(Form)
+        self.cur_py.setObjectName("cur_py")
+        self.horizontalLayout.addWidget(self.cur_py)
+        self.horizontalLayout.setStretch(0, 4)
+        self.horizontalLayout.setStretch(2, 5)
+        self.verticalLayout.addLayout(self.horizontalLayout)
         self.set_app_py = QtWidgets.QPushButton(Form)
         self.set_app_py.setObjectName("set_app_py")
-        self.horizontalLayout.addWidget(self.set_app_py)
-        self.verticalLayout.addLayout(self.horizontalLayout)
+        self.verticalLayout.addWidget(self.set_app_py)
 
         self.retranslateUi(Form)
         QtCore.QMetaObject.connectSlotsByName(Form)
@@ -54,5 +62,7 @@ class Ui_Form(object):
         Form.setWindowTitle(QtWidgets.QApplication.translate("Form", "Python路径", None, -1))
         self.label.setText(QtWidgets.QApplication.translate("Form", "Python解释器", None, -1))
         self.py_setting_btn.setText(QtWidgets.QApplication.translate("Form", "⚙", None, -1))
+        self.label_3.setText(QtWidgets.QApplication.translate("Form", "当前：", None, -1))
+        self.cur_py.setText(QtWidgets.QApplication.translate("Form", "空", None, -1))
         self.set_app_py.setText(QtWidgets.QApplication.translate("Form", "选为解释器", None, -1))
 

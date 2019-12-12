@@ -32,6 +32,7 @@ class SettingWidget(QWidget, Ui_Setting):
             return
         if os.path.exists(path) and os.path.isdir(path):
             G.config.install_path = path
+            G.config.to_file()
             self.install_path.setText(path)
 
     def pypi_use_slot(self):
@@ -39,10 +40,12 @@ class SettingWidget(QWidget, Ui_Setting):
             G.config.pypi_use = True
         else:
             G.config.pypi_use = False
+        G.config.to_file()
 
     def pypi_change_slot(self):
         i_ = self.pypi_source.text().strip()
         if i_ and re.match(r"^(https?://)?([\da-z\.-]+)\.([a-z\.]{2,6})([/\w .-]*)*/?$", i_):
             G.config.pypi_source = i_
+            G.config.to_file()
         else:
             self.pypi_source.setText(G.config.pypi_source)

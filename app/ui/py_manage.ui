@@ -46,7 +46,7 @@
     <widget class="QListWidget" name="pip_list"/>
    </item>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout" stretch="0,0">
+    <layout class="QHBoxLayout" name="horizontalLayout" stretch="4,0,5">
      <item>
       <widget class="QLabel" name="app_name">
        <property name="text">
@@ -55,13 +55,27 @@
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="set_app_py">
+      <widget class="QLabel" name="label_3">
        <property name="text">
-        <string>选为解释器</string>
+        <string>当前：</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="cur_py">
+       <property name="text">
+        <string>空</string>
        </property>
       </widget>
      </item>
     </layout>
+   </item>
+   <item>
+    <widget class="QPushButton" name="set_app_py">
+     <property name="text">
+      <string>选为解释器</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

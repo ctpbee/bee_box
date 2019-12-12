@@ -1,14 +1,17 @@
 import os
 import re
 import subprocess
+import sys
 
-from PySide2.QtCore import QThreadPool, QObject, Signal
+from PySide2.QtCore import QThreadPool, QObject, Signal, Slot
 from PySide2.QtGui import QCloseEvent
 from PySide2.QtWidgets import QWidget, QFileDialog, QTableWidgetItem, QAbstractItemView, QMessageBox, QTableWidget, \
     QDialog
 
 from app.lib.global_var import G
 from app.lib.path_lib import get_py_version, join_path, venv_path
+from app.progressmsg import ProgressMsgDialog
+from app.tip import TipDialog
 from app.ui.ui_py_manage import Ui_Form
 from app.ui.ui_interpretes import Ui_Interpreters
 from app.ui.ui_new_env import Ui_NewEnv
@@ -33,8 +36,16 @@ class PyManageWidget(QWidget, Ui_Form):
         if not app_name:
             self.app_name.hide()
             self.set_app_py.hide()
+            self.cur_py.hide()
+            self.label_3.hide()
         else:
             self.app_name.setText(app_name)
+            path = G.config.installed_apps[app_name].get('py_', '未选择')
+            for name, p in G.config.python_path.items():
+                if path == p:
+                    self.cur_py.setText(name)
+                else:
+                    self.cur_py.setText(path)
 
     def load_py(self):
         self.py_box.clear()
@@ -51,6 +62,10 @@ class PyManageWidget(QWidget, Ui_Form):
         py_ = self.path.text()
         G.config.installed_apps[self.app_name.text()].update({"py_": py_})
         G.config.to_file()
+        for name, p in G.config.python_path.items():
+            if py_ == p:
+                self.cur_py.setText(name)
+        TipDialog("设置成功")
 
     def py_setting_slot(self):
         self.interpreter = InterpreterWidget(self)
@@ -116,13 +131,6 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         event.accept()
 
 
-class NewEnvObject(QObject):
-    sig_new = Signal()
-
-    def __init__(self):
-        super(self.__class__, self).__init__()
-
-
 class NewEnvWidget(QDialog, Ui_NewEnv):
     """新建虚拟环境  或  导入外部环境"""
 
@@ -131,8 +139,6 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         self.setupUi(self)
         self.parent_widget = parent_widget
         self.thread_pool = QThreadPool()
-        self.new_env_job = NewEnvObject()
-        self.new_env_job.sig_new.connect(self.create_env_succ)
         # btn
         self.name.textChanged.connect(self.name_change_slot)
         self.env_radio.clicked.connect(self.env_radio_slot)
@@ -142,6 +148,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         self.ok_btn.clicked.connect(self.ok_btn_slot)
         self.cancel_btn.clicked.connect(self.close)
         self.ready_action()
+        self.infobox = ProgressMsgDialog(self)
 
     def ready_action(self):
         self.env_radio_slot()
@@ -195,9 +202,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
             vir_path = os.path.join(path, dirname)
             self.thread_pool.start(Worker(self.create_env, py_, vir_path, name,
                                           succ_callback=self.create_env_succ, fail_callback=self.create_env_fail))
-            self.infobox = QMessageBox()
-            self.infobox.setIcon(QMessageBox.Information)
-            self.infobox.setText('正在创建虚拟环境...')
+            self.infobox.sig.msg.emit("准备中...")
             self.infobox.exec_()
 
         if self.exit_radio.isChecked():
@@ -209,23 +214,27 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
 
     def create_env(self, py_, vir_path, name):
         try:
-            output = subprocess.check_output(
-                [py_, "-m", "virtualenv", "--no-site-packages", vir_path]).decode()
+            virtualenv_ = "virtualenv"
+            img_ = ["-i", G.config.pypi_source] if G.config.pypi_source and G.config.pypi_use else []
+            subprocess.check_output([py_, "-m", 'pip', 'install', virtualenv_] + img_)
+            # 开始新建venv
+            self.infobox.sig.msg.emit('新建虚拟环境中...')
+            subprocess.check_output([py_, "-m", virtualenv_, "--no-site-packages", vir_path])
+            # record
             py_path = join_path(vir_path, 'Scripts', 'python.exe')
             G.config.python_path.update({name: py_path})
             G.config.to_file()
             return True
         except subprocess.CalledProcessError as e:
-            print(e)
+            self.infobox.sig.msg.emit(str(e))
             return False
 
     def create_env_succ(self):
+        self.infobox.sig.msg.emit('创建成功')
         self.infobox.close()
-        QMessageBox.information(self, '提示', '创建成功')
 
     def create_env_fail(self):
-        self.infobox.close()
-        QMessageBox.information(self, '提示', '创建失败')
+        self.infobox.sig.msg.emit('创建失败')
 
     def closeEvent(self, event):
         self.parent_widget.load_py()
@@ -255,10 +264,13 @@ class ModifyEnvWidget(QDialog, Ui_Modify):
     def save_btn_slot(self):
         name = self.name.text()
         path = self.path.text()
-        G.config.python_path.pop(self.raw_name)
-        G.config.python_path.update({name: path})
-        G.config.to_file()
-        self.close()
+        if os.path.exists(path) and os.path.isfile(path):
+            G.config.python_path.pop(self.raw_name)
+            G.config.python_path.update({name: path})
+            G.config.to_file()
+            self.close()
+        else:
+            TipDialog("未知路径")
 
     def closeEvent(self, event):
         self.parent_widget.load_py()

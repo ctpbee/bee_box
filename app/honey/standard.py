@@ -5,7 +5,7 @@ import re
 import subprocess
 import time
 import requests
-from PySide2.QtCore import QThreadPool
+from PySide2.QtCore import QThreadPool, QProcess
 from PySide2.QtWidgets import QAction, QWidget, QMessageBox
 
 from app.lib.global_var import G
@@ -84,6 +84,11 @@ def before_download(handler):
 def before_install(handler):
     @functools.wraps(handler)
     def wrap(self):
+        if not G.config.installed_apps[self.pack_name]['py_']:
+            self._tip("未选择Python解释器")
+            self.act_setting_slot()
+            return
+        self._progress_show()
         self.thread_pool.start(Worker(handler, self, succ_callback=self.on_install_success,
                                       fail_callback=self.on_install_fail))
 
@@ -121,7 +126,6 @@ class Standard(object):
     icon = ""  # 应用图标
     app_url = ""  # 应用地址
     versions = {}  # 应用版本及下载地址
-    lasted_ver = ""  # 最新版本
 
     # installed
     install_version = ""  # 选择安装的版本
@@ -140,11 +144,11 @@ class Standard(object):
         self.count = 0
         self.start_time = 0
         self.cancel = False
+        self.p = QProcess(self.parent)
 
     def check(self, **kwargs):
         """检查已下载应用参数"""
 
-        self.install_version = kwargs.get("install_version")  # 安装版本
         self.app_folder = kwargs.get("app_folder")  # 应用安装路径
         self.entry = kwargs.get("entry")  # 启动文件
         self.py_ = kwargs.get("py_")  # 解释器
@@ -216,15 +220,18 @@ class Standard(object):
         """卸载/更新处理"""
         act = q.text()
         if act == "设置":
-            self.py_manage = PyManageWidget(self.parent, self.pack_name)
-            self.py_manage.show()
+            self.act_setting_slot()
         elif Actions.to_en(act) == Actions.UNINSTALL:
             self.action = Actions.UNINSTALL
             self.action_handler()
 
+    def act_setting_slot(self):
+        self.py_manage = PyManageWidget(self.parent, self.pack_name)
+        self.py_manage.show()
+
     @before_download
     def download_handler(self):
-        url = self.versions[self.install_version or self.lasted_ver]
+        url = self.versions[self.install_version]
         postfix = os.path.splitext(url)[-1]  # .zip
         self.app_folder = os.path.join(G.config.install_path, self.pack_name)
         file_temp = self.app_folder + postfix  # 压缩文件路径
@@ -293,17 +300,20 @@ class Standard(object):
         try:
             self.entry, required = self.get_build()
             img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
-            f = open(required, 'r').readlines()
-            for line in f:
-                self._transfer("progress_msg", "setText", line.strip())
-                cmd_ = [self.py_, "-m", "pip", "install", line] + img_
-                out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
+            req = open(required, 'r').read()
+            cmd_ = [self.py_, "-m", "pip", "install", '-r', req] + img_
+            out_bytes = subprocess.Popen(cmd_, stderr=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
+            while out_bytes.poll() is None:
+                for line in iter(out_bytes.stdout.readline, b''):
+                    self._transfer("progress_msg", "setText", line)
             return True
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode()  # Output generated before error
             code = e.returncode
             self._tip(out_bytes)
             return False
+        except OSError as e:
+            self._tip(str(e))
 
     def on_install_success(self):
         self._progress_hide()
@@ -348,7 +358,9 @@ class Standard(object):
         try:
             py_ = G.config.installed_apps[self.pack_name]['py_']
         except Exception:
-            return self._tip("未选择Python解释器")
+            self._tip("未选择Python解释器")
+            self.act_setting_slot()
+            return
         try:
             ##检测依赖
             output = subprocess.check_output([py_, "-m", 'pip', "freeze"]).decode()
@@ -357,10 +369,16 @@ class Standard(object):
                 requirement = f.read().splitlines()
             dissatisfy, version_less = diff_pip(output, requirement)
             if dissatisfy:
-                self._tip(msg="\n".join(dissatisfy))
+                self._tip(msg="\n".join(dissatisfy[:15]))
+                replay = QMessageBox.information(self.parent, '提示', '是否安装缺失依赖', QMessageBox.Yes | QMessageBox.No,
+                                                 QMessageBox.No)
+                if replay == QMessageBox.Yes:
+                    self.action = Actions.INSTALL
+                    self.action_handler()
                 return
-            ##run
+                ##run
             cmd = [py_, entry]
+            print(cmd)
             output = subprocess.check_output(cmd).decode()
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode('utf8')  # Output generated before error

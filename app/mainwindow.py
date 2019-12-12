@@ -16,20 +16,11 @@ class Job(QObject):
         super(self.__class__, self).__init__()
 
 
-qss = """
-QMainWindow{
-margin:0px;
-}
-
-"""
-
-
 class MainWindow(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(self.__class__, self).__init__()
         self.quit_ = False
         self.setupUi(self)
-        self.setStyleSheet(qss)
         self.job = Job()
         self.layout_init()
         self.tray_init()
@@ -88,6 +79,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
             G.pool_done = True
             try:
                 self.widget.close()
+                self.widget.deleteLater()
             except:
                 pass
             event.accept()

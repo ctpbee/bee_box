@@ -13,7 +13,4 @@ class Client(Standard):
                                    {"1.0": "https://github.com/ctpbee/bee_box/archive/master.zip"}
                                    )
         self.app_url = kwargs.get('app_url', "https://github.com/ctpbee/ctpbee_backend")
-        self.lasted_ver = "1.0"
-
-
-
+        self.install_version = kwargs.get("install_version", "1.0")  # 默认安装版本

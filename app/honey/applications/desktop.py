@@ -1,6 +1,7 @@
 from app.honey.standard import Standard
 from app.resource import icon_path
 
+
 class Desktop(Standard):
     def app_info(self, **kwargs):
         ##
@@ -10,5 +11,5 @@ class Desktop(Standard):
         self.versions = kwargs.get('versions',
                                    {"1.0": "https://github.com/ctpbee/ctpbee_desktop/archive/master.zip"}
                                    )
-        self.lasted_ver = "1.0"
+        self.install_version = kwargs.get("install_version","1.0")  # 默认安装版本
         self.app_url = kwargs.get('app_url', "https://github.com/ctpbee/ctpbee_desktop")

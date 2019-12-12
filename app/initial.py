@@ -55,6 +55,7 @@ class InitJob(QObject):
             open(config_path, 'w')
             G.config.python_path = find_py_path()
             G.config.install_path = install_path
+            G.config.to_file()
         else:
             self.sig_progress.emit(5, "正在加载配置..")
             with open(config_path, 'r')as fp:

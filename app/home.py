@@ -14,47 +14,10 @@ class HomeJob(QObject):
         super(self.__class__, self).__init__()
 
 
-qss = """
-QWidget,#setting_btn,#app_setting_btn{
-background:#ffffff;
-color:#000000
-}
-
-#line,#line_2{
-background:#ffffff;
-}
-QPushButton,QToolButton{
-    border-style: none;  
-    border: 0px;  
-    color: #F0F0F0;  
-    padding: 5px;     
-    border-radius:5px;  
-    background: #1B89CA
-}
-QPushButton:disable,QToolButton:disable{
-background:#f0f0f0;
-color:#202020
-}
-
-QPushButton:hover,QToolButton:hover{
-    background: #5CACEE  
-
-}
-QLabel:hover{
-color:#00c1c1
-}
-QPushButton:pressed,QToolButton:pressed{   
-    background: #1B89CA
-}  
-
-"""
-
-
 class HomeWidget(QWidget, Ui_Home):
     def __init__(self, mainwindow):
         super(self.__class__, self).__init__()
         self.setupUi(self)
-        # self.setStyleSheet(qss)
         self.mainwindow = mainwindow
         self.job = HomeJob()
         ## button
@@ -83,9 +46,11 @@ class HomeWidget(QWidget, Ui_Home):
         app_cls = all_app[data['cls_name']]
         app_cls(self, **data)
 
+
     def closeEvent(self, event: QtGui.QCloseEvent):
         try:
             self.setting_widget.close()
+            self.setting_widget.deleteLater()
         except:
             pass
         event.accept()
