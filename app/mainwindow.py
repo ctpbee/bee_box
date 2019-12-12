@@ -1,4 +1,4 @@
-from PySide2.QtCore import  QObject, Signal, Slot, Qt
+from PySide2.QtCore import QObject, Signal, Slot, Qt
 from PySide2.QtGui import QIcon, QCloseEvent, QBitmap, QPainter
 from PySide2.QtWidgets import QMainWindow, QSystemTrayIcon, QMenu, QDesktopWidget, QMessageBox
 
@@ -9,7 +9,7 @@ from app.initial import InitialWidget
 
 
 class Job(QObject):
-    msg_box_signal = Signal(dict)
+    msg_box_signal = Signal(dict)  # 用于消息弹窗
     log_signal = Signal(str)
 
     def __init__(self):
@@ -31,6 +31,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     @Slot(dict)
     def msg_box_slot(self, data):
+        """消息弹窗插槽"""
         QMessageBox.information(self, "bee box", data['msg'], QMessageBox.Ok, QMessageBox.Ok)
 
     def layout_init(self):
@@ -39,12 +40,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         taskbar_height = self.desktop.screenGeometry().height() - self.desktop.availableGeometry().height()  # 任务栏高度
         self.move((self.desktop.availableGeometry().width() - self.width() - 10),
                   self.desktop.availableGeometry().height() - self.height() - taskbar_height)  # 初始化位置到右下角
+        """边缘圆角"""
         self.bmp = QBitmap(self.size())
         self.bmp.fill()
         self.ppp = QPainter(self.bmp)
         self.ppp.setPen(Qt.black)
         self.ppp.setBrush(Qt.black)
         self.ppp.drawRoundedRect(self.bmp.rect(), 10, 10)
+        self.ppp.end()
         self.setMask(self.bmp)
 
     def tray_init(self):
@@ -64,6 +67,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.setCentralWidget(self.widget)
 
     def iconActivated(self, reason):
+        """托盘点击插槽"""
         if reason in (QSystemTrayIcon.Trigger, QSystemTrayIcon.DoubleClick):
             if self.isHidden():
                 self.show()

@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'home.ui',
 # licensing of 'home.ui' applies.
 #
-# Created: Sat Dec  7 17:16:58 2019
+# Created: Thu Dec 12 18:00:36 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -39,6 +39,12 @@ class Ui_Home(object):
         self.setting_btn.setFlat(True)
         self.setting_btn.setObjectName("setting_btn")
         self.horizontalLayout.addWidget(self.setting_btn)
+        self.exit_btn = QtWidgets.QPushButton(self.head_widget)
+        self.exit_btn.setMinimumSize(QtCore.QSize(0, 0))
+        self.exit_btn.setMaximumSize(QtCore.QSize(30, 16777215))
+        self.exit_btn.setFlat(True)
+        self.exit_btn.setObjectName("exit_btn")
+        self.horizontalLayout.addWidget(self.exit_btn)
         self.verticalLayout.addWidget(self.head_widget)
         self.scrollArea = QtWidgets.QScrollArea(Home)
         self.scrollArea.setStyleSheet("")
@@ -81,4 +87,5 @@ class Ui_Home(object):
         Home.setWindowTitle(QtWidgets.QApplication.translate("Home", "Home", None, -1))
         self.label.setText(QtWidgets.QApplication.translate("Home", "bee box", None, -1))
         self.setting_btn.setText(QtWidgets.QApplication.translate("Home", "⚙", None, -1))
+        self.exit_btn.setText(QtWidgets.QApplication.translate("Home", "❎", None, -1))
 

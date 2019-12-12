@@ -1,7 +1,6 @@
 import os
 import time
 
-from PySide2 import QtGui
 from PySide2.QtCore import QThread, QObject, Signal
 from PySide2.QtWidgets import QWidget
 
@@ -40,12 +39,10 @@ class InitialWidget(QWidget, Ui_Form):
     def show_progress(self, pro, msg):
         self.progressBar.setValue(pro)
         self.msg.setText(msg)
-        if pro == 100:
-            time.sleep(1)
+        if pro == -1:
             self.mainwindow.home_handler()
+            self.thread.quit()
             self.close()
-            return
-
 
 
 class InitJob(QObject):
@@ -68,5 +65,8 @@ class InitJob(QObject):
                     G.config.update(json.load(fp))
             except Exception as e:
                 os.remove(config_path)
+                self.sig_progress.emit(5, "配置文件损坏")
                 self.box_init()
         self.sig_progress.emit(100, "初始化完成")
+        time.sleep(0.5)
+        self.sig_progress.emit(-1, "")

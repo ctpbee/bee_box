@@ -8,6 +8,7 @@ from app.setting import SettingWidget
 
 
 class HomeJob(QObject):
+    """ 安装成功后增加UI信号 """
     install_signal = Signal(dict)
 
     def __init__(self):
@@ -22,6 +23,7 @@ class HomeWidget(QWidget, Ui_Home):
         self.job = HomeJob()
         ## button
         self.setting_btn.clicked.connect(self.setting_click)
+        self.exit_btn.clicked.connect(self.exit_click)
         ## pypi
         self.job.install_signal.connect(self.add_installed_layout_slot)
         self.ready_action()
@@ -29,6 +31,9 @@ class HomeWidget(QWidget, Ui_Home):
     def setting_click(self):
         self.setting_widget = SettingWidget()
         self.setting_widget.show()
+
+    def exit_click(self):
+        self.mainwindow.quit_action()
 
     def ready_action(self):
         self.init_ui()

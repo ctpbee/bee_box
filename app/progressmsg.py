@@ -5,6 +5,7 @@ from app.ui.ui_progress import Ui_Form
 
 
 class ProgressSig(QObject):
+    """消息 ，进度信号"""
     msg = Signal(str)
     progress = Signal(int)
 

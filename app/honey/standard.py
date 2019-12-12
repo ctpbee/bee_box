@@ -294,13 +294,15 @@ class Standard(object):
         """解析 build.json"""
         try:
             self.entry, required = self.get_build()
+            print(G.config.pypi_use,G.config.pypi_source)
             img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
-            req = open(required, 'r').read()
-            cmd_ = [self.py_, "-m", "pip", "install", '-r', req] + img_
-            out_bytes = subprocess.Popen(cmd_, stderr=subprocess.PIPE, stdout=subprocess.PIPE, universal_newlines=True)
-            while out_bytes.poll() is None:
-                for line in iter(out_bytes.stdout.readline, b''):
-                    self._transfer("progress_msg", "setText", line)
+            f = open(required, 'r').readlines()
+            for line in f:
+                line = line.strip()
+                self._transfer("progress_msg", "setText", "installing " + line)
+                cmd_ = [self.py_, "-m", "pip", "install", line] + img_
+                print(cmd_)
+                out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
             return True
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode()  # Output generated before error

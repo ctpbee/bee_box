@@ -6,7 +6,7 @@ class Config:
     python_path = {}
     install_path = ""
     installed_apps = {}
-    pypi_source = ""
+    pypi_source = "https://pypi.douban.com/simple"
     pypi_use = True
 
     def __setattr__(self, key, value):

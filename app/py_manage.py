@@ -36,11 +36,13 @@ class PyManageWidget(QWidget, Ui_Form):
         #
         self.load_py()
         if not app_name:
+            """用于设置窗口"""
             self.app_name.hide()
             self.set_app_py.hide()
             self.cur_py.hide()
             self.label_3.hide()
         else:
+            """用于应用窗口"""
             self.app_name.setText(app_name)
             path = G.config.installed_apps[app_name].get('py_', '未选择')
             for name, p in G.config.python_path.items():
@@ -50,17 +52,20 @@ class PyManageWidget(QWidget, Ui_Form):
                     self.cur_py.setText(path)
 
     def load_py(self):
+        """加载PY列表"""
         self.py_box.clear()
         for k, v in G.config.python_path.items():
             self.py_box.addItem(k)
 
     def load_pip(self, py_):
+        """加载pip包列表"""
         self.pip_list.clear()
         output = subprocess.check_output([py_, '-m', 'pip', 'freeze']).decode()
         for i in output.splitlines():
             self.pip_list.addItem(i)
 
     def set_app_py_slot(self):
+        """设置为当前app解释器"""
         py_ = self.path.text()
         G.config.installed_apps[self.app_name.text()].update({"py_": py_})
         G.config.to_file()
@@ -79,6 +84,7 @@ class PyManageWidget(QWidget, Ui_Form):
             self.load_pip(path)
 
     def window_cleanup(self):
+        """关闭的事后处理"""
         self.interpreter.window_cleanup()
         self.close()
 
@@ -104,6 +110,7 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         self.load_py()
 
     def load_py(self):
+        """加载py列表"""
         self.py_table.setRowCount(0)
         for k, v in G.config.python_path.items():
             self.py_table.insertRow(0)
@@ -213,8 +220,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
             py_ = G.config.python_path[self.base_py_list.currentText()]
             dirname = f'{name}_venv'
             vir_path = os.path.join(path, dirname)
-            self.thread_pool.start(Worker(self.create_env, py_, vir_path, name,
-                                          succ_callback=self.create_env_succ, fail_callback=self.create_env_fail))
+            self.thread_pool.start(Worker(self.create_env, py_, vir_path, name, callback=self.create_env_callback))
             self.infobox.sig.msg.emit("准备中...")
             self.infobox.exec_()
 
@@ -242,12 +248,12 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
             self.infobox.sig.msg.emit(str(e))
             return False
 
-    def create_env_succ(self):
-        self.infobox.sig.msg.emit('创建成功')
+    def create_env_callback(self, res):
+        if res is True:
+            self.infobox.sig.msg.emit('创建成功')
+        elif res is False:
+            self.infobox.sig.msg.emit('创建失败')
         self.infobox.close()
-
-    def create_env_fail(self):
-        self.infobox.sig.msg.emit('创建失败')
 
     def closeEvent(self, event):
         self.parent_widget.load_py()
@@ -274,7 +280,8 @@ class ModifyEnvWidget(QDialog, Ui_Modify):
 
     def path_btn_slot(self):
         path, _ = QFileDialog.getOpenFileName(self, '选择Python路径', '', 'Python Interpreter(*.exe)')
-        if not path: return
+        if not path:
+            return
         self.path.setText(path)
 
     def save_btn_slot(self):
@@ -294,4 +301,3 @@ class ModifyEnvWidget(QDialog, Ui_Modify):
 
     def window_cleanup(self):
         self.close()
-
