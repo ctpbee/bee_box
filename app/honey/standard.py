@@ -84,7 +84,7 @@ def before_download(handler):
 def before_install(handler):
     @functools.wraps(handler)
     def wrap(self):
-        if not G.config.installed_apps[self.pack_name]['py_']:
+        if not G.config.installed_apps[self.pack_name]['py_'] or not self._py:
             self._tip("未选择Python解释器")
             self.act_setting_slot()
             return
@@ -307,7 +307,7 @@ class Standard(object):
                 print(cmd_)
                 if self.cancel or G.pool_done:
                     return False
-                out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
+                out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT, creationflags=0x08000000)
             return True
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode()  # Output generated before error
@@ -364,7 +364,7 @@ class Standard(object):
             return
         try:
             ##检测依赖
-            output = subprocess.check_output([py_, "-m", 'pip', "freeze"]).decode()
+            output = subprocess.check_output([py_, "-m", 'pip', "freeze"], creationflags=0x08000000).decode()
             output = output.splitlines()
             with open(requirement, 'r') as f:
                 requirement = f.read().splitlines()
@@ -381,7 +381,7 @@ class Standard(object):
             cmd = [py_, entry]
             print(cmd)
             TipDialog("正在启动...")
-            output = subprocess.check_output(cmd).decode()
+            output = subprocess.check_output(cmd, creationflags=0x08000000).decode()
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode('utf8')  # Output generated before error
             code = e.returncode

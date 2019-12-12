@@ -62,7 +62,8 @@ class PyManageWidget(QWidget, Ui_Form):
     def load_pip(self, py_):
         """加载pip包列表"""
         self.pip_list.clear()
-        output = subprocess.check_output([py_, '-m', 'pip', 'freeze']).decode()
+        output = subprocess.check_output([py_, '-m', 'pip', 'freeze'],
+                                         creationflags=0x08000000).decode()  # creationflags=0x08000000  不显示shell窗口
         for i in output.splitlines():
             self.pip_list.addItem(i)
 
@@ -241,10 +242,12 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         try:
             virtualenv_ = "virtualenv"
             img_ = ["-i", G.config.pypi_source] if G.config.pypi_source and G.config.pypi_use else []
-            subprocess.check_output([py_, "-m", 'pip', 'install', virtualenv_] + img_)
+            subprocess.check_output([py_, "-m", 'pip', 'install', virtualenv_] + img_,
+                                    creationflags=0x08000000)  # creationflags=0x08000000  不显示shell窗口
             # 开始新建venv
             self.infobox.sig.msg.emit('新建虚拟环境中...')
-            subprocess.check_output([py_, "-m", virtualenv_, "--no-site-packages", vir_path])
+            subprocess.check_output([py_, "-m", virtualenv_, "--no-site-packages", vir_path],
+                                    creationflags=0x08000000)  # creationflags=0x08000000  不显示shell窗口
             # record
             py_path = join_path(vir_path, 'Scripts', 'python.exe')
             G.config.python_path.update({name: py_path})
