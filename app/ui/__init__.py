@@ -1,9 +1,6 @@
 ## ui
 # pyside2-uic signin.ui > ui_signin.py
 
-## resource
-# pyrcc5 -o img_rc.py signin.qrc
-
 
 scroll_bar = """
 QScrollBar:vertical {  
@@ -83,35 +80,41 @@ QScrollBar::add-page:horizontal,QScrollBar::sub-page:horizontal {
 """
 
 qss = """
+
 QWidget{
 background:#FFFFFF;
 color:#000000
 }
 
+  
+QProgressBar::chunk {  
+    width: 5px;   
+    margin: 0.5px;  
+    background-color: #1B89CA;  
+} 
+
 QPushButton,QToolButton{
     border:1px solid #1b89ca;
-    border-radius:2px;
-    padding:5px;
+    border-radius:5px;
+    padding:5px
 }
 QPushButton:disabled{
     background:#2B2B2B;
     color:#b6b6b6;
     border-radius:2px;
 }
+QToolButton:down-arrow{
+    border-radius:15px;
 
-QPushButton#setting_btn,QPushButton#exit_btn{
-    border:none;
-}
-QPushButton#setting_btn:hover,QPushButton#exit_btn:hover{
-    border:1px solid green;
 }
 
 QPushButton:hover,QToolButton:hover{
-    background:green;
+    background:#BFE2F5;
 }
 
+
 QMenu::item:selected{
-    background: green;
+    background: #BFE2F5;
     color: black;
 }
 
@@ -138,5 +141,10 @@ QComboBox,QLineEdit,QDoubleSpinBox,QSpinBox{
     color:#000000;
     border:1px solid #1b89ca;
     border-radius:5px;
+}
+
+QToolButton::drop-down{
+border-top-right-radius: 3px;
+border-bottom-right-radius: 3px;
 }
 """ + scroll_bar

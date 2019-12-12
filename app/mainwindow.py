@@ -43,14 +43,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.move((self.desktop.availableGeometry().width() - self.width() - 10),
                   self.desktop.availableGeometry().height() - self.height() - taskbar_height)  # 初始化位置到右下角
         """边缘圆角"""
-        self.bmp = QBitmap(self.size())
-        self.bmp.fill()
-        self.ppp = QPainter(self.bmp)
-        self.ppp.setPen(Qt.black)
-        self.ppp.setBrush(Qt.black)
-        self.ppp.drawRoundedRect(self.bmp.rect(), 10, 10)
-        self.ppp.end()
-        self.setMask(self.bmp)
+        # self.bmp = QBitmap(self.size())
+        # self.bmp.fill()
+        # self.ppp = QPainter(self.bmp)
+        # self.ppp.setPen(Qt.black)
+        # self.ppp.setBrush(Qt.black)
+        # self.ppp.drawRoundedRect(self.bmp.rect(), 10, 10)
+        # self.ppp.end()
+        # self.setMask(self.bmp)
 
     def tray_init(self):
         icon = QIcon(":/icon/icon/CTPBEE.png")

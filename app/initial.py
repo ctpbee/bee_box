@@ -20,7 +20,8 @@ QProgressBar::chunk {
     width: 5px;   
     margin: 0.5px;  
     background-color: #1B89CA;  
-}  """
+}  
+"""
 
 
 class InitialWidget(QWidget, Ui_Form):

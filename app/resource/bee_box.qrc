@@ -1,5 +1,10 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icon/version.png</file>
+    <file>icon/github.png</file>
+    <file>icon/qq.png</file>
+    <file>icon/quit.png</file>
+    <file>icon/setting.png</file>
     <file>icon/bee_temp_grey.png</file>
     <file>icon/CTPBEE.png</file>
   </qresource>

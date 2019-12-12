@@ -14,6 +14,7 @@ from app.honey.diy_ui import AppDiv
 from app.lib.helper import extract, diff_pip
 from app.lib.path_lib import find_file, join_path
 from app.py_manage import PyManageWidget
+from app.tip import TipDialog
 
 
 class Actions(dict):
@@ -25,12 +26,12 @@ class Actions(dict):
     CANCEL = "cancel"
 
     __map = {
-        DOWNLOAD: "下载",
-        INSTALL: "安装",
-        UNINSTALL: "卸载",
-        UPGRADE: "升级",
-        RUN: "启动",
-        CANCEL: "取消"}
+        DOWNLOAD: "下载 ",
+        INSTALL: "安装 ",
+        UNINSTALL: "卸载 ",
+        UPGRADE: "升级 ",
+        RUN: "启动 ",
+        CANCEL: "取消 "}
 
     @classmethod
     def to_zn(cls, act):
@@ -88,6 +89,8 @@ def before_install(handler):
             self.act_setting_slot()
             return
         self._progress_show()
+        self.action = Actions.CANCEL
+        self.div.action.setText(Actions.to_zn(self.action))
         self.thread_pool.start(Worker(handler, self, callback=self.on_install_callback))
 
     return wrap
@@ -294,7 +297,7 @@ class Standard(object):
         """解析 build.json"""
         try:
             self.entry, required = self.get_build()
-            print(G.config.pypi_use,G.config.pypi_source)
+            print(G.config.pypi_use, G.config.pypi_source)
             img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
             f = open(required, 'r').readlines()
             for line in f:
@@ -302,6 +305,8 @@ class Standard(object):
                 self._transfer("progress_msg", "setText", "installing " + line)
                 cmd_ = [self.py_, "-m", "pip", "install", line] + img_
                 print(cmd_)
+                if self.cancel or G.pool_done:
+                    return False
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT)
             return True
         except subprocess.CalledProcessError as e:
@@ -375,10 +380,12 @@ class Standard(object):
                 ##run
             cmd = [py_, entry]
             print(cmd)
+            TipDialog("正在启动...")
             output = subprocess.check_output(cmd).decode()
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode('utf8')  # Output generated before error
             code = e.returncode
+            print(out_bytes)
             self._tip(out_bytes)
 
     def upgrade_handler(self):

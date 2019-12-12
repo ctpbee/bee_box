@@ -1,5 +1,4 @@
 from app.honey.standard import Standard
-from app.resource import icon_path
 
 
 class Desktop(Standard):

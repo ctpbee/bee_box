@@ -127,13 +127,15 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         row = self.py_table.currentRow()
         name = self.py_table.item(row, 0).text()
         path = self.py_table.item(row, 1).text()
-        replay = QMessageBox.question(self, '提示', '确定删除吗？', QMessageBox.Yes | QMessageBox.Cancel, QMessageBox.Cancel)
+        replay = QMessageBox.question(self, '提示', f'确定删除{name}吗？', QMessageBox.Yes | QMessageBox.Cancel,
+                                      QMessageBox.Cancel)
         if replay == QMessageBox.Yes:
             G.config.python_path.pop(name, None)
             G.config.to_file()
             if os.path.exists(path) and os.path.isdir(path):
                 os.rmdir(path)
             self.load_py()
+            TipDialog("已删除")
 
     def change_btn_slot(self):
         row = self.py_table.currentRow()
@@ -254,9 +256,9 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
 
     def create_env_callback(self, res):
         if res is True:
-            self.infobox.sig.msg.emit('创建成功')
+            TipDialog('创建成功')
         elif res is False:
-            self.infobox.sig.msg.emit('创建失败')
+            TipDialog('创建失败')
         self.infobox.close()
 
     def closeEvent(self, event):
@@ -296,6 +298,7 @@ class ModifyEnvWidget(QDialog, Ui_Modify):
             G.config.python_path.pop(self.raw_name)
             G.config.python_path.update({name: path})
             G.config.to_file()
+            TipDialog("修改成功")
             self.close()
         else:
             TipDialog("未知路径")

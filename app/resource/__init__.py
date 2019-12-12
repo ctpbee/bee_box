@@ -1,5 +1,2 @@
 ## resource
-# pyrcc5 -o img_rc.py signin.qrc
-import os
-
-icon_path = os.path.join(os.path.dirname(__file__), 'icon')
+# pyside2-rcc -o bee_box_rc.py bee_box.qrc

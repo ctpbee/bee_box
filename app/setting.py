@@ -8,6 +8,7 @@ from PySide2.QtWidgets import QWidget, QTableWidgetItem, QFileDialog
 from app.lib.global_var import G
 from app.lib.path_lib import beebox_path
 from app.py_manage import PyManageWidget
+from app.tip import TipDialog
 from app.ui import qss
 from app.ui.ui_setting import Ui_Setting
 
@@ -37,6 +38,8 @@ class SettingWidget(QWidget, Ui_Setting):
             G.config.install_path = path
             G.config.to_file()
             self.install_path.setText(path)
+            TipDialog("修改成功")
+
 
     def pypi_use_slot(self):
         if self.pypi_checkBox.isChecked():
@@ -44,12 +47,14 @@ class SettingWidget(QWidget, Ui_Setting):
         else:
             G.config.pypi_use = False
         G.config.to_file()
+        TipDialog("修改成功")
 
     def pypi_change_slot(self):
         i_ = self.pypi_source.text().strip()
         if i_ and re.match(r"^(https?://)?([\da-z\.-]+)\.([a-z\.]{2,6})([/\w .-]*)*/?$", i_):
             G.config.pypi_source = i_
             G.config.to_file()
+            TipDialog("修改成功")
         else:
             self.pypi_source.setText(G.config.pypi_source)
 

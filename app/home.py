@@ -7,6 +7,7 @@ from app.ui.ui_home import Ui_Home
 from app.lib.global_var import G
 from app.honey import all_app
 from app.setting import SettingWidget
+import webbrowser
 
 
 class HomeJob(QObject):
@@ -23,10 +24,12 @@ class HomeWidget(QWidget, Ui_Home):
         self.setupUi(self)
         self.setStyleSheet(qss)
         self.mainwindow = mainwindow
+        self.progressBar.setFixedHeight(3)
         self.job = HomeJob()
         ## button
         self.setting_btn.clicked.connect(self.setting_click)
-        self.exit_btn.clicked.connect(self.exit_click)
+        self.github.clicked.connect(self.github_click)
+        self.qq.clicked.connect(self.qq_click)
         ## pypi
         self.job.install_signal.connect(self.add_installed_layout_slot)
         self.ready_action()
@@ -34,9 +37,6 @@ class HomeWidget(QWidget, Ui_Home):
     def setting_click(self):
         self.setting_widget = SettingWidget()
         self.setting_widget.show()
-
-    def exit_click(self):
-        self.mainwindow.quit_action()
 
     def ready_action(self):
         self.init_ui()
@@ -59,3 +59,15 @@ class HomeWidget(QWidget, Ui_Home):
         except:
             pass
         event.accept()
+
+    def qq_click(self):
+        self.open_url("https://jq.qq.com/?_wv=1027&k=5xWbIq3")
+
+    def github_click(self):
+        self.open_url("https://github.com/ctpbee")
+
+    def open_url(self, url):
+        try:
+            webbrowser.get('chrome').open_new_tab(url)
+        except Exception as e:
+            webbrowser.open_new_tab(url)

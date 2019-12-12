@@ -1,7 +1,8 @@
 from PySide2.QtCore import QTimer
 from PySide2.QtGui import Qt, QCloseEvent
-from PySide2.QtWidgets import QDialog
+from PySide2.QtWidgets import QDialog, QApplication
 
+from app.lib.global_var import G
 from app.ui.ui_tip import Ui_Tip
 
 qss = """

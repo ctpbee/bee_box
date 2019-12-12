@@ -13,70 +13,133 @@
   <property name="windowTitle">
    <string>Home</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" stretch="0,8">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0,8,0">
+   <property name="leftMargin">
+    <number>11</number>
+   </property>
+   <property name="topMargin">
+    <number>11</number>
+   </property>
+   <property name="rightMargin">
+    <number>11</number>
+   </property>
+   <property name="bottomMargin">
+    <number>11</number>
+   </property>
    <item>
-    <widget class="QWidget" name="head_widget" native="true">
-     <layout class="QHBoxLayout" name="horizontalLayout">
-      <item>
-       <widget class="QLabel" name="label">
-        <property name="font">
-         <font>
-          <family>Arial</family>
-          <pointsize>40</pointsize>
-          <weight>9</weight>
-          <italic>true</italic>
-          <bold>false</bold>
-          <underline>false</underline>
-         </font>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">font: 75 italic 40pt &quot;Arial&quot;;
-color: rgb(255, 85, 0);</string>
-        </property>
-        <property name="text">
-         <string>bee box</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="setting_btn">
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>⚙</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="exit_btn">
-        <property name="minimumSize">
-         <size>
-          <width>0</width>
-          <height>0</height>
-         </size>
-        </property>
-        <property name="maximumSize">
-         <size>
-          <width>30</width>
-          <height>16777215</height>
-         </size>
-        </property>
-        <property name="text">
-         <string>❎</string>
-        </property>
-        <property name="flat">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-     </layout>
+    <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="1,0">
+     <item>
+      <layout class="QHBoxLayout" name="horizontalLayout_5">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="font">
+          <font>
+           <pointsize>48</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
+          </font>
+         </property>
+         <property name="toolTip">
+          <string>组织标志</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">image: url(:/icon/icon/CTPBEE.png);
+</string>
+         </property>
+         <property name="text">
+          <string>  </string>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QLabel" name="label_4">
+         <property name="font">
+          <font>
+           <family>Consolas</family>
+           <pointsize>24</pointsize>
+           <weight>50</weight>
+           <italic>true</italic>
+           <bold>false</bold>
+           <underline>false</underline>
+           <strikeout>false</strikeout>
+           <kerning>true</kerning>
+          </font>
+         </property>
+         <property name="text">
+          <string>bee box</string>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </item>
+     <item>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <item>
+        <layout class="QHBoxLayout" name="horizontalLayout_3">
+         <item>
+          <widget class="QToolButton" name="setting_btn">
+           <property name="maximumSize">
+            <size>
+             <width>16777215</width>
+             <height>16777215</height>
+            </size>
+           </property>
+           <property name="toolTip">
+            <string>设置</string>
+           </property>
+           <property name="icon">
+            <iconset resource="../resource/bee_box.qrc">
+             <normaloff>:/icon/icon/setting.png</normaloff>:/icon/icon/setting.png</iconset>
+           </property>
+           <property name="iconSize">
+            <size>
+             <width>25</width>
+             <height>25</height>
+            </size>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </item>
+       <item>
+        <spacer name="verticalSpacer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QProgressBar" name="progressBar">
+     <property name="font">
+      <font>
+       <pointsize>1</pointsize>
+      </font>
+     </property>
+     <property name="maximum">
+      <number>0</number>
+     </property>
+     <property name="value">
+      <number>0</number>
+     </property>
+     <property name="textVisible">
+      <bool>false</bool>
+     </property>
+     <property name="textDirection">
+      <enum>QProgressBar::TopToBottom</enum>
+     </property>
     </widget>
    </item>
    <item>
@@ -102,14 +165,39 @@ color: rgb(255, 85, 0);</string>
         <x>0</x>
         <y>0</y>
         <width>459</width>
-        <height>607</height>
+        <height>569</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
+        <widget class="QLabel" name="label_2">
+         <property name="font">
+          <font>
+           <family>微软雅黑</family>
+           <pointsize>14</pointsize>
+           <weight>50</weight>
+           <italic>false</italic>
+           <bold>false</bold>
+          </font>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">font: 14pt &quot;微软雅黑&quot;;</string>
+         </property>
+         <property name="text">
+          <string>已安装</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QVBoxLayout" name="installed_layout">
          <property name="spacing">
-          <number>20</number>
+          <number>10</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>5</number>
          </property>
         </layout>
        </item>
@@ -133,9 +221,22 @@ color: rgb(255, 85, 0);</string>
         </widget>
        </item>
        <item>
+        <widget class="QLabel" name="label_3">
+         <property name="styleSheet">
+          <string notr="true">font: 14pt &quot;微软雅黑&quot;;</string>
+         </property>
+         <property name="text">
+          <string>所有</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <layout class="QVBoxLayout" name="apps_layout">
          <property name="spacing">
-          <number>20</number>
+          <number>10</number>
+         </property>
+         <property name="bottomMargin">
+          <number>5</number>
          </property>
         </layout>
        </item>
@@ -156,8 +257,60 @@ color: rgb(255, 85, 0);</string>
      </widget>
     </widget>
    </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <spacer name="horizontalSpacer_2">
+       <property name="orientation">
+        <enum>Qt::Horizontal</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>40</width>
+         <height>20</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <widget class="QToolButton" name="github">
+       <property name="icon">
+        <iconset resource="../resource/bee_box.qrc">
+         <normaloff>:/icon/icon/github.png</normaloff>:/icon/icon/github.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="qq">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;ctpbee开源量化社区群：756319143&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resource/bee_box.qrc">
+         <normaloff>:/icon/icon/qq.png</normaloff>:/icon/icon/qq.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="toolButton">
+       <property name="toolTip">
+        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;当前版本：1.0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       </property>
+       <property name="text">
+        <string>1.0</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resource/bee_box.qrc">
+         <normaloff>:/icon/icon/version.png</normaloff>:/icon/icon/version.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
   </layout>
  </widget>
- <resources/>
+ <resources>
+  <include location="../resource/bee_box.qrc"/>
+ </resources>
  <connections/>
 </ui>
