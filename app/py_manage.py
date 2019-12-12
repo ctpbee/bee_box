@@ -64,6 +64,7 @@ class PyManageWidget(QWidget, Ui_Form):
         self.pip_list.clear()
         output = subprocess.check_output([py_, '-m', 'pip', 'freeze'],
                                          creationflags=0x08000000).decode()  # creationflags=0x08000000  不显示shell窗口
+        print(output)
         for i in output.splitlines():
             self.pip_list.addItem(i)
 

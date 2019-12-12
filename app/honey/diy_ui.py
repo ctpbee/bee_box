@@ -12,7 +12,7 @@ class AppDivJob(QObject):
         super(self.__class__, self).__init__()
 
 
-font_qss = "font: 9pt \"微软雅黑\";"
+
 
 
 class AppDiv:
@@ -37,19 +37,15 @@ class AppDiv:
         self.app_layout = QHBoxLayout()
         ### 1
         self.icon = QLabel(self.widget)
-        self.icon.setStyleSheet(font_qss)
         ####  2
         self.name = QLabel(self.widget)
-        self.name.setStyleSheet(font_qss)
         self.desc = MyLabel(self.widget)
-        self.desc.setStyleSheet(font_qss)
         self.desc_layout = QVBoxLayout()
         self.desc_layout.addWidget(self.name)
         self.desc_layout.addWidget(self.desc)
         ####  3
         self.menu = QMenu(self.widget)
         self.action = QToolButton(self.widget)
-        self.action.setStyleSheet(font_qss)
         self.action.setPopupMode(QToolButton.MenuButtonPopup)
         self.action.setMenu(self.menu)
         ###
@@ -67,7 +63,6 @@ class AppDiv:
         self.progressbar.setRange(0, 0)
         self.progressbar.setVisible(False)
         self.progress_msg = QLabel(self.widget)
-        self.progress_msg.setStyleSheet(font_qss)
         self.progress_msg.setVisible(False)
         self.progress_layout.addWidget(self.progressbar)
         self.progress_layout.addWidget(self.progress_msg)

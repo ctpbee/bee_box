@@ -247,7 +247,7 @@ class Standard(object):
             mode = 'wb'
         # download
         try:
-            response = requests.get(url, stream=True, headers=headers, timeout=5)
+            response = requests.get(url, stream=True, headers=headers)
             response.raise_for_status()
         except Exception as e:
             return False
@@ -257,7 +257,7 @@ class Standard(object):
         with open(file_temp, mode) as file:
             chunk_size = 1024
             for data in response.iter_content(chunk_size=chunk_size):
-                if data and self.cancel or G.pool_done:
+                if self.cancel or G.pool_done:
                     return False
                 file.write(data)  ##
                 self.count += 1
@@ -297,7 +297,6 @@ class Standard(object):
         """解析 build.json"""
         try:
             self.entry, required = self.get_build()
-            print(G.config.pypi_use, G.config.pypi_source)
             img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
             f = open(required, 'r').readlines()
             for line in f:
@@ -308,6 +307,7 @@ class Standard(object):
                 if self.cancel or G.pool_done:
                     return False
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT, creationflags=0x08000000)
+                print(out_bytes.decode())
             return True
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode()  # Output generated before error
@@ -315,7 +315,10 @@ class Standard(object):
             self._tip(out_bytes)
             return False
         except OSError as e:
+            self._tip(cmd_)
             self._tip(str(e))
+            return False
+
 
     def on_install_callback(self, res):
         self._progress_hide()

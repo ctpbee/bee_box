@@ -5,6 +5,7 @@ from PySide2.QtWidgets import QApplication
 from app.mainwindow import MainWindow
 
 if __name__ == '__main__':
+
     try:
         import ctypes
 
