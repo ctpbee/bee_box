@@ -13,6 +13,11 @@ class ProgressSig(QObject):
         super(self.__class__, self).__init__()
 
 
+qss = """
+
+"""
+
+
 class ProgressMsgDialog(QDialog, Ui_Form):
     def __init__(self, parent, msg='', p_min=0, p_max=0, p_val=0):
         super(self.__class__, self).__init__(parent)

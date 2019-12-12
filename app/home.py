@@ -1,6 +1,8 @@
 from PySide2 import QtGui
 from PySide2.QtCore import Slot, QObject, Signal
 from PySide2.QtWidgets import QWidget
+
+from app.ui import qss
 from app.ui.ui_home import Ui_Home
 from app.lib.global_var import G
 from app.honey import all_app
@@ -19,6 +21,7 @@ class HomeWidget(QWidget, Ui_Home):
     def __init__(self, mainwindow):
         super(self.__class__, self).__init__()
         self.setupUi(self)
+        self.setStyleSheet(qss)
         self.mainwindow = mainwindow
         self.job = HomeJob()
         ## button

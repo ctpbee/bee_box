@@ -5,7 +5,7 @@
 # Form implementation generated from reading ui file 'interpretes.ui',
 # licensing of 'interpretes.ui' applies.
 #
-# Created: Tue Dec  3 18:07:06 2019
+# Created: Thu Dec 12 19:17:41 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -49,7 +49,7 @@ class Ui_Interpreters(object):
         QtCore.QMetaObject.connectSlotsByName(Interpreters)
 
     def retranslateUi(self, Interpreters):
-        Interpreters.setWindowTitle(QtWidgets.QApplication.translate("Interpreters", "Form", None, -1))
+        Interpreters.setWindowTitle(QtWidgets.QApplication.translate("Interpreters", "解释器", None, -1))
         self.py_table.horizontalHeaderItem(0).setText(QtWidgets.QApplication.translate("Interpreters", "名称", None, -1))
         self.py_table.horizontalHeaderItem(1).setText(QtWidgets.QApplication.translate("Interpreters", "路径", None, -1))
         self.add_btn.setText(QtWidgets.QApplication.translate("Interpreters", "➕", None, -1))

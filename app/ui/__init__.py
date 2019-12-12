@@ -82,3 +82,61 @@ QScrollBar::add-page:horizontal,QScrollBar::sub-page:horizontal {
 }
 """
 
+qss = """
+QWidget{
+background:#FFFFFF;
+color:#000000
+}
+
+QPushButton,QToolButton{
+    border:1px solid #1b89ca;
+    border-radius:2px;
+    padding:5px;
+}
+QPushButton:disabled{
+    background:#2B2B2B;
+    color:#b6b6b6;
+    border-radius:2px;
+}
+
+QPushButton#setting_btn,QPushButton#exit_btn{
+    border:none;
+}
+QPushButton#setting_btn:hover,QPushButton#exit_btn:hover{
+    border:1px solid green;
+}
+
+QPushButton:hover,QToolButton:hover{
+    background:green;
+}
+
+QMenu::item:selected{
+    background: green;
+    color: black;
+}
+
+
+QTabBar::tab {
+     border:1px solid #1b89ca;
+     border-radius:2px;
+     min-width: 60px;
+     padding: 2px;
+ }
+QTabBar::tab:selected{
+    background:#1b89ca;
+}
+QTabBar::tab:!selected{
+    margin-top:5px;
+}
+
+QTabWidget::pane{
+    border:1px solid #1b89ca;
+}
+
+
+QComboBox,QLineEdit,QDoubleSpinBox,QSpinBox{
+    color:#000000;
+    border:1px solid #1b89ca;
+    border-radius:5px;
+}
+""" + scroll_bar

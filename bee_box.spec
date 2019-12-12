@@ -27,7 +27,7 @@ exe = EXE(pyz,
           bootloader_ignore_signals=False,
           strip=False,
           upx=True,
-          console=True,
+          console=False,
           icon='C:\\GIT\\bee_box\\beebox.ico')
 coll = COLLECT(exe,
                a.binaries,

@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'modify_env.ui',
 # licensing of 'modify_env.ui' applies.
 #
-# Created: Tue Dec  3 18:03:08 2019
+# Created: Thu Dec 12 19:26:18 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -55,7 +55,7 @@ class Ui_Modify(object):
         QtCore.QMetaObject.connectSlotsByName(Modify)
 
     def retranslateUi(self, Modify):
-        Modify.setWindowTitle(QtWidgets.QApplication.translate("Modify", "Form", None, -1))
+        Modify.setWindowTitle(QtWidgets.QApplication.translate("Modify", "修改", None, -1))
         self.label.setText(QtWidgets.QApplication.translate("Modify", "名称", None, -1))
         self.label_2.setText(QtWidgets.QApplication.translate("Modify", "路径", None, -1))
         self.path_btn.setText(QtWidgets.QApplication.translate("Modify", "...", None, -1))

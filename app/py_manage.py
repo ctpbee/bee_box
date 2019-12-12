@@ -13,6 +13,7 @@ from app.lib.global_var import G
 from app.lib.path_lib import get_py_version, join_path, venv_path
 from app.progressmsg import ProgressMsgDialog
 from app.tip import TipDialog
+from app.ui import qss
 from app.ui.ui_py_manage import Ui_Form
 from app.ui.ui_interpretes import Ui_Interpreters
 from app.ui.ui_new_env import Ui_NewEnv
@@ -26,6 +27,7 @@ class PyManageWidget(QWidget, Ui_Form):
     def __init__(self, home, app_name=None):
         super(self.__class__, self).__init__()
         self.setupUi(self)
+        self.setStyleSheet(qss)
         self.home = home
         # btn
         self.py_setting_btn.clicked.connect(self.py_setting_slot)
@@ -95,6 +97,7 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
     def __init__(self, parent_widget):
         super(self.__class__, self).__init__()
         self.setupUi(self)
+        self.setStyleSheet(qss)
         self.parent_widget = parent_widget
         self.py_table.horizontalHeader().setStretchLastSection(True)  # 最后一列自适应表格宽度
         self.py_table.setSelectionBehavior(QAbstractItemView.SelectRows)
@@ -157,6 +160,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
     def __init__(self, parent_widget):
         super(self.__class__, self).__init__()
         self.setupUi(self)
+        self.setStyleSheet(qss)
         self.parent_widget = parent_widget
         self.thread_pool = QThreadPool()
         # btn
@@ -269,6 +273,7 @@ class ModifyEnvWidget(QDialog, Ui_Modify):
     def __init__(self, parent_widget, name, path):
         super(self.__class__, self).__init__()
         self.setupUi(self)
+        self.setStyleSheet(qss)
         self.parent_widget = parent_widget
         self.raw_name = name
         self.raw_path = path

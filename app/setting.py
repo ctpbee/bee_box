@@ -8,6 +8,7 @@ from PySide2.QtWidgets import QWidget, QTableWidgetItem, QFileDialog
 from app.lib.global_var import G
 from app.lib.path_lib import beebox_path
 from app.py_manage import PyManageWidget
+from app.ui import qss
 from app.ui.ui_setting import Ui_Setting
 
 
@@ -15,6 +16,7 @@ class SettingWidget(QWidget, Ui_Setting):
     def __init__(self, ):
         super(self.__class__, self).__init__()
         self.setupUi(self)
+        self.setStyleSheet(qss)
         ## button
         self.py_manage = PyManageWidget(self)
         self.py_manage_layout.addWidget(self.py_manage)

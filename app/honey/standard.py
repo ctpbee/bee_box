@@ -197,7 +197,7 @@ class Standard(object):
             self.parent.apps_layout.addLayout(self.div.layout)
         elif self.action == Actions.RUN or self.action == Actions.INSTALL:
             act_uninstall = QAction(Actions.to_zn(Actions.UNINSTALL), self.parent)
-            act_setting = QAction("设置", self.parent)
+            act_setting = QAction("解释器", self.parent)
             setattr(self.div, f"act_uninstall", act_uninstall)
             setattr(self.div, f"act_setting", act_setting)
             self.div.menu.addAction(act_uninstall)
@@ -217,7 +217,7 @@ class Standard(object):
     def menu_action_triggered(self, q):
         """卸载/更新处理"""
         act = q.text()
-        if act == "设置":
+        if act == "解释器":
             self.act_setting_slot()
         elif Actions.to_en(act) == Actions.UNINSTALL:
             self.action = Actions.UNINSTALL

@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'new_env.ui',
 # licensing of 'new_env.ui' applies.
 #
-# Created: Tue Dec  3 19:00:33 2019
+# Created: Thu Dec 12 19:19:32 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -87,7 +87,7 @@ class Ui_NewEnv(object):
         QtCore.QMetaObject.connectSlotsByName(NewEnv)
 
     def retranslateUi(self, NewEnv):
-        NewEnv.setWindowTitle(QtWidgets.QApplication.translate("NewEnv", "Form", None, -1))
+        NewEnv.setWindowTitle(QtWidgets.QApplication.translate("NewEnv", "新建虚拟环境", None, -1))
         self.label.setText(QtWidgets.QApplication.translate("NewEnv", "名称", None, -1))
         self.env_radio.setText(QtWidgets.QApplication.translate("NewEnv", "新的虚拟环境", None, -1))
         self.label_3.setText(QtWidgets.QApplication.translate("NewEnv", "位置", None, -1))

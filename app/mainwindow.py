@@ -3,6 +3,7 @@ from PySide2.QtGui import QIcon, QCloseEvent, QBitmap, QPainter
 from PySide2.QtWidgets import QMainWindow, QSystemTrayIcon, QMenu, QDesktopWidget, QMessageBox
 
 from app.lib.global_var import G
+from app.ui import qss
 from app.ui.ui_mainwindow import Ui_MainWindow
 from app.home import HomeWidget
 from app.initial import InitialWidget
@@ -21,6 +22,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(self.__class__, self).__init__()
         self.quit_ = False
         self.setupUi(self)
+        self.setStyleSheet(qss)
         self.job = Job()
         self.layout_init()
         self.tray_init()
