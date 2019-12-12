@@ -7,14 +7,11 @@ class Worker(QRunnable):
         self.setAutoDelete(True)
         self.fn = fn
         self.args = args
-        self.succ_callback = kwargs.pop("succ_callback", None)
-        self.fail_callback = kwargs.pop("fail_callback", None)
+        self.callback = kwargs.pop("callback", None)
         self.kwargs = kwargs
 
     @Slot()
     def run(self):
         res = self.fn(*self.args, **self.kwargs)
-        if res is True and self.succ_callback:
-            self.succ_callback()
-        if res is False and self.fail_callback:
-            self.fail_callback()
+        if self.callback:
+            self.callback(res)

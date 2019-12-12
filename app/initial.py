@@ -1,5 +1,7 @@
 import os
+import time
 
+from PySide2 import QtGui
 from PySide2.QtCore import QThread, QObject, Signal
 from PySide2.QtWidgets import QWidget
 
@@ -36,12 +38,14 @@ class InitialWidget(QWidget, Ui_Form):
         self.thread.start()
 
     def show_progress(self, pro, msg):
-        if pro == 100:
-            self.mainwindow.home_handler()
-            self.deleteLater()
-            return
         self.progressBar.setValue(pro)
         self.msg.setText(msg)
+        if pro == 100:
+            time.sleep(1)
+            self.mainwindow.home_handler()
+            self.close()
+            return
+
 
 
 class InitJob(QObject):

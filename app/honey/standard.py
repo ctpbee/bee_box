@@ -75,8 +75,7 @@ def before_download(handler):
         self.div.progress_msg.setText("获取中...")
         self.action = Actions.CANCEL
         self.div.action.setText(Actions.to_zn(self.action))
-        self.thread_pool.start(Worker(handler, self, succ_callback=self.on_download_success,
-                                      fail_callback=self.on_download_fail))
+        self.thread_pool.start(Worker(handler, self, callback=self.on_download_callback))
 
     return wrap
 
@@ -89,8 +88,7 @@ def before_install(handler):
             self.act_setting_slot()
             return
         self._progress_show()
-        self.thread_pool.start(Worker(handler, self, succ_callback=self.on_install_success,
-                                      fail_callback=self.on_install_fail))
+        self.thread_pool.start(Worker(handler, self, callback=self.on_install_callback))
 
     return wrap
 
@@ -245,12 +243,12 @@ class Standard(object):
             headers = {}
             mode = 'wb'
         # download
-        response = requests.get(url, stream=True, headers=headers)
         try:
+            response = requests.get(url, stream=True, headers=headers, timeout=5)
             response.raise_for_status()
         except Exception as e:
             return False
-        content_size = response.headers.get('Content-Length', 0)
+        content_size = float(response.headers.get('Content-Length', 0))
         self._transfer("progressbar", "setRange", 0, content_size)
         # save
         with open(file_temp, mode) as file:
@@ -262,10 +260,9 @@ class Standard(object):
                 self.count += 1
                 ##show
                 current = chunk_size * self.count + local_file
-
                 if content_size:
                     self._transfer("progressbar", "setValue", current)
-                    self._transfer("progress_msg", "setText", str(current * 100 // content_size) + '%')
+                    self._transfer("progress_msg", "setText", f"{(current * 100 // content_size)}%")
                 else:
                     speed = format_size(current / (time.time() - self.start_time))
                     self._transfer("progress_msg", "setText", speed + "/s")
@@ -273,26 +270,24 @@ class Standard(object):
         extract(file_temp)  # 解压
         return True
 
-    def on_download_success(self):
-        self.action = Actions.DOWNLOAD
+    def on_download_callback(self, res):
         self._progress_hide()
-        self._transfer("action", "setText", Actions.to_zn(self.action))
-        data = {"cls_name": self.cls_name,
-                "install_version": self.install_version,
-                "action": Actions.INSTALL,
-                "app_folder": self.app_folder,
-                "py_": "",
-                "entry": "",
-                }
-        G.config.installed_apps.update({self.pack_name: data})
-        G.config.to_file()
-        self.div.add_installed_layout(data)
-
-    def on_download_fail(self):
-        """隐藏进度条"""
-        self._progress_hide()
-        self.action = Actions.DOWNLOAD
-        self._transfer("action", "setText", Actions.to_zn(self.action))
+        if res is True:
+            self.action = Actions.DOWNLOAD
+            self._transfer("action", "setText", Actions.to_zn(self.action))
+            data = {"cls_name": self.cls_name,
+                    "install_version": self.install_version,
+                    "action": Actions.INSTALL,
+                    "app_folder": self.app_folder,
+                    "py_": "",
+                    "entry": "",
+                    }
+            G.config.installed_apps.update({self.pack_name: data})
+            G.config.to_file()
+            self.div.add_installed_layout(data)
+        elif res is False:
+            self.action = Actions.DOWNLOAD
+            self._transfer("action", "setText", Actions.to_zn(self.action))
 
     @before_install
     def install_handler(self):
@@ -315,18 +310,17 @@ class Standard(object):
         except OSError as e:
             self._tip(str(e))
 
-    def on_install_success(self):
+    def on_install_callback(self, res):
         self._progress_hide()
-        self.action = Actions.RUN
-        record = {"action": Actions.RUN, 'entry': self.entry}
-        G.config.installed_apps[self.pack_name].update(record)
-        G.config.to_file()
-        self._transfer("action", "setText", Actions.to_zn(self.action))
-
-    def on_install_fail(self):
-        self._progress_hide()
-        self.action = Actions.INSTALL
-        self.div.action.setText(Actions.to_zn(self.action))
+        if res is True:
+            self.action = Actions.RUN
+            record = {"action": Actions.RUN, 'entry': self.entry}
+            G.config.installed_apps[self.pack_name].update(record)
+            G.config.to_file()
+            self._transfer("action", "setText", Actions.to_zn(self.action))
+        elif res is False:
+            self.action = Actions.INSTALL
+            self.div.action.setText(Actions.to_zn(self.action))
 
     def get_build(self):
         """

@@ -39,7 +39,6 @@ class HomeWidget(QWidget, Ui_Home):
         [all_app[cfg['cls_name']](self, **cfg) for pack_name, cfg in G.config.installed_apps.items()]
         # 所有app
         [app_cls(self) for app_cls in all_app.values()]
-        # py_manage
 
     @Slot(dict)
     def add_installed_layout_slot(self, data):

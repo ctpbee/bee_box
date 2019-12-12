@@ -1,4 +1,4 @@
-from PySide2.QtCore import QThreadPool, QObject, Signal, Slot, Qt
+from PySide2.QtCore import  QObject, Signal, Slot, Qt
 from PySide2.QtGui import QIcon, QCloseEvent, QBitmap, QPainter
 from PySide2.QtWidgets import QMainWindow, QSystemTrayIcon, QMenu, QDesktopWidget, QMessageBox
 
