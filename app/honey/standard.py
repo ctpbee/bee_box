@@ -66,7 +66,6 @@ def before_download(handler):
     @functools.wraps(handler)
     def wrap(self):
         """主线程中UI处理"""
-        self.cancel = False
         for i in G.config.installed_apps.values():
             if i['cls_name'] == self.cls_name and self.install_version == i['install_version']:
                 self._tip("此版本已下载")
@@ -76,6 +75,7 @@ def before_download(handler):
         self._progress_show()
         self.div.progress_msg.setText("获取中...")
         self.action = Actions.CANCEL
+        self.cancel = False
         self.div.action.setText(Actions.to_zn(self.action))
         self.thread_pool.start(Worker(handler, self, callback=self.on_download_callback))
 
@@ -88,7 +88,6 @@ def before_install(handler):
         """主线程中UI处理
         检查py_ ,requirement
         """
-        self.cancel = False
         self.py_ = G.config.installed_apps[self.pack_name].get('py_')
         if not self.py_:
             QMessageBox.warning(self.parent, "提示", "未选择Python解释器")
@@ -97,8 +96,14 @@ def before_install(handler):
         if not os.path.exists(self.py_) or not os.path.isfile(self.py_):
             QMessageBox.warning(self.parent, "提示", f"{self.py_} 不存在")
             return
+        try:
+            self.entry_, self.requirement_ = self.get_build()
+        except Exception as e:
+            QMessageBox.warning(self.parent, "提示", str(e))
+            return
         self._progress_show()
         self.action = Actions.CANCEL
+        self.cancel = False
         self.div.action.setText(Actions.to_zn(self.action))
         self.thread_pool.start(Worker(handler, self, callback=self.on_install_callback))
 
@@ -118,14 +123,14 @@ def before_run(handler):
             QMessageBox.warning(self.parent, "提示", f"{self.py_} 不存在")
             return
         try:
-            self.entry, self.requirement = self.get_build()
+            self.entry_, self.requirement_ = self.get_build()
         except Exception as e:
-            QMessageBox.warning(self.parent, str(e))
+            QMessageBox.warning(self.parent, "提示", str(e))
             return
         ##检测依赖
         output = subprocess.check_output([self.py_, "-m", 'pip', "freeze"], creationflags=0x08000000).decode()
         output = output.splitlines()
-        with open(self.requirement, 'r') as f:
+        with open(self.requirement_, 'r') as f:
             requirement = f.read().splitlines()
         dissatisfy, version_less = diff_pip(output, requirement)
         if dissatisfy:
@@ -174,7 +179,10 @@ class Standard(object):
     # installed
     install_version = ""  # 选择安装的版本
     app_folder = ""  # 应用安装路径
-    py_ = ""  # 解释器
+
+    py_ = ""  # 解释器 (G 中实时获取)
+    entry_ = ""  # 启动文件 (build.json实时获取)
+    requirement_ = ""  # 依赖(build.json实时获取)
 
     def __init__(self, parent: QWidget, **kwargs):
         self.cls_name = self.__class__.__name__
@@ -192,7 +200,6 @@ class Standard(object):
         """检查已下载应用参数"""
 
         self.app_folder = kwargs.get("app_folder")  # 应用安装路径
-        self.py_ = kwargs.get("py_")  # 解释器
         self.install_version = kwargs.get('install_version')  # 应用安装路径
         self.app_info(**kwargs)
 
@@ -357,9 +364,8 @@ class Standard(object):
     def install_handler(self):
         """解析 build.json"""
         try:
-            _, required = self.get_build()
             img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
-            with open(required, 'r')as fp:
+            with open(self.requirement_, 'r')as fp:
                 f = fp.readlines()
                 for line in f:
                     line = line.strip()
@@ -393,7 +399,7 @@ class Standard(object):
     def run_handler(self):
         try:
             ##run
-            cmd = [self.py_, self.entry]
+            cmd = [self.py_, self.entry_]
             print(cmd)
             TipDialog("正在启动...")
             p = subprocess.Popen(cmd, creationflags=0x08000000)
