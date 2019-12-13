@@ -89,6 +89,7 @@ class MyLabel(QLabel):
         font.setUnderline(True)
         self.setFont(font)
         self.url = None
+        self.setCursor(Qt.PointingHandCursor)
 
     def mousePressEvent(self, e: QMouseEvent):
         if self.url:

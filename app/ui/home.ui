@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>481</width>
-    <height>734</height>
+    <width>476</width>
+    <height>717</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -47,7 +47,7 @@
 </string>
          </property>
          <property name="text">
-          <string>  </string>
+          <string/>
          </property>
         </widget>
        </item>
@@ -164,8 +164,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>459</width>
-        <height>569</height>
+        <width>454</width>
+        <height>541</height>
        </rect>
       </property>
       <layout class="QVBoxLayout" name="verticalLayout_4">
@@ -184,7 +184,7 @@
           <string notr="true">font: 14pt &quot;微软雅黑&quot;;</string>
          </property>
          <property name="text">
-          <string>已安装</string>
+          <string>可用</string>
          </property>
         </widget>
        </item>

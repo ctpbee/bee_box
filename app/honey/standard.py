@@ -65,6 +65,7 @@ def format_size(bytes):
 def before_download(handler):
     @functools.wraps(handler)
     def wrap(self):
+        """主线程中UI处理"""
         self.cancel = False
         for i in G.config.installed_apps.values():
             if i['cls_name'] == self.cls_name and self.install_version == i['install_version']:
@@ -84,7 +85,10 @@ def before_download(handler):
 def before_install(handler):
     @functools.wraps(handler)
     def wrap(self):
-        if not G.config.installed_apps[self.pack_name]['py_'] or not self._py:
+        """主线程中UI处理"""
+
+        self.cancel = False
+        if not G.config.installed_apps[self.pack_name]['py_']:
             self._tip("未选择Python解释器")
             self.act_setting_slot()
             return
@@ -99,6 +103,10 @@ def before_install(handler):
 def before_run(handler):
     @functools.wraps(handler)
     def wrap(self):
+        if not G.config.installed_apps[self.pack_name]['py_']:
+            self._tip("未选择Python解释器")
+            self.act_setting_slot()
+            return
         self.thread_pool.start(Worker(handler, self))
 
     return wrap
@@ -307,7 +315,6 @@ class Standard(object):
                 if self.cancel or G.pool_done:
                     return False
                 out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT, creationflags=0x08000000)
-                print(out_bytes.decode())
             return True
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode()  # Output generated before error
@@ -318,7 +325,6 @@ class Standard(object):
             self._tip(cmd_)
             self._tip(str(e))
             return False
-
 
     def on_install_callback(self, res):
         self._progress_hide()

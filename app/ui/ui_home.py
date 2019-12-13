@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'home.ui',
 # licensing of 'home.ui' applies.
 #
-# Created: Thu Dec 12 21:42:26 2019
+# Created: Fri Dec 13 08:50:44 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -13,7 +13,7 @@ from PySide2 import QtCore, QtGui, QtWidgets
 class Ui_Home(object):
     def setupUi(self, Home):
         Home.setObjectName("Home")
-        Home.resize(481, 734)
+        Home.resize(476, 717)
         self.verticalLayout = QtWidgets.QVBoxLayout(Home)
         self.verticalLayout.setContentsMargins(11, 11, 11, 11)
         self.verticalLayout.setObjectName("verticalLayout")
@@ -29,6 +29,7 @@ class Ui_Home(object):
         self.label.setFont(font)
         self.label.setStyleSheet("image: url(:/icon/icon/CTPBEE.png);\n"
 "")
+        self.label.setText("")
         self.label.setObjectName("label")
         self.horizontalLayout_5.addWidget(self.label)
         self.label_4 = QtWidgets.QLabel(Home)
@@ -81,7 +82,7 @@ class Ui_Home(object):
         self.scrollArea.setWidgetResizable(True)
         self.scrollArea.setObjectName("scrollArea")
         self.scrollAreaWidgetContents = QtWidgets.QWidget()
-        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 459, 569))
+        self.scrollAreaWidgetContents.setGeometry(QtCore.QRect(0, 0, 454, 541))
         self.scrollAreaWidgetContents.setObjectName("scrollAreaWidgetContents")
         self.verticalLayout_4 = QtWidgets.QVBoxLayout(self.scrollAreaWidgetContents)
         self.verticalLayout_4.setObjectName("verticalLayout_4")
@@ -154,10 +155,9 @@ class Ui_Home(object):
     def retranslateUi(self, Home):
         Home.setWindowTitle(QtWidgets.QApplication.translate("Home", "Home", None, -1))
         self.label.setToolTip(QtWidgets.QApplication.translate("Home", "组织标志", None, -1))
-        self.label.setText(QtWidgets.QApplication.translate("Home", "  ", None, -1))
         self.label_4.setText(QtWidgets.QApplication.translate("Home", "bee box", None, -1))
         self.setting_btn.setToolTip(QtWidgets.QApplication.translate("Home", "设置", None, -1))
-        self.label_2.setText(QtWidgets.QApplication.translate("Home", "已安装", None, -1))
+        self.label_2.setText(QtWidgets.QApplication.translate("Home", "可用", None, -1))
         self.label_3.setText(QtWidgets.QApplication.translate("Home", "所有", None, -1))
         self.qq.setToolTip(QtWidgets.QApplication.translate("Home", "<html><head/><body><p>ctpbee开源量化社区群：756319143</p></body></html>", None, -1))
         self.toolButton.setToolTip(QtWidgets.QApplication.translate("Home", "<html><head/><body><p>当前版本：1.0</p></body></html>", None, -1))

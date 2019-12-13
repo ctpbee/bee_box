@@ -29,11 +29,11 @@ class PyManageWidget(QWidget, Ui_Form):
         self.setupUi(self)
         self.setStyleSheet(qss)
         self.home = home
+        self.interpreter = None
         # btn
         self.py_setting_btn.clicked.connect(self.py_setting_slot)
         self.set_app_py.clicked.connect(self.set_app_py_slot)
         #
-        self.interpreter = InterpreterWidget(self)
         self.py_box.currentTextChanged.connect(self.py_change_slot)
         #
         self.load_py()
@@ -79,6 +79,7 @@ class PyManageWidget(QWidget, Ui_Form):
         TipDialog("设置成功")
 
     def py_setting_slot(self):
+        self.interpreter = InterpreterWidget(self)
         self.interpreter.exec_()
 
     def py_change_slot(self, name):
@@ -89,23 +90,24 @@ class PyManageWidget(QWidget, Ui_Form):
 
     def window_cleanup(self):
         """关闭的事后处理"""
-        self.interpreter.window_cleanup()
+        if self.interpreter:
+            self.interpreter.window_cleanup()
         self.close()
 
 
 class InterpreterWidget(QDialog, Ui_Interpreters):
     """所有解释器list 列表"""
 
-    def __init__(self, parent_widget):
+    def __init__(self, py_manage):
         super(self.__class__, self).__init__()
         self.setupUi(self)
         self.setStyleSheet(qss)
-        self.parent_widget = parent_widget
+        self.py_manage = py_manage
         self.py_table.horizontalHeader().setStretchLastSection(True)  # 最后一列自适应表格宽度
         self.py_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.py_table.setEditTriggers(QTableWidget.NoEditTriggers)  # 单元格不可编辑
         #
-        self.new_env = NewEnvWidget(self)
+        self.new_env = None
         self.modify_env = None
         # btn
         self.add_btn.clicked.connect(self.add_btn_slot)
@@ -123,6 +125,7 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
             self.py_table.setItem(0, 1, QTableWidgetItem(str(v)))
 
     def add_btn_slot(self):
+        self.new_env = NewEnvWidget(self)
         self.new_env.exec_()
 
     def del_btn_slot(self):
@@ -147,8 +150,8 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         self.modify_env.exec_()
 
     def closeEvent(self, event):
+        self.py_manage.load_py()
         event.accept()
-        self.parent_widget.load_py()
 
     def window_cleanup(self):
         if self.new_env:
@@ -161,11 +164,11 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
 class NewEnvWidget(QDialog, Ui_NewEnv):
     """新建虚拟环境  或  导入外部环境"""
 
-    def __init__(self, parent_widget):
+    def __init__(self, interpreter):
         super(self.__class__, self).__init__()
         self.setupUi(self)
         self.setStyleSheet(qss)
-        self.parent_widget = parent_widget
+        self.interpreter = interpreter
         self.thread_pool = QThreadPool()
         # btn
         self.name.textChanged.connect(self.name_change_slot)
@@ -176,7 +179,6 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         self.ok_btn.clicked.connect(self.ok_btn_slot)
         self.cancel_btn.clicked.connect(self.close)
         self.ready_action()
-        self.infobox = ProgressMsgDialog(self)
 
     def ready_action(self):
         self.env_radio_slot()
@@ -229,6 +231,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
             dirname = f'{name}_venv'
             vir_path = os.path.join(path, dirname)
             self.thread_pool.start(Worker(self.create_env, py_, vir_path, name, callback=self.create_env_callback))
+            self.infobox = ProgressMsgDialog(self)
             self.infobox.sig.msg.emit("准备中...")
             self.infobox.exec_()
 
@@ -237,7 +240,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
             G.config.python_path.update({name: path})
             G.config.to_file()
         self.close()
-        self.parent_widget.load_py()
+        self.interpreter.load_py()
 
     def create_env(self, py_, vir_path, name):
         try:
@@ -260,13 +263,14 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
 
     def create_env_callback(self, res):
         if res is True:
-            TipDialog('创建成功')
+            self.infobox.sig.msg.emit('创建成功')
+            self.infobox.close()
+
         elif res is False:
-            TipDialog('创建失败')
-        self.infobox.close()
+            self.infobox.sig.msg.emit('创建失败')
 
     def closeEvent(self, event):
-        self.parent_widget.load_py()
+        self.interpreter.load_py()
         event.accept()
 
     def window_cleanup(self):
@@ -276,11 +280,11 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
 class ModifyEnvWidget(QDialog, Ui_Modify):
     """ 修改名称或解释器路径"""
 
-    def __init__(self, parent_widget, name, path):
+    def __init__(self, interpreter, name, path):
         super(self.__class__, self).__init__()
         self.setupUi(self)
         self.setStyleSheet(qss)
-        self.parent_widget = parent_widget
+        self.interpreter = interpreter
         self.raw_name = name
         self.raw_path = path
         self.name.setText(name)
@@ -308,7 +312,7 @@ class ModifyEnvWidget(QDialog, Ui_Modify):
             TipDialog("未知路径")
 
     def closeEvent(self, event):
-        self.parent_widget.load_py()
+        self.interpreter.load_py()
         event.accept()
 
     def window_cleanup(self):

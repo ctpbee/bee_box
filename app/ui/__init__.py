@@ -101,7 +101,6 @@ QPushButton,QToolButton{
 QPushButton:disabled{
     background:#2B2B2B;
     color:#b6b6b6;
-    border-radius:2px;
 }
 QToolButton:down-arrow{
     border-radius:15px;
@@ -141,6 +140,10 @@ QComboBox,QLineEdit,QDoubleSpinBox,QSpinBox{
     color:#000000;
     border:1px solid #1b89ca;
     border-radius:5px;
+}
+
+QComboBox:disabled,QLineEdit:disabled,QDoubleSpinBox:disabled,QSpinBox:disabled,QPushButton:disabled{
+    background:#2B2B2B;
 }
 
 QToolButton::drop-down{
