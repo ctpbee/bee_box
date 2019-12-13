@@ -2,6 +2,7 @@ import os
 import re
 import subprocess
 import sys
+import time
 
 from PySide2 import QtGui
 from PySide2.QtCore import QThreadPool, QObject, Signal, Slot, Qt
@@ -154,8 +155,8 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         row = self.py_table.currentRow()
         name = self.py_table.item(row, 0).text()
         path = self.py_table.item(row, 1).text()
-        replay = QMessageBox.question(self, '提示', f'确定删除{name}吗？', QMessageBox.Yes | QMessageBox.Cancel,
-                                      QMessageBox.Cancel)
+        replay = QMessageBox.question(self, '提示', f'确定删除[{name}]吗？', QMessageBox.Yes | QMessageBox.No,
+                                      QMessageBox.No)
         if replay == QMessageBox.Yes:
             G.config.python_path.pop(name, None)
             for p in G.config.installed_apps.values():
@@ -184,6 +185,13 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         self.close()
 
 
+class NewEnvObject(QObject):
+    sig = Signal(str)
+
+    def __init__(self):
+        super().__init__()
+
+
 class NewEnvWidget(QDialog, Ui_NewEnv):
     """新建虚拟环境  或  导入外部环境"""
 
@@ -192,6 +200,8 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         self.setupUi(self)
         self.setStyleSheet(qss)
         self.interpreter = interpreter
+        self.job = NewEnvObject()
+        self.job.sig.connect(self.tip_)
         self.thread_pool = QThreadPool()
         # btn
         self.name.textChanged.connect(self.name_change_slot)
@@ -262,8 +272,12 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
             path = self.exis_path.text()
             G.config.python_path.update({name: path})
             G.config.to_file()
+            self.close()
+
+    @Slot(str)
+    def tip_(self, msg):
+        QMessageBox.information(self, "提示", msg)
         self.close()
-        self.interpreter.load_py()
 
     def create_env(self, py_, vir_path, name):
         try:
@@ -281,15 +295,14 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
             G.config.to_file()
             return True
         except subprocess.CalledProcessError as e:
-            self.infobox.sig.msg.emit(str(e))
-            return False
+            self.job.sig.emit(str(e))
 
     def create_env_callback(self, res):
-        if res is True:
-            self.infobox.sig.msg.emit('创建成功')
-        elif res is False:
-            self.infobox.sig.msg.emit('创建失败')
         self.infobox.close()
+        if res is True:
+            self.job.sig.emit("创建成功")
+        elif res is False:
+            self.job.sig.emit("创建失败")
 
     def closeEvent(self, event):
         self.interpreter.load_py()

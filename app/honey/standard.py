@@ -85,7 +85,9 @@ def before_download(handler):
 def before_install(handler):
     @functools.wraps(handler)
     def wrap(self):
-        """主线程中UI处理"""
+        """主线程中UI处理
+        检查py_ ,requirement
+        """
         self.cancel = False
         self.py_ = G.config.installed_apps[self.pack_name].get('py_')
         if not self.py_:
@@ -106,6 +108,7 @@ def before_install(handler):
 def before_run(handler):
     @functools.wraps(handler)
     def wrap(self):
+        """检查py_, entry ,requirement"""
         self.py_ = G.config.installed_apps[self.pack_name].get('py_')
         if not self.py_:
             QMessageBox.warning(self.parent, "提示", "未选择Python解释器")
@@ -117,7 +120,8 @@ def before_run(handler):
         try:
             self.entry, self.requirement = self.get_build()
         except Exception as e:
-            return self._tip(str(e))
+            QMessageBox.warning(self.parent, str(e))
+            return
         ##检测依赖
         output = subprocess.check_output([self.py_, "-m", 'pip', "freeze"], creationflags=0x08000000).decode()
         output = output.splitlines()
@@ -125,8 +129,8 @@ def before_run(handler):
             requirement = f.read().splitlines()
         dissatisfy, version_less = diff_pip(output, requirement)
         if dissatisfy:
-            QMessageBox.warning(self.parent, "不满足依赖:", "\n".join(dissatisfy[:15]) + "...")
-            replay = QMessageBox.question(self.parent, '提示', '是否安装缺失依赖', QMessageBox.Yes | QMessageBox.No,
+            QMessageBox.warning(self.parent, "缺少依赖:", "\n".join(dissatisfy[:15]) + "...")
+            replay = QMessageBox.question(self.parent, '提示', '是否安装缺少依赖', QMessageBox.Yes | QMessageBox.No,
                                           QMessageBox.No)
             if replay == QMessageBox.Yes:
                 self.action = Actions.INSTALL
@@ -188,8 +192,8 @@ class Standard(object):
         """检查已下载应用参数"""
 
         self.app_folder = kwargs.get("app_folder")  # 应用安装路径
-        self.entry = kwargs.get("entry")  # 启动文件
         self.py_ = kwargs.get("py_")  # 解释器
+        self.install_version = kwargs.get('install_version')  # 应用安装路径
         self.app_info(**kwargs)
 
     def app_info(self, **kwargs):
@@ -256,6 +260,8 @@ class Standard(object):
 
     def menu_action_triggered(self, q):
         """卸载/更新处理"""
+        if self.action == Actions.CANCEL:
+            return
         act = q.text()
         if act == "解释器":
             self.act_setting_slot()
@@ -359,10 +365,9 @@ class Standard(object):
                     line = line.strip()
                     self._transfer("progress_msg", "setText", "installing " + line)
                     cmd_ = [self.py_, "-m", "pip", "install", line] + img_
-                    print(cmd_)
                     if self.cancel or G.pool_done:
                         return False
-                    out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT, creationflags=0x08000000)
+                    output = subprocess.check_output(cmd_, creationflags=0x08000000)
             return True
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode()  # Output generated before error
@@ -392,11 +397,10 @@ class Standard(object):
             print(cmd)
             TipDialog("正在启动...")
             p = subprocess.Popen(cmd, creationflags=0x08000000)
-            self._transfer("progress_msg", "setText", "运行中...")
+            self._transfer("progress_msg", "setText", "运行中")
             while not p.poll():
-                if self.cancel:
+                if self.cancel or G.pool_done:
                     p.terminate()
-                time.sleep(2)
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode('utf8')  # Output generated before error
             code = e.returncode
