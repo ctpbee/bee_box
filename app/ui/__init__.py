@@ -94,10 +94,13 @@ QPushButton,QToolButton{
     border-radius:5px;
     padding:5px
 }
-QPushButton:disabled{
-    background:#2B2B2B;
-    color:#b6b6b6;
+
+QPushButton:selected,QToolButton:selected{
+    background:#1b89ca;
+    border-radius:5px;
+    padding:5px
 }
+
 QToolButton:down-arrow{
     border-radius:15px;
 
@@ -139,11 +142,7 @@ QComboBox,QLineEdit,QDoubleSpinBox,QSpinBox{
 }
 
 QComboBox:disabled,QLineEdit:disabled,QDoubleSpinBox:disabled,QSpinBox:disabled,QPushButton:disabled{
-    background:#2B2B2B;
+    background:#C0C0C0;
 }
 
-QToolButton::drop-down{
-border-top-right-radius: 3px;
-border-bottom-right-radius: 3px;
-}
 """ + scroll_bar

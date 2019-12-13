@@ -274,6 +274,9 @@
      </item>
      <item>
       <widget class="QToolButton" name="github">
+       <property name="toolTip">
+        <string>github</string>
+       </property>
        <property name="icon">
         <iconset resource="../resource/bee_box.qrc">
          <normaloff>:/icon/icon/github.png</normaloff>:/icon/icon/github.png</iconset>
@@ -302,6 +305,17 @@
        <property name="icon">
         <iconset resource="../resource/bee_box.qrc">
          <normaloff>:/icon/icon/version.png</normaloff>:/icon/icon/version.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QToolButton" name="quit_btn">
+       <property name="text">
+        <string>...</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../resource/bee_box.qrc">
+         <normaloff>:/icon/icon/quit.png</normaloff>:/icon/icon/quit.png</iconset>
        </property>
       </widget>
      </item>

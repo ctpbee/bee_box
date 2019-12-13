@@ -155,7 +155,7 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         row = self.py_table.currentRow()
         name = self.py_table.item(row, 0).text()
         path = self.py_table.item(row, 1).text()
-        replay = QMessageBox.question(self, '提示', f'确定删除[{name}]吗？', QMessageBox.Yes | QMessageBox.No,
+        replay = QMessageBox.question(self, '提示', f'确定删除[ {name} ]吗？', QMessageBox.Yes | QMessageBox.No,
                                       QMessageBox.No)
         if replay == QMessageBox.Yes:
             G.config.python_path.pop(name, None)

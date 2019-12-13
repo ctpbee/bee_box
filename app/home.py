@@ -1,6 +1,6 @@
 from PySide2 import QtGui
 from PySide2.QtCore import Slot, QObject, Signal
-from PySide2.QtWidgets import QWidget
+from PySide2.QtWidgets import QWidget, QMessageBox
 
 from app.ui import qss
 from app.ui.ui_home import Ui_Home
@@ -27,6 +27,7 @@ class HomeWidget(QWidget, Ui_Home):
         self.progressBar.setFixedHeight(3)
         self.job = HomeJob()
         ## button
+        self.quit_btn.clicked.connect(self.quit_click)
         self.setting_btn.clicked.connect(self.setting_click)
         self.github.clicked.connect(self.github_click)
         self.qq.clicked.connect(self.qq_click)
@@ -37,6 +38,12 @@ class HomeWidget(QWidget, Ui_Home):
     def setting_click(self):
         self.setting_widget = SettingWidget()
         self.setting_widget.show()
+
+    def quit_click(self):
+        replay = QMessageBox.question(self, 'bee box', '是否退出bee box', QMessageBox.Yes | QMessageBox.Cancel,
+                                      QMessageBox.Cancel)
+        if replay == QMessageBox.Yes:
+            self.mainwindow.quit_action()
 
     def ready_action(self):
         self.init_ui()
