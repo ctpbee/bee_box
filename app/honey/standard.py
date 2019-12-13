@@ -88,11 +88,12 @@ def before_install(handler):
         """主线程中UI处理"""
 
         self.cancel = False
-        if not G.config.installed_apps[self.pack_name]['py_']:
+        self.py_ = G.config.installed_apps[self.pack_name].get('py_')
+
+        if not self.py_:
             self._tip("未选择Python解释器")
             self.act_setting_slot()
             return
-        self.py_ = G.config.installed_apps[self.pack_name]['py_']
         self._progress_show()
         self.action = Actions.CANCEL
         self.div.action.setText(Actions.to_zn(self.action))
@@ -116,7 +117,7 @@ def before_run(handler):
 def before_uninstall(handler):
     @functools.wraps(handler)
     def wrap(self):
-        replay = QMessageBox.information(self.parent, "提示", "确定删除吗?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        replay = QMessageBox.information(self.parent, "提示", "确定卸载吗?", QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if replay == QMessageBox.Yes:
             self.div.progress_msg.setText("卸载中...")
             self.thread_pool.start(Worker(handler, self))
@@ -286,6 +287,7 @@ class Standard(object):
                     "install_version": self.install_version,
                     "action": Actions.INSTALL,
                     "app_folder": self.app_folder,
+                    "py_": ""
                     }
             G.config.installed_apps.update({self.pack_name: data})
             G.config.to_file()
@@ -388,8 +390,8 @@ class Standard(object):
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode('utf8')  # Output generated before error
             code = e.returncode
-            print(out_bytes)
-            self._tip(out_bytes)
+            if out_bytes.strip():
+                self._tip(out_bytes)
 
     def upgrade_handler(self):
         pass
