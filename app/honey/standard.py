@@ -92,6 +92,7 @@ def before_install(handler):
             self._tip("未选择Python解释器")
             self.act_setting_slot()
             return
+        self.py_ = G.config.installed_apps[self.pack_name]['py_']
         self._progress_show()
         self.action = Actions.CANCEL
         self.div.action.setText(Actions.to_zn(self.action))
@@ -139,7 +140,6 @@ class Standard(object):
     # installed
     install_version = ""  # 选择安装的版本
     app_folder = ""  # 应用安装路径
-    entry = ""  # 启动文件
     py_ = ""  # 解释器
 
     def __init__(self, parent: QWidget, **kwargs):
@@ -153,7 +153,6 @@ class Standard(object):
         self.count = 0
         self.start_time = 0
         self.cancel = False
-        self.p = QProcess(self.parent)
 
     def check(self, **kwargs):
         """检查已下载应用参数"""
@@ -231,8 +230,7 @@ class Standard(object):
         if act == "解释器":
             self.act_setting_slot()
         elif Actions.to_en(act) == Actions.UNINSTALL:
-            self.action = Actions.UNINSTALL
-            self.action_handler()
+            self.uninstall_handler()
 
     def act_setting_slot(self):
         self.py_manage = PyManageWidget(self.parent, self.pack_name)
@@ -284,59 +282,18 @@ class Standard(object):
     def on_download_callback(self, res):
         self._progress_hide()
         if res is True:
-            self.action = Actions.DOWNLOAD
-            self._transfer("action", "setText", Actions.to_zn(self.action))
             data = {"cls_name": self.cls_name,
                     "install_version": self.install_version,
                     "action": Actions.INSTALL,
                     "app_folder": self.app_folder,
-                    "py_": "",
-                    "entry": "",
                     }
             G.config.installed_apps.update({self.pack_name: data})
             G.config.to_file()
             self.div.add_installed_layout(data)
         elif res is False:
-            self.action = Actions.DOWNLOAD
-            self._transfer("action", "setText", Actions.to_zn(self.action))
-
-    @before_install
-    def install_handler(self):
-        """解析 build.json"""
-        try:
-            self.entry, required = self.get_build()
-            img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
-            f = open(required, 'r').readlines()
-            for line in f:
-                line = line.strip()
-                self._transfer("progress_msg", "setText", "installing " + line)
-                cmd_ = [self.py_, "-m", "pip", "install", line] + img_
-                print(cmd_)
-                if self.cancel or G.pool_done:
-                    return False
-                out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT, creationflags=0x08000000)
-            return True
-        except subprocess.CalledProcessError as e:
-            out_bytes = e.output.decode()  # Output generated before error
-            code = e.returncode
-            self._tip(out_bytes)
-            return False
-        except OSError as e:
-            self._tip(cmd_)
-            self._tip(str(e))
-            return False
-
-    def on_install_callback(self, res):
-        self._progress_hide()
-        if res is True:
-            self.action = Actions.RUN
-            record = {"action": Actions.RUN, 'entry': self.entry}
-            G.config.installed_apps[self.pack_name].update(record)
-            G.config.to_file()
-            self._transfer("action", "setText", Actions.to_zn(self.action))
-        elif res is False:
-            self.action = Actions.INSTALL
-            self.div.action.setText(Actions.to_zn(self.action))
+            pass
+        self.action = Actions.DOWNLOAD
+        self._transfer("action", "setText", Actions.to_zn(self.action))
 
     def get_build(self):
         """
@@ -358,6 +315,43 @@ class Standard(object):
             return entry, requirement
         else:
             raise Exception("未找到文件build.json")
+
+    @before_install
+    def install_handler(self):
+        """解析 build.json"""
+        try:
+            _, required = self.get_build()
+            img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
+            with open(required, 'r')as fp:
+                f = fp.readlines()
+                for line in f:
+                    line = line.strip()
+                    self._transfer("progress_msg", "setText", "installing " + line)
+                    cmd_ = [self.py_, "-m", "pip", "install", line] + img_
+                    print(cmd_)
+                    if self.cancel or G.pool_done:
+                        return False
+                    out_bytes = subprocess.check_output(cmd_, stderr=subprocess.STDOUT, creationflags=0x08000000)
+            return True
+        except subprocess.CalledProcessError as e:
+            out_bytes = e.output.decode()  # Output generated before error
+            code = e.returncode
+            self._tip(out_bytes)
+            return False
+        except OSError as e:
+            self._tip(str(e))
+            return False
+
+    def on_install_callback(self, res):
+        self._progress_hide()
+        if res is True:
+            self.action = Actions.RUN
+            record = {"action": Actions.RUN}
+            G.config.installed_apps[self.pack_name].update(record)
+            G.config.to_file()
+        elif res is False:
+            self.action = Actions.INSTALL
+        self._transfer("action", "setText", Actions.to_zn(self.action))
 
     @before_run
     def run_handler(self):
@@ -428,7 +422,5 @@ class Standard(object):
             self.install_handler()
         elif self.action == Actions.RUN:
             self.run_handler()
-        elif self.action == Actions.UNINSTALL:
-            self.uninstall_handler()
         elif self.action == Actions.UPGRADE:
             self.upgrade_handler()
