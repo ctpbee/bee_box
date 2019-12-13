@@ -39,7 +39,13 @@ class AppDiv:
         self.icon = QLabel(self.widget)
         ####  2
         self.name = QLabel(self.widget)
+        self.name.setAlignment(Qt.AlignCenter)
+        self.name.setStyleSheet("""
+        border:1px solid #1b89ca;
+        border-radius:5px;
+""")
         self.desc = MyLabel(self.widget)
+        self.desc.setAlignment(Qt.AlignCenter)
         self.desc_layout = QVBoxLayout()
         self.desc_layout.addWidget(self.name)
         self.desc_layout.addWidget(self.desc)
@@ -53,8 +59,8 @@ class AppDiv:
         self.app_layout.addLayout(self.desc_layout)
         self.app_layout.addWidget(self.action)
         self.app_layout.setStretch(0, 3)
-        self.app_layout.setStretch(1, 5)
-        self.app_layout.setStretch(2, 2)
+        self.app_layout.setStretch(1, 4)
+        self.app_layout.setStretch(2, 3)
         ##  4
         self.progress_layout = QHBoxLayout()
         self.progressbar = QProgressBar()
@@ -90,6 +96,7 @@ class MyLabel(QLabel):
         self.setFont(font)
         self.url = None
         self.setCursor(Qt.PointingHandCursor)
+
 
     def mousePressEvent(self, e: QMouseEvent):
         if self.url:

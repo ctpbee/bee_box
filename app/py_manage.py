@@ -4,10 +4,10 @@ import subprocess
 import sys
 
 from PySide2 import QtGui
-from PySide2.QtCore import QThreadPool, QObject, Signal, Slot
+from PySide2.QtCore import QThreadPool, QObject, Signal, Slot, Qt
 from PySide2.QtGui import QCloseEvent
 from PySide2.QtWidgets import QWidget, QFileDialog, QTableWidgetItem, QAbstractItemView, QMessageBox, QTableWidget, \
-    QDialog
+    QDialog, QMenu
 
 from app.lib.global_var import G
 from app.lib.path_lib import get_py_version, join_path, venv_path
@@ -30,11 +30,14 @@ class PyManageWidget(QWidget, Ui_Form):
         self.setStyleSheet(qss)
         self.home = home
         self.interpreter = None
+        self.thread_pool = QThreadPool()
         # btn
         self.py_setting_btn.clicked.connect(self.py_setting_slot)
         self.set_app_py.clicked.connect(self.set_app_py_slot)
         #
         self.py_box.currentTextChanged.connect(self.py_change_slot)
+        self.pip_list.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.pip_list.customContextMenuRequested.connect(self.generate_menu)  ####右键菜单
         #
         self.load_py()
         if not app_name:
@@ -64,9 +67,28 @@ class PyManageWidget(QWidget, Ui_Form):
         self.pip_list.clear()
         output = subprocess.check_output([py_, '-m', 'pip', 'freeze'],
                                          creationflags=0x08000000).decode()  # creationflags=0x08000000  不显示shell窗口
-        print(output)
         for i in output.splitlines():
             self.pip_list.addItem(i)
+
+    def generate_menu(self, pos):
+        row_num = -1
+        for i in self.pip_list.selectionModel().selection().indexes():
+            row_num = i.row()
+        menu = QMenu()
+        item1 = menu.addAction("uninstall")
+        action = menu.exec_(self.pip_list.mapToGlobal(pos))
+        row_data = self.pip_list.item(row_num)
+        if action == item1 and row_data:
+            pack = row_data.text()
+            py_ = self.path.text()
+            self.thread_pool.start(Worker(self.uninstall_pip, py_, pack))
+            self.pip_list.takeItem(row_num)
+
+    def uninstall_pip(self, py_, pack):
+        try:
+            subprocess.check_output([py_, '-m', 'pip', 'uninstall', pack, '-y'])
+        except subprocess.CalledProcessError as e:
+            return
 
     def set_app_py_slot(self):
         """设置为当前app解释器"""
@@ -231,7 +253,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
             dirname = f'{name}_venv'
             vir_path = os.path.join(path, dirname)
             self.thread_pool.start(Worker(self.create_env, py_, vir_path, name, callback=self.create_env_callback))
-            self.infobox = ProgressMsgDialog(self)
+            self.infobox = ProgressMsgDialog()
             self.infobox.sig.msg.emit("准备中...")
             self.infobox.exec_()
 
@@ -264,10 +286,9 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
     def create_env_callback(self, res):
         if res is True:
             self.infobox.sig.msg.emit('创建成功')
-            self.infobox.close()
-
         elif res is False:
             self.infobox.sig.msg.emit('创建失败')
+        self.infobox.close()
 
     def closeEvent(self, event):
         self.interpreter.load_py()

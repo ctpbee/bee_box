@@ -2,7 +2,7 @@ import os
 import re
 
 from PySide2 import QtGui
-from PySide2.QtCore import Slot
+from PySide2.QtCore import Slot, Qt
 from PySide2.QtWidgets import QWidget, QTableWidgetItem, QFileDialog
 
 from app.lib.global_var import G
@@ -28,6 +28,8 @@ class SettingWidget(QWidget, Ui_Setting):
         self.load_setting()
 
     def load_setting(self):
+        self.pypi_source.setText(G.config.pypi_source)
+        self.pypi_checkBox.setCheckState(Qt.Checked if G.config.pypi_use else Qt.Unchecked)
         self.install_path.setText(G.config.install_path)
 
     def install_path_slot(self):
@@ -39,7 +41,6 @@ class SettingWidget(QWidget, Ui_Setting):
             G.config.to_file()
             self.install_path.setText(path)
             TipDialog("修改成功")
-
 
     def pypi_use_slot(self):
         if self.pypi_checkBox.isChecked():

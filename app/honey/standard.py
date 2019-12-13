@@ -86,12 +86,12 @@ def before_install(handler):
     @functools.wraps(handler)
     def wrap(self):
         """主线程中UI处理"""
-
         self.cancel = False
         self.py_ = G.config.installed_apps[self.pack_name].get('py_')
-
+        if not os.path.exists(self.py_) or not os.path.isfile(self.py_):
+            QMessageBox.warning(self.parent, "提示", f"{self.py_} 不存在")
         if not self.py_:
-            self._tip("未选择Python解释器")
+            QMessageBox.warning(self.parent, "提示", "未选择Python解释器")
             self.act_setting_slot()
             return
         self._progress_show()
@@ -105,10 +105,37 @@ def before_install(handler):
 def before_run(handler):
     @functools.wraps(handler)
     def wrap(self):
-        if not G.config.installed_apps[self.pack_name]['py_']:
-            self._tip("未选择Python解释器")
+        self.py_ = G.config.installed_apps[self.pack_name].get('py_')
+        if not os.path.exists(self.py_) or not os.path.isfile(self.py_):
+            QMessageBox.warning(self.parent, "提示", f"{self.py_} 不存在")
+        if not self.py_:
+            QMessageBox.warning(self.parent, "提示", "未选择Python解释器")
             self.act_setting_slot()
             return
+        try:
+            self.entry, self.requirement = self.get_build()
+        except Exception as e:
+            return self._tip(str(e))
+        ##检测依赖
+        output = subprocess.check_output([self.py_, "-m", 'pip', "freeze"], creationflags=0x08000000).decode()
+        output = output.splitlines()
+        with open(self.requirement, 'r') as f:
+            requirement = f.read().splitlines()
+        dissatisfy, version_less = diff_pip(output, requirement)
+        if dissatisfy:
+            QMessageBox.warning(self.parent, "不满足依赖:", "\n".join(dissatisfy[:15]) + "...")
+            replay = QMessageBox.question(self.parent, '提示', '是否安装缺失依赖', QMessageBox.Yes | QMessageBox.No,
+                                          QMessageBox.No)
+            if replay == QMessageBox.Yes:
+                self.action = Actions.INSTALL
+                self.action_handler()
+            return
+
+        # run
+        self._progress_show()
+        self.action = Actions.CANCEL
+        self.cancel = False
+        self.div.action.setText(Actions.to_zn(self.action))
         self.thread_pool.start(Worker(handler, self))
 
     return wrap
@@ -358,40 +385,24 @@ class Standard(object):
     @before_run
     def run_handler(self):
         try:
-            entry, requirement = self.get_build()
-        except Exception as e:
-            return self._tip(str(e))
-        try:
-            py_ = G.config.installed_apps[self.pack_name]['py_']
-        except Exception:
-            self._tip("未选择Python解释器")
-            self.act_setting_slot()
-            return
-        try:
-            ##检测依赖
-            output = subprocess.check_output([py_, "-m", 'pip', "freeze"], creationflags=0x08000000).decode()
-            output = output.splitlines()
-            with open(requirement, 'r') as f:
-                requirement = f.read().splitlines()
-            dissatisfy, version_less = diff_pip(output, requirement)
-            if dissatisfy:
-                self._tip(msg="\n".join(dissatisfy[:15]))
-                replay = QMessageBox.information(self.parent, '提示', '是否安装缺失依赖', QMessageBox.Yes | QMessageBox.No,
-                                                 QMessageBox.No)
-                if replay == QMessageBox.Yes:
-                    self.action = Actions.INSTALL
-                    self.action_handler()
-                return
-                ##run
-            cmd = [py_, entry]
+            ##run
+            cmd = [self.py_, self.entry]
             print(cmd)
             TipDialog("正在启动...")
-            output = subprocess.check_output(cmd, creationflags=0x08000000).decode()
+            p = subprocess.Popen(cmd, creationflags=0x08000000)
+            self._transfer("progress_msg", "setText", "运行中...")
+            while not p.poll():
+                if self.cancel:
+                    p.terminate()
+                time.sleep(2)
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode('utf8')  # Output generated before error
             code = e.returncode
             if out_bytes.strip():
                 self._tip(out_bytes)
+        self.action = Actions.RUN
+        self._transfer("action", "setText", Actions.to_zn(self.action))
+        self._progress_hide()
 
     def upgrade_handler(self):
         pass

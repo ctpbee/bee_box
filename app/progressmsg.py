@@ -1,6 +1,7 @@
-from PySide2.QtCore import QObject, Signal, Slot
+from PySide2.QtCore import QObject, Signal, Slot, Qt
 from PySide2.QtWidgets import QDialog
 
+from app.ui import qss
 from app.ui.ui_progress import Ui_Form
 
 
@@ -13,15 +14,12 @@ class ProgressSig(QObject):
         super(self.__class__, self).__init__()
 
 
-qss = """
-
-"""
-
-
 class ProgressMsgDialog(QDialog, Ui_Form):
-    def __init__(self, parent, msg='', p_min=0, p_max=0, p_val=0):
+    def __init__(self, parent=None, msg='', p_min=0, p_max=0, p_val=0):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
+        self.setStyleSheet(qss)
+        self.setWindowFlags(Qt.FramelessWindowHint)  # 隐藏整个头部
         self.sig = ProgressSig()
         self.sig.msg.connect(self.msg_slot)
         self.sig.progress.connect(self.progress_slot)

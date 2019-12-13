@@ -41,7 +41,6 @@ QScrollBar::add-line:vertical {
     width:10px;  
     subcontrol-position: bottom;   
     subcontrol-origin: margin;  
-    border-image:url(:/image/add-line_vertical.png);  
 }  
 
 QScrollBar::add-line:horizontal {  
@@ -49,7 +48,6 @@ QScrollBar::add-line:horizontal {
     width:10px;  
     subcontrol-position: right;  
     subcontrol-origin: margin;  
-    border-image:url(:/image/add-line_horizontal.png);  
 }  
 
 QScrollBar::sub-line:vertical {  
@@ -57,7 +55,6 @@ QScrollBar::sub-line:vertical {
     width:10px;  
     subcontrol-position: top;   
     subcontrol-origin: margin;  
-    border-image:url(:/image/sub-line_vertical.png);  
 }  
 
 QScrollBar::sub-line:horizontal {  
@@ -65,7 +62,6 @@ QScrollBar::sub-line:horizontal {
     width:10px;  
     subcontrol-position: left;  
     subcontrol-origin: margin;  
-    border-image:url(:/image/sub-line_horizontal.png);  
 }  
 
 QScrollBar::add-page:vertical,QScrollBar::sub-page:vertical {  
