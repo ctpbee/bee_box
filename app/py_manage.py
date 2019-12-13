@@ -158,9 +158,10 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
                                       QMessageBox.Cancel)
         if replay == QMessageBox.Yes:
             G.config.python_path.pop(name, None)
+            for p in G.config.installed_apps.values():
+                if path == p.get('py_', ""):
+                    p.update({"py_": ""})
             G.config.to_file()
-            if os.path.exists(path) and os.path.isdir(path):
-                os.rmdir(path)
             self.load_py()
             TipDialog("已删除")
 

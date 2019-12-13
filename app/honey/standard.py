@@ -88,11 +88,12 @@ def before_install(handler):
         """主线程中UI处理"""
         self.cancel = False
         self.py_ = G.config.installed_apps[self.pack_name].get('py_')
-        if not os.path.exists(self.py_) or not os.path.isfile(self.py_):
-            QMessageBox.warning(self.parent, "提示", f"{self.py_} 不存在")
         if not self.py_:
             QMessageBox.warning(self.parent, "提示", "未选择Python解释器")
             self.act_setting_slot()
+            return
+        if not os.path.exists(self.py_) or not os.path.isfile(self.py_):
+            QMessageBox.warning(self.parent, "提示", f"{self.py_} 不存在")
             return
         self._progress_show()
         self.action = Actions.CANCEL
@@ -106,11 +107,12 @@ def before_run(handler):
     @functools.wraps(handler)
     def wrap(self):
         self.py_ = G.config.installed_apps[self.pack_name].get('py_')
-        if not os.path.exists(self.py_) or not os.path.isfile(self.py_):
-            QMessageBox.warning(self.parent, "提示", f"{self.py_} 不存在")
         if not self.py_:
             QMessageBox.warning(self.parent, "提示", "未选择Python解释器")
             self.act_setting_slot()
+            return
+        if not os.path.exists(self.py_) or not os.path.isfile(self.py_):
+            QMessageBox.warning(self.parent, "提示", f"{self.py_} 不存在")
             return
         try:
             self.entry, self.requirement = self.get_build()
