@@ -1,12 +1,8 @@
 import os
-import re
 import subprocess
-import sys
-import time
 
-from PySide2 import QtGui
-from PySide2.QtCore import QThreadPool, QObject, Signal, Slot, Qt
-from PySide2.QtGui import QCloseEvent
+from PySide2.QtCore import QThreadPool, QObject, Signal, Slot, Qt, QUrl, QRegExp
+from PySide2.QtGui import QDesktopServices, QRegExpValidator
 from PySide2.QtWidgets import QWidget, QFileDialog, QTableWidgetItem, QAbstractItemView, QMessageBox, QTableWidget, \
     QDialog, QMenu
 
@@ -137,6 +133,9 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         self.del_btn.clicked.connect(self.del_btn_slot)
         self.change_btn.clicked.connect(self.change_btn_slot)
         #
+        self.py_table.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.py_table.customContextMenuRequested.connect(self.generate_menu)
+        #
         self.load_py()
 
     def load_py(self):
@@ -147,6 +146,18 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
             self.py_table.setItem(0, 0, QTableWidgetItem(str(k)))
             self.py_table.setItem(0, 1, QTableWidgetItem(str(v)))
 
+    def generate_menu(self, pos):
+        row_num = -1
+        for i in self.py_table.selectionModel().selection().indexes():
+            row_num = i.row()
+        menu = QMenu()
+        item1 = menu.addAction("打开所在文件夹")
+        action = menu.exec_(self.py_table.mapToGlobal(pos))
+        row_data = self.py_table.item(row_num, 1)
+        if action == item1 and row_data:
+            path = row_data.text()
+            QDesktopServices.openUrl(QUrl("file:" + os.path.dirname(path)))
+
     def add_btn_slot(self):
         self.new_env = NewEnvWidget(self)
         self.new_env.exec_()
@@ -155,7 +166,7 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
         row = self.py_table.currentRow()
         name = self.py_table.item(row, 0).text()
         path = self.py_table.item(row, 1).text()
-        replay = QMessageBox.question(self, '提示', f'确定删除[ {name} ]吗？', QMessageBox.Yes | QMessageBox.No,
+        replay = QMessageBox.question(self, '提示', f'确定删除[ {name} ]吗？\n(不删除本地环境)', QMessageBox.Yes | QMessageBox.No,
                                       QMessageBox.No)
         if replay == QMessageBox.Yes:
             G.config.python_path.pop(name, None)
@@ -203,6 +214,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         self.job = NewEnvObject()
         self.job.sig.connect(self.tip_)
         self.thread_pool = QThreadPool()
+        # rex
         # btn
         self.name.textChanged.connect(self.name_change_slot)
         self.env_radio.clicked.connect(self.env_radio_slot)
@@ -261,8 +273,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         if self.env_radio.isChecked():
             path = self.path.text()
             py_ = G.config.python_path[self.base_py_list.currentText()]
-            dirname = f'{name}_venv'
-            vir_path = os.path.join(path, dirname)
+            vir_path = os.path.join(path, name)
             self.thread_pool.start(Worker(self.create_env, py_, vir_path, name, callback=self.create_env_callback))
             self.infobox = ProgressMsgDialog()
             self.infobox.sig.msg.emit("准备中...")

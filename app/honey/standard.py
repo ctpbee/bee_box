@@ -436,7 +436,6 @@ class Standard(object):
 
     def cancel_handler(self):
         self.cancel = True
-        self.div.progress_msg.setText("正在释放资源...")
 
     def action_handler(self):
         if self.action == Actions.DOWNLOAD:
