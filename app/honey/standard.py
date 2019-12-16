@@ -72,11 +72,7 @@ def before_download(handler):
                 return
         self.start_time = time.time()
         self.count = 0
-        self._progress_show()
-        self.div.progress_msg.setText("获取中...")
-        self.action = Actions.CANCEL
-        self.cancel = False
-        self.div.action.setText(Actions.to_zn(self.action))
+        self.before_handle()
         self.thread_pool.start(Worker(handler, self, callback=self.on_download_callback))
 
     return wrap
@@ -101,10 +97,8 @@ def before_install(handler):
         except Exception as e:
             QMessageBox.warning(self.parent, "提示", str(e))
             return
-        self._progress_show()
-        self.action = Actions.CANCEL
-        self.cancel = False
-        self.div.action.setText(Actions.to_zn(self.action))
+        self.before_handle()
+
         self.thread_pool.start(Worker(handler, self, callback=self.on_install_callback))
 
     return wrap
@@ -143,10 +137,7 @@ def before_run(handler):
             return
 
         # run
-        self._progress_show()
-        self.action = Actions.CANCEL
-        self.cancel = False
-        self.div.action.setText(Actions.to_zn(self.action))
+        self.before_handle()
         self.thread_pool.start(Worker(handler, self))
 
     return wrap
@@ -227,6 +218,12 @@ class Standard(object):
         self._transfer("progressbar", "setVisible", True)
         self._transfer("progress_msg", "setVisible", True)
 
+    def before_handle(self):
+        self.action = Actions.CANCEL
+        self.cancel = False
+        self.div.action.setText(Actions.to_zn(self.action))
+        self._progress_show()
+
     def _tip(self, msg):
         self.parent.mainwindow.job.msg_box_signal.emit({"msg": str(msg)})
 
@@ -295,6 +292,7 @@ class Standard(object):
             headers = {}
             mode = 'wb'
         # download
+        self._transfer("progress_msg", "setText", "获取中...")
         try:
             response = requests.get(url, stream=True, headers=headers)
             response.raise_for_status()
@@ -378,7 +376,8 @@ class Standard(object):
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode()  # Output generated before error
             code = e.returncode
-            self._tip(out_bytes)
+            if out_bytes:
+                self._tip(out_bytes)
             return False
         except OSError as e:
             self._tip(str(e))
@@ -400,12 +399,11 @@ class Standard(object):
         try:
             ##run
             cmd = [self.py_, self.entry_]
-            print(cmd)
             TipDialog("正在启动...")
             p = subprocess.Popen(cmd, creationflags=0x08000000)
             self._transfer("progress_msg", "setText", "运行中")
             while not p.poll():
-                if self.cancel or G.pool_done:
+                if self.cancel:
                     p.terminate()
         except subprocess.CalledProcessError as e:
             out_bytes = e.output.decode('utf8')  # Output generated before error
@@ -436,6 +434,7 @@ class Standard(object):
 
     def cancel_handler(self):
         self.cancel = True
+        self._transfer("progress_msg", "setText", "canceling...")
 
     def action_handler(self):
         if self.action == Actions.DOWNLOAD:

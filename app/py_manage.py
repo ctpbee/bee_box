@@ -291,13 +291,19 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         self.close()
 
     def create_env(self, py_, vir_path, name):
+        virtualenv_ = "virtualenv"
+        img_ = ["-i", G.config.pypi_source] if G.config.pypi_source and G.config.pypi_use else []
         try:
-            virtualenv_ = "virtualenv"
-            img_ = ["-i", G.config.pypi_source] if G.config.pypi_source and G.config.pypi_use else []
             subprocess.check_output([py_, "-m", 'pip', 'install', virtualenv_] + img_,
                                     creationflags=0x08000000)  # creationflags=0x08000000  不显示shell窗口
+        except subprocess.CalledProcessError as e:
+            # err = e.output.decode()
+            # self.job.sig.emit(err)
+            pass
+
             # 开始新建venv
-            self.infobox.sig.msg.emit('新建虚拟环境中...')
+        self.infobox.sig.msg.emit('新建虚拟环境中...')
+        try:
             subprocess.check_output([py_, "-m", virtualenv_, "--no-site-packages", vir_path],
                                     creationflags=0x08000000)  # creationflags=0x08000000  不显示shell窗口
             # record
@@ -306,7 +312,8 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
             G.config.to_file()
             return True
         except subprocess.CalledProcessError as e:
-            self.job.sig.emit(str(e))
+            err = e.output.decode()
+            self.job.sig.emit(err)
 
     def create_env_callback(self, res):
         self.infobox.close()

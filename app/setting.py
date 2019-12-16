@@ -28,9 +28,11 @@ class SettingWidget(QWidget, Ui_Setting):
         self.load_setting()
 
     def load_setting(self):
+        self.sm = False
         self.pypi_source.setText(G.config.pypi_source)
         self.pypi_checkBox.setCheckState(Qt.Checked if G.config.pypi_use else Qt.Unchecked)
         self.install_path.setText(G.config.install_path)
+        self.sm = True
 
     def install_path_slot(self):
         path = QFileDialog.getExistingDirectory(self, "安装路径", beebox_path)
@@ -48,14 +50,16 @@ class SettingWidget(QWidget, Ui_Setting):
         else:
             G.config.pypi_use = False
         G.config.to_file()
-        TipDialog("修改成功")
+        if self.sm:
+            TipDialog("修改成功")
 
     def pypi_change_slot(self):
         i_ = self.pypi_source.text().strip()
         if i_ and re.match(r"^(https?://)?([\da-z\.-]+)\.([a-z\.]{2,6})([/\w .-]*)*/?$", i_):
             G.config.pypi_source = i_
             G.config.to_file()
-            TipDialog("修改成功")
+            if self.sm:
+                TipDialog("修改成功")
         else:
             self.pypi_source.setText(G.config.pypi_source)
 

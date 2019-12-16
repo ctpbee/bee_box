@@ -6,7 +6,7 @@ import platform
 platform_ = platform.system()
 
 pattern = r"[P|p][Y|y][T|t][H|h][O|o][N|n]\d*"  # python
-pattern2 = r"([P|p]ython\d*[/$|\\$]?)$"  # python36/ 末尾
+pattern2 = r"([P|p]ython.*[/$|\\$]?)$"  # python36/ 末尾
 pattern3 = r"[P|p]ython\d*\.exe$"  # python37.exe
 pattern4 = r"[P|p][I|i][P|p]\d*\.exe$"  # pip3.exe
 

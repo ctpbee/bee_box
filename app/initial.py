@@ -69,5 +69,5 @@ class InitJob(QObject):
                 self.sig_progress.emit(5, "配置文件损坏")
                 self.box_init()
         self.sig_progress.emit(100, "初始化完成")
-        time.sleep(0.5)
+        time.sleep(0.3)
         self.sig_progress.emit(-1, "")

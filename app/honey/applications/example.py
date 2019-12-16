@@ -1,5 +1,13 @@
 from app.honey.standard import Standard
 
+"""
+首先应用目录下需要有build.json内容包括
+{   
+    'entry':'',
+    'requirement':''
+}
+"""
+
 
 class AppNameClass(Standard):
     def app_info(self, **kwargs):
