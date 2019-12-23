@@ -97,18 +97,18 @@ def diff_pip(cur: list, need: list):
             pack = i
             v = ""
         cur_store[pack] = v
-    for i in need:
-        i = i.replace(" ", "")
-        if "=" in i:
-            pack = re.findall(pack_part, i)[0]
-            v = re.findall(v_part, i)[0]
+    for j in need:
+        j = j.replace(" ", "")
+        if "=" in j:
+            pack = re.findall(pack_part, j)[0]
+            v = re.findall(v_part, j)[0]
         else:
-            pack = i
+            pack = j
             v = ""
         try:
             c_v = cur_store[pack]
             if v > c_v:
-                version_less.append(i)
+                version_less.append(j)
         except KeyError:
-            dissatisfy.append(i)
+            dissatisfy.append(j)
     return dissatisfy, version_less

@@ -1,8 +1,9 @@
 import functools
 import json
 import os
-import re
+import shutil
 import subprocess
+import git
 import time
 import requests
 from PySide2.QtCore import QThreadPool, QProcess
@@ -19,7 +20,6 @@ from app.tip import TipDialog
 
 class Actions(dict):
     DOWNLOAD = 'download'
-    INSTALL = "install"
     UNINSTALL = "uninstall"
     UPGRADE = "upgrade"
     RUN = "run"
@@ -27,7 +27,6 @@ class Actions(dict):
 
     __map = {
         DOWNLOAD: "下载 ",
-        INSTALL: "安装 ",
         UNINSTALL: "卸载 ",
         UPGRADE: "升级 ",
         RUN: "启动 ",
@@ -92,11 +91,6 @@ def before_install(handler):
         if not os.path.exists(self.py_) or not os.path.isfile(self.py_):
             QMessageBox.warning(self.parent, "提示", f"{self.py_} 不存在")
             return
-        try:
-            self.entry_, self.requirement_ = self.get_build()
-        except Exception as e:
-            QMessageBox.warning(self.parent, "提示", str(e))
-            return
         self.before_handle()
 
         self.thread_pool.start(Worker(handler, self, callback=self.on_install_callback))
@@ -117,14 +111,14 @@ def before_run(handler):
             QMessageBox.warning(self.parent, "提示", f"{self.py_} 不存在")
             return
         try:
-            self.entry_, self.requirement_ = self.get_build()
+            self.entry_, requirement_ = self.get_build()
         except Exception as e:
             QMessageBox.warning(self.parent, "提示", str(e))
             return
         ##检测依赖
         output = subprocess.check_output([self.py_, "-m", 'pip', "freeze"], creationflags=0x08000000).decode()
         output = output.splitlines()
-        with open(self.requirement_, 'r') as f:
+        with open(requirement_, 'r') as f:
             requirement = f.read().splitlines()
         dissatisfy, version_less = diff_pip(output, requirement)
         if dissatisfy:
@@ -132,7 +126,7 @@ def before_run(handler):
             replay = QMessageBox.question(self.parent, '提示', '是否安装缺少依赖', QMessageBox.Yes | QMessageBox.No,
                                           QMessageBox.No)
             if replay == QMessageBox.Yes:
-                self.action = Actions.INSTALL
+                self.requirement_ = dissatisfy
                 self.action_handler()
             return
 
@@ -173,7 +167,7 @@ class Standard(object):
 
     py_ = ""  # 解释器 (G 中实时获取)
     entry_ = ""  # 启动文件 (build.json实时获取)
-    requirement_ = ""  # 依赖(build.json实时获取)
+    requirement_ = ""  # 缺失依赖
 
     def __init__(self, parent: QWidget, **kwargs):
         self.cls_name = self.__class__.__name__
@@ -243,7 +237,7 @@ class Standard(object):
             self.div.desc.url = self.app_url  # 可点击
             setattr(self.parent, self.ui_name, self)
             self.parent.apps_layout.addLayout(self.div.layout)
-        elif self.action == Actions.RUN or self.action == Actions.INSTALL:
+        elif self.action == Actions.RUN:
             act_uninstall = QAction(Actions.to_zn(Actions.UNINSTALL), self.parent)
             act_setting = QAction("解释器", self.parent)
             setattr(self.div, f"act_uninstall", act_uninstall)
@@ -277,12 +271,30 @@ class Standard(object):
         self.py_manage.show()
 
     @before_download
+    def git_download_handler(self):
+        url = self.versions[self.install_version]
+        name = os.path.basename(os.path.splitext(url)[0])
+        self.app_folder = os.path.join(G.config.install_path, name)
+        if os.path.isdir(self.app_folder):  # 只含.git
+            shutil.rmtree(self.app_folder)
+        try:
+            repo = git.Repo.clone_from(url, self.app_folder, progress=Progress(self._transfer))
+        except Exception as e:
+            self._tip(str(e))
+            return False
+        return True
+
+    @before_download
     def download_handler(self):
+        """
+        版本号
+        下载目录
+        """
         url = self.versions[self.install_version]
         postfix = os.path.splitext(url)[-1]  # .zip
         self.app_folder = os.path.join(G.config.install_path, self.pack_name)
         file_temp = self.app_folder + postfix  # 压缩文件路径
-        ##
+        ## 文件续传
         if os.path.exists(file_temp):
             local_file = os.path.getsize(file_temp)
             headers = {'Range': 'bytes=%d-' % local_file}
@@ -316,7 +328,6 @@ class Standard(object):
                 else:
                     speed = format_size(current / (time.time() - self.start_time))
                     self._transfer("progress_msg", "setText", speed + "/s")
-
         extract(file_temp)  # 解压
         return True
 
@@ -325,7 +336,7 @@ class Standard(object):
         if res is True:
             data = {"cls_name": self.cls_name,
                     "install_version": self.install_version,
-                    "action": Actions.INSTALL,
+                    "action": Actions.RUN,
                     "app_folder": self.app_folder,
                     "py_": ""
                     }
@@ -361,38 +372,28 @@ class Standard(object):
     @before_install
     def install_handler(self):
         """解析 build.json"""
-        try:
-            img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
-            with open(self.requirement_, 'r')as fp:
-                f = fp.readlines()
-                for line in f:
-                    line = line.strip()
-                    self._transfer("progress_msg", "setText", "installing " + line)
-                    cmd_ = [self.py_, "-m", "pip", "install", line] + img_
-                    if self.cancel or G.pool_done:
-                        return False
-                    output = subprocess.check_output(cmd_, creationflags=0x08000000)
-            return True
-        except subprocess.CalledProcessError as e:
-            out_bytes = e.output.decode()  # Output generated before error
-            code = e.returncode
-            if out_bytes:
-                self._tip(out_bytes)
-            return False
-        except OSError as e:
-            self._tip(str(e))
-            return False
+        img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
+        for line in self.requirement_:
+            line = line.strip().replace('==', '>=')
+            self._transfer("progress_msg", "setText", "installing " + line)
+            cmd_ = [self.py_, "-m", "pip", "install", line] + img_
+            if self.cancel or G.pool_done:
+                return False
+            try:
+                output = subprocess.check_output(cmd_, creationflags=0x08000000)
+            except subprocess.CalledProcessError as e:
+                out_bytes = e.output.decode()  # Output generated before error
+                code = e.returncode
+                if out_bytes:
+                    self._tip(out_bytes)
+                return False
+            except OSError as e:
+                self._tip(str(e))
+                return False
+        return True
 
     def on_install_callback(self, res):
         self._progress_hide()
-        if res is True:
-            self.action = Actions.RUN
-            record = {"action": Actions.RUN}
-            G.config.installed_apps[self.pack_name].update(record)
-            G.config.to_file()
-        elif res is False:
-            self.action = Actions.INSTALL
-        self._transfer("action", "setText", Actions.to_zn(self.action))
 
     @before_run
     def run_handler(self):
@@ -419,7 +420,6 @@ class Standard(object):
 
     @before_uninstall
     def uninstall_handler(self):
-        import shutil
         try:
             if os.path.exists(self.app_folder) and os.path.isdir(self.app_folder):
                 shutil.rmtree(self.app_folder)
@@ -438,12 +438,22 @@ class Standard(object):
 
     def action_handler(self):
         if self.action == Actions.DOWNLOAD:
-            self.download_handler()
+            # self.download_handler()
+            self.git_download_handler()
         elif self.action == Actions.CANCEL:
             self.cancel_handler()
-        elif self.action == Actions.INSTALL:
-            self.install_handler()
         elif self.action == Actions.RUN:
             self.run_handler()
         elif self.action == Actions.UPGRADE:
             self.upgrade_handler()
+
+
+class Progress(git.remote.RemoteProgress):
+    def __init__(self, _transfer):
+        super().__init__()
+        self._transfer = _transfer
+
+    def update(self, op_code, cur_count, max_count=None, message=''):
+        self._transfer("progressbar", "setRange", 0, max_count)
+        self._transfer("progressbar", "setValue", cur_count)
+        self._transfer("progress_msg", "setText", message)

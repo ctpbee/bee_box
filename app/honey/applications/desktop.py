@@ -8,7 +8,7 @@ class Desktop(Standard):
         self.desc = kwargs.get('desc', 'ctpbee桌面端')
         self.icon = kwargs.get('icon', ":/icon/icon/bee_temp_grey.png")
         self.versions = kwargs.get('versions',
-                                   {"1.0": "https://github.com/ctpbee/ctpbee_desktop/archive/master.zip"}
+                                   {"1.0": "https://github.com/ctpbee/ctpbee_desktop.git"}
                                    )
         self.install_version = kwargs.get("install_version","1.0")  # 默认安装版本
         self.app_url = kwargs.get('app_url', "https://github.com/ctpbee/ctpbee_desktop")
