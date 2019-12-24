@@ -16,14 +16,14 @@ class Config:
     python_path = {}
     install_path = ""
     installed_apps = {}
-    pypi_source = "https://mirrors.aliyun.com"
+    pypi_source = "https://mirrors.aliyun.com/pypi/simple"
     pypi_use = True
 
     def get_pypi_source(self):
-        if self.pypi_use:
+        if not self.pypi_use:
             return []
         else:
-            return ["-i", self.pypi_source, "--trusted-host", get_domian(self.pypi_use)]
+            return ["-i", self.pypi_source, "--trusted-host", get_domian(self.pypi_source)]
 
     def __setattr__(self, key, value):
         self.__dict__[key] = value

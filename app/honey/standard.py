@@ -2,7 +2,6 @@ import functools
 import json
 import os
 import shutil
-import subprocess
 import time
 import requests
 from PySide2.QtCore import QThreadPool, QProcess
@@ -131,6 +130,9 @@ class Standard(object):
         self.count = 0
         self.start_time = 0
         self.cancel = False
+        self.process = QProcess(self.parent)
+        self.process.readyReadStandardOutput.connect(self.on_readoutput)
+        self.process.readyReadStandardError.connect(self.on_readerror)
 
     def check(self, **kwargs):
         """检查已下载应用参数"""
@@ -152,22 +154,21 @@ class Standard(object):
         """ui中id"""
         return self.cls_name + "_app"
 
-    def _transfer(self, parent, func, *args):
-        self.div.job.div_signal.emit(self.div.transfer(parent, func, *args))
-
-    def _progress_hide(self):
-        self._transfer("progressbar", "setVisible", False)
-        self._transfer("progress_msg", "setVisible", False)
-
-    def _progress_show(self):
-        self._transfer("progressbar", "setVisible", True)
-        self._transfer("progress_msg", "setVisible", True)
+    def _transfer(self, widget, value=None):
+        if widget == 'bar':
+            self.div.job.progressbar_signal.emit(value)
+        elif widget == 'msg':
+            self.div.job.msg_signal.emit(value)
+        elif widget == 'switch':
+            self.div.job.switch_signal.emit()
+        elif widget == 'action':
+            self.div.job.action_signal.emit(value)
 
     def before_handle(self):
         self.action = Actions.CANCEL
         self.cancel = False
         self.div.action.setText(Actions.to_zn(self.action))
-        self._progress_show()
+        self._transfer('switch')
 
     def _tip(self, msg):
         self.parent.mainwindow.job.msg_box_signal.emit({"msg": str(msg)})
@@ -246,14 +247,14 @@ class Standard(object):
             headers = {}
             mode = 'wb'
         # download
-        self._transfer("progress_msg", "setText", "获取中...")
+        self._transfer("msg", "获取中...")
         try:
             response = requests.get(url, stream=True, headers=headers)
             response.raise_for_status()
         except Exception as e:
             return False
         content_size = float(response.headers.get('Content-Length', 0))
-        self._transfer("progressbar", "setRange", 0, content_size)
+        self._transfer("bar", dict(range=[0, content_size]))
         # save
         with open(file_temp, mode) as file:
             chunk_size = 1024
@@ -265,14 +266,14 @@ class Standard(object):
                 ##show
                 current = chunk_size * self.count + local_file
                 if content_size:
-                    self._transfer("progressbar", "setValue", current)
+                    self._transfer("bar", dict(value=current))
                 speed = format_size(current / (time.time() - self.start_time))
-                self._transfer("progress_msg", "setText", speed + "/s")
+                self._transfer("msg", speed + "/s")
         extract(file_temp)  # 解压
         return True
 
     def on_download_callback(self, res):
-        self._progress_hide()
+        self._transfer('switch')
         if res is True:
             data = {"cls_name": self.cls_name,
                     "install_version": self.install_version,
@@ -286,7 +287,7 @@ class Standard(object):
         elif res is False:
             pass
         self.action = Actions.DOWNLOAD
-        self._transfer("action", "setText", Actions.to_zn(self.action))
+        self._transfer("action", Actions.to_zn(self.action))
 
     def get_build(self):
         """
@@ -313,23 +314,27 @@ class Standard(object):
     def install_handler(self):
         """解析 build.json"""
         img_ = G.config.get_pypi_source()
-        p = QProcess()
-        self._transfer("progressbar", "setRange", 0, len(self.requirement_))
-        for index, line in enumerate(self.requirement_):
+        for line in self.requirement_:
             line = line.strip().replace('==', '>=')
-            self._transfer("progressbar", "setValue", index + 1)
-            self._transfer("progress_msg", "setText", "installing " + line)
             cmd_ = [self.py_, "-m", "pip", "install", line] + img_
             if self.cancel or G.pool_done:
                 return False
-            p.start(" ".join(cmd_))
-            p.waitForFinished()
+            self.process.start(" ".join(cmd_))
+            self.process.waitForFinished()
         return True
 
+    def on_readoutput(self):
+        output = self.process.readAllStandardOutput().data().decode()
+        self._transfer("msg", output)
+
+    def on_readerror(self):
+        error = self.process.readAllStandardError().data().decode()
+        self._tip(error)
+
     def on_install_callback(self, res):
-        self._progress_hide()
+        self._transfer('switch')
         self.action = Actions.RUN
-        self._transfer("action", "setText", Actions.to_zn(self.action))
+        self._transfer("action", Actions.to_zn(self.action))
 
     def run_handler(self):
         self.py_ = G.config.installed_apps[self.pack_name].get('py_')
@@ -355,10 +360,14 @@ class Standard(object):
             requirement = f.read().splitlines()
         dissatisfy, version_less = diff_pip(output, requirement)
         if dissatisfy:
-            QMessageBox.warning(self.parent, "缺少依赖:", "\n".join(dissatisfy[:15]) + "...")
-            replay = QMessageBox.question(self.parent, '提示', '是否安装缺少依赖', QMessageBox.Yes | QMessageBox.No,
-                                          QMessageBox.No)
-            if replay == QMessageBox.Yes:
+            msgbox = QMessageBox(self.parent)
+            msgbox.setWindowTitle("缺少依赖")
+            msgbox.setText("\n".join(dissatisfy[:15]) + "\n...")
+            yes = msgbox.addButton('立即安装', QMessageBox.AcceptRole)
+            no = msgbox.addButton('稍后', QMessageBox.RejectRole)
+            msgbox.setDefaultButton(yes)
+            reply = msgbox.exec_()
+            if reply == QMessageBox.AcceptRole:
                 self.requirement_ = dissatisfy
                 self.install_handler()
             return
@@ -386,7 +395,7 @@ class Standard(object):
 
     def cancel_handler(self):
         self.cancel = True
-        self._transfer("progress_msg", "setText", "canceling...")
+        self._transfer("msg", "Releasing...")
 
     def action_handler(self):
         if self.action == Actions.DOWNLOAD:

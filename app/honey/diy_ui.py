@@ -3,10 +3,14 @@ import webbrowser
 from PySide2.QtCore import QObject, Signal, Qt
 from PySide2.QtGui import QMouseEvent, QFont
 from PySide2.QtWidgets import QLabel, QVBoxLayout, QHBoxLayout, QProgressBar, QToolButton, QMenu
+from PySide2.QtGui import QFontMetrics
 
 
 class AppDivJob(QObject):
-    div_signal = Signal(dict)
+    progressbar_signal = Signal(dict)
+    msg_signal = Signal(str)
+    action_signal = Signal(str)
+    switch_signal = Signal()
 
     def __init__(self):
         super(self.__class__, self).__init__()
@@ -28,7 +32,10 @@ class AppDiv:
     def __init__(self, widget):
         self.widget = widget
         self.job = AppDivJob()
-        self.job.div_signal.connect(self.set_progress_slot)
+        self.job.progressbar_signal.connect(self.progressbar_signal_slot)
+        self.job.msg_signal.connect(self.msg_signal_slot)
+        self.job.action_signal.connect(self.action_signal_slot)
+        self.job.switch_signal.connect(self.progress_switch)
         self.layout = QVBoxLayout()
         self.layout.setMargin(10)
         self.app_layout = QHBoxLayout()
@@ -69,17 +76,31 @@ class AppDiv:
         self.progress_msg.setVisible(False)
         self.progress_layout.addWidget(self.progressbar)
         self.progress_layout.addWidget(self.progress_msg)
+        self.progress_layout.setStretch(0, 3)
+        self.progress_layout.setStretch(1, 7)
 
         self.layout.addLayout(self.app_layout)
         self.layout.addLayout(self.progress_layout)
 
-    def transfer(self, widget, func, *args):
-        return {"widget": widget, "func": func, "args": args}
+    def progress_switch(self):
+        if self.progressbar.isHidden():
+            self.progressbar.show()
+            self.progress_msg.show()
+        else:
+            self.progress_msg.hide()
+            self.progressbar.hide()
 
-    def set_progress_slot(self, data):
-        widget = getattr(self, data['widget'])
-        func = getattr(widget, data['func'])
-        func(*data['args'])
+    def progressbar_signal_slot(self, data: dict):
+        self.progressbar.setRange(*data['range'])
+        self.progressbar.setValue(data['value'])
+
+    def msg_signal_slot(self, msg: str):
+        fontWidth = QFontMetrics(self.progress_msg.font())
+        elideNote = fontWidth.elidedText(msg, Qt.ElideRight, self.name.width() + self.action.width() - 15)
+        self.progress_msg.setText(elideNote)
+
+    def action_signal_slot(self, act: str):
+        self.action.setText(act)
 
     def add_installed_layout(self, data):
         self.widget.job.install_signal.emit(data)
