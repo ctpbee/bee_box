@@ -1,7 +1,7 @@
 import os
 import subprocess
 
-from PySide2.QtCore import QThreadPool, QObject, Signal, Slot, Qt, QUrl, QRegExp
+from PySide2.QtCore import QThreadPool, QObject, Signal, Slot, Qt, QUrl, QRegExp, QProcess
 from PySide2.QtGui import QDesktopServices, QRegExpValidator
 from PySide2.QtWidgets import QWidget, QFileDialog, QTableWidgetItem, QAbstractItemView, QMessageBox, QTableWidget, \
     QDialog, QMenu
@@ -62,8 +62,13 @@ class PyManageWidget(QWidget, Ui_Form):
     def load_pip(self, py_):
         """加载pip包列表"""
         self.pip_list.clear()
-        output = subprocess.check_output([py_, '-m', 'pip', 'freeze'],
-                                         creationflags=0x08000000).decode()  # creationflags=0x08000000  不显示shell窗口
+        self.p = QProcess()
+        # self.p.readyReadStandardOutput.connect(self.readout)
+        self.p.finished.connect(self.pip_finish_slot)
+        self.p.start(' '.join([py_, '-m', 'pip', 'freeze']))
+
+    def pip_finish_slot(self):
+        output = self.p.readAllStandardOutput().data().decode()
         for i in output.splitlines():
             self.pip_list.addItem(i)
 
@@ -82,10 +87,8 @@ class PyManageWidget(QWidget, Ui_Form):
             self.pip_list.takeItem(row_num)
 
     def uninstall_pip(self, py_, pack):
-        try:
-            subprocess.check_output([py_, '-m', 'pip', 'uninstall', pack, '-y'])
-        except subprocess.CalledProcessError as e:
-            return
+        cmd = " ".join([py_, '-m', 'pip', 'uninstall', pack, '-y'])
+        QProcess().start(cmd)
 
     def set_app_py_slot(self):
         """设置为当前app解释器"""
@@ -269,16 +272,15 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         self.exis_path.setText(path)
 
     def ok_btn_slot(self):
+        self.infobox = ProgressMsgDialog()
+        self.infobox.sig.msg.emit("准备中...")
         name = self.name.text()
         if self.env_radio.isChecked():
             path = self.path.text()
             py_ = G.config.python_path[self.base_py_list.currentText()]
             vir_path = os.path.join(path, name)
-            self.thread_pool.start(Worker(self.create_env, py_, vir_path, name, callback=self.create_env_callback))
-            self.infobox = ProgressMsgDialog()
-            self.infobox.sig.msg.emit("准备中...")
+            self.create_env(py_, vir_path, name)
             self.infobox.exec_()
-
         if self.exit_radio.isChecked():
             path = self.exis_path.text()
             G.config.python_path.update({name: path})
@@ -290,32 +292,36 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         QMessageBox.information(self, "提示", msg)
         self.close()
 
+    def readout_slot(self):
+        output = self.p.readAllStandardOutput().data().decode()
+        self.infobox.sig.msg.emit(output)
+
+    def finished_slot(self):
+        if self.infobox_flag:
+            self.infobox.close()
+            self.job.sig.emit("创建完成")
+
     def create_env(self, py_, vir_path, name):
+        self.infobox_flag = False
+        self.p = QProcess()
+        self.p.readyReadStandardOutput.connect(self.readout_slot)
+        self.p.finished.connect(self.finished_slot)
         virtualenv_ = "virtualenv"
         img_ = ["-i", G.config.pypi_source] if G.config.pypi_source and G.config.pypi_use else []
-        try:
-            subprocess.check_output([py_, "-m", 'pip', 'install', virtualenv_] + img_,
-                                    creationflags=0x08000000)  # creationflags=0x08000000  不显示shell窗口
-        except subprocess.CalledProcessError as e:
-            # err = e.output.decode()
-            # self.job.sig.emit(err)
-            pass
-
-            # 开始新建venv
+        cmd = " ".join([py_, "-m", 'pip', 'install', virtualenv_] + img_)
+        self.p.start(cmd)
+        self.p.waitForFinished()
+        # 开始新建venv
         self.infobox.sig.msg.emit('新建虚拟环境中...')
-        try:
-            subprocess.check_output([py_, "-m", virtualenv_, "--no-site-packages", vir_path],
-                                    creationflags=0x08000000)  # creationflags=0x08000000  不显示shell窗口
-            # record
-            py_path = join_path(vir_path, 'Scripts', 'python.exe')
-            G.config.python_path.update({name: py_path})
-            G.config.to_file()
-            return True
-        except subprocess.CalledProcessError as e:
-            err = e.output.decode()
-            self.job.sig.emit(err)
+        cmd = " ".join([py_, "-m", virtualenv_, "--no-site-packages", vir_path])
+        self.p.start(cmd)
+        self.infobox_flag = True
+        # record
+        py_path = join_path(vir_path, 'Scripts', 'python.exe')
+        G.config.python_path.update({name: py_path})
+        G.config.to_file()
 
-    def create_env_callback(self, res):
+    def create_env_callback(self,res):
         self.infobox.close()
         if res is True:
             self.job.sig.emit("创建成功")
