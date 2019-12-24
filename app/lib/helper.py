@@ -1,4 +1,6 @@
+import ctypes
 import gzip
+import inspect
 import os
 import re
 import tarfile
@@ -112,3 +114,25 @@ def diff_pip(cur: list, need: list):
         except KeyError:
             dissatisfy.append(j)
     return dissatisfy, version_less
+
+
+def _async_raise(tid, exctype):
+    """raises the exception, performs cleanup if needed"""
+    tid = ctypes.c_long(tid)
+    if not inspect.isclass(exctype):
+        exctype = type(exctype)
+    res = ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, ctypes.py_object(exctype))
+    if res == 0:
+        raise ValueError("invalid thread id")
+    elif res != 1:
+        # """if it returns a number greater than one, you're in trouble,
+        # and you should call it again with exc=NULL to revert the effect"""
+        ctypes.pythonapi.PyThreadState_SetAsyncExc(tid, None)
+        raise SystemError("PyThreadState_SetAsyncExc failed")
+
+
+def end_thread(thread):
+    """
+    which used to kill thread !
+    """
+    _async_raise(thread.ident, SystemExit)

@@ -240,10 +240,13 @@ class Standard(object):
         elif self.action == Actions.RUN:
             act_uninstall = QAction(Actions.to_zn(Actions.UNINSTALL), self.parent)
             act_setting = QAction("解释器", self.parent)
+            act_upgrade = QAction(Actions.to_zn(Actions.UPGRADE), self.parent)
             setattr(self.div, f"act_uninstall", act_uninstall)
             setattr(self.div, f"act_setting", act_setting)
-            self.div.menu.addAction(act_uninstall)
+            setattr(self.div, f"act_upgrade", act_upgrade)
             self.div.menu.addAction(act_setting)
+            self.div.menu.addAction(act_upgrade)
+            self.div.menu.addAction(act_uninstall)
             self.div.menu.triggered[QAction].connect(self.menu_action_triggered)
             self.div.desc.setText(self.install_version)
             setattr(self.parent, self.pack_name, self)
@@ -265,24 +268,34 @@ class Standard(object):
             self.act_setting_slot()
         elif Actions.to_en(act) == Actions.UNINSTALL:
             self.uninstall_handler()
+        elif Actions.to_en(act) == Actions.UPGRADE:
+            self.upgrade_handler()
 
     def act_setting_slot(self):
         self.py_manage = PyManageWidget(self.parent, self.pack_name)
         self.py_manage.show()
 
-    @before_download
-    def git_download_handler(self):
-        url = self.versions[self.install_version]
-        name = os.path.basename(os.path.splitext(url)[0])
-        self.app_folder = os.path.join(G.config.install_path, name)
-        if os.path.isdir(self.app_folder):  # 只含.git
-            shutil.rmtree(self.app_folder)
-        try:
-            repo = git.Repo.clone_from(url, self.app_folder, progress=Progress(self._transfer))
-        except Exception as e:
-            self._tip(str(e))
-            return False
-        return True
+    # @before_download
+    # def git_download_handler(self):
+    #     url = self.versions[self.install_version]
+    #     name = os.path.basename(os.path.splitext(url)[0])
+    #     self.app_folder = os.path.join(G.config.install_path, name)
+    #     if os.path.exists(self.app_folder) and os.path.isdir(self.app_folder):
+    #         try:
+    #             repo = git.Repo.init(self.app_folder)
+    #             if not repo.remotes:
+    #                 repo.create_remote('origin', url)
+    #             repo.remote().pull(progress=Progress(self._transfer))
+    #         except Exception as e:
+    #             self._tip(str(e))
+    #             return False
+    #     else:
+    #         try:
+    #             repo = git.Repo.clone_from(url, self.app_folder, progress=Progress(self._transfer))
+    #         except Exception as e:
+    #             self._tip(str(e))
+    #             return False
+    #     return True
 
     @before_download
     def download_handler(self):
@@ -324,10 +337,8 @@ class Standard(object):
                 current = chunk_size * self.count + local_file
                 if content_size:
                     self._transfer("progressbar", "setValue", current)
-                    self._transfer("progress_msg", "setText", f"{(current * 100 // content_size)}%")
-                else:
-                    speed = format_size(current / (time.time() - self.start_time))
-                    self._transfer("progress_msg", "setText", speed + "/s")
+                speed = format_size(current / (time.time() - self.start_time))
+                self._transfer("progress_msg", "setText", speed + "/s")
         extract(file_temp)  # 解压
         return True
 
@@ -438,22 +449,20 @@ class Standard(object):
 
     def action_handler(self):
         if self.action == Actions.DOWNLOAD:
-            # self.download_handler()
-            self.git_download_handler()
+            self.download_handler()
+            # self.git_download_handler()
         elif self.action == Actions.CANCEL:
             self.cancel_handler()
         elif self.action == Actions.RUN:
             self.run_handler()
-        elif self.action == Actions.UPGRADE:
-            self.upgrade_handler()
 
 
-class Progress(git.remote.RemoteProgress):
-    def __init__(self, _transfer):
-        super().__init__()
-        self._transfer = _transfer
-
-    def update(self, op_code, cur_count, max_count=None, message=''):
-        self._transfer("progressbar", "setRange", 0, max_count)
-        self._transfer("progressbar", "setValue", cur_count)
-        self._transfer("progress_msg", "setText", message)
+# class Progress(git.remote.RemoteProgress):
+#     def __init__(self, _transfer):
+#         super().__init__()
+#         self._transfer = _transfer
+#
+#     def update(self, op_code, cur_count, max_count=None, message=''):
+#         self._transfer("progressbar", "setRange", 0, max_count)
+#         self._transfer("progressbar", "setValue", cur_count)
+#         self._transfer("progress_msg", "setText", message)
