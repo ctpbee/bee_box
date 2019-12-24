@@ -45,7 +45,7 @@ def get_py_version(path):
         return v.decode().strip() + "(Base)"
     except Exception as e:
         print(e)
-    return 'Python(Base)'
+        return 'Python(Base)'
 
 
 def get_pip_version(path):

@@ -29,7 +29,7 @@ class TipDialog(QDialog, Ui_Tip):
         self.l = [i / 10 for i in range(11)]
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.do)
-        self.timer.start(50)
+        self.timer.start(30)
         self.exec_()
 
     def do(self):

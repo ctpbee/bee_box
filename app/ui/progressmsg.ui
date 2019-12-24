@@ -6,16 +6,21 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>312</width>
-    <height>124</height>
+    <width>430</width>
+    <height>114</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout">
+  <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
    <item>
     <widget class="QLabel" name="msg">
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string>TextLabel</string>
      </property>

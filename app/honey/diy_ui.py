@@ -12,9 +12,6 @@ class AppDivJob(QObject):
         super(self.__class__, self).__init__()
 
 
-
-
-
 class AppDiv:
     """
     +------1--------------2------------3-------------------+
@@ -95,8 +92,12 @@ class MyLabel(QLabel):
         font.setUnderline(True)
         self.setFont(font)
         self.url = None
+        self.setStyleSheet("""
+                QLabel:hover{
+                color:#1b89ca
+                }
+                """)
         self.setCursor(Qt.PointingHandCursor)
-
 
     def mousePressEvent(self, e: QMouseEvent):
         if self.url:

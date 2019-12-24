@@ -312,7 +312,7 @@ class Standard(object):
     @before_install
     def install_handler(self):
         """解析 build.json"""
-        img_ = ["-i", G.config.pypi_source] if G.config.pypi_use and G.config.pypi_source else []
+        img_ = G.config.get_pypi_source()
         p = QProcess()
         self._transfer("progressbar", "setRange", 0, len(self.requirement_))
         for index, line in enumerate(self.requirement_):

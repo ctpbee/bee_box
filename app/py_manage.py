@@ -46,6 +46,8 @@ class PyManageWidget(QWidget, Ui_Form):
         else:
             """用于应用窗口"""
             self.app_name.setText(app_name)
+            self.app_name.setStyleSheet("""color:#BE9117""")
+            self.cur_py.setStyleSheet("""color:#168AD5""")
             path = G.config.installed_apps[app_name].get('py_', '未选择')
             for name, p in G.config.python_path.items():
                 if path == p:
@@ -87,8 +89,8 @@ class PyManageWidget(QWidget, Ui_Form):
             self.pip_list.takeItem(row_num)
 
     def uninstall_pip(self, py_, pack):
-        cmd = " ".join([py_, '-m', 'pip', 'uninstall', pack, '-y'])
-        QProcess().start(cmd)
+        cmd = [py_, '-m', 'pip', 'uninstall', pack, '-y']
+        subprocess.check_output(cmd)
 
     def set_app_py_slot(self):
         """设置为当前app解释器"""
@@ -264,11 +266,11 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         self.exit_path_btn.setEnabled(True)
 
     def path_btn_slot(self):
-        path = QFileDialog.getExistingDirectory(self, "新建虚拟环境至", '')
+        path = QFileDialog.getExistingDirectory(self, "新建虚拟环境至", '/')
         self.path.setText(path)
 
     def exit_path_btn_slot(self):
-        path, _ = QFileDialog.getOpenFileName(self, "选择Python解释器", '', 'Python Interpreter (*.exe)')
+        path, _ = QFileDialog.getOpenFileName(self, "选择Python解释器", '/', 'Python Interpreter (*.exe)')
         self.exis_path.setText(path)
 
     def ok_btn_slot(self):
@@ -307,7 +309,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         self.p.readyReadStandardOutput.connect(self.readout_slot)
         self.p.finished.connect(self.finished_slot)
         virtualenv_ = "virtualenv"
-        img_ = ["-i", G.config.pypi_source] if G.config.pypi_source and G.config.pypi_use else []
+        img_ = G.config.get_pypi_source()
         cmd = " ".join([py_, "-m", 'pip', 'install', virtualenv_] + img_)
         self.p.start(cmd)
         self.p.waitForFinished()
@@ -321,7 +323,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         G.config.python_path.update({name: py_path})
         G.config.to_file()
 
-    def create_env_callback(self,res):
+    def create_env_callback(self, res):
         self.infobox.close()
         if res is True:
             self.job.sig.emit("创建成功")
@@ -353,7 +355,7 @@ class ModifyEnvWidget(QDialog, Ui_Modify):
         self.cancel_btn.clicked.connect(self.close)
 
     def path_btn_slot(self):
-        path, _ = QFileDialog.getOpenFileName(self, '选择Python路径', '', 'Python Interpreter(*.exe)')
+        path, _ = QFileDialog.getOpenFileName(self, '选择Python路径', '/', 'Python Interpreter(*.exe)')
         if not path:
             return
         self.path.setText(path)
