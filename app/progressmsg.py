@@ -19,6 +19,7 @@ class ProgressMsgDialog(QDialog, Ui_Form):
         super(self.__class__, self).__init__(parent)
         self.setupUi(self)
         self.setStyleSheet(qss)
+        self.setWindowTitle('tip')
         self.msg.setWordWrap(True)
         self.progress.setFixedHeight(1)
         self.setWindowFlags(Qt.FramelessWindowHint)  # 隐藏整个头部

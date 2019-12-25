@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icon">
+    <file>icon/noicon.png</file>
     <file>icon/version.png</file>
     <file>icon/github.png</file>
     <file>icon/qq.png</file>

@@ -30,6 +30,7 @@ class InitialWidget(QWidget, Ui_Form):
         self.setupUi(self)
         self.setStyleSheet(qss)
         self.mainwindow = mainwindow
+        self.progressBar.setFixedHeight(10)
         self.thread = QThread()
         self.job = InitJob()
         self.job.sig_progress.connect(self.show_progress)
@@ -53,21 +54,23 @@ class InitJob(QObject):
         super(self.__class__, self).__init__()
 
     def box_init(self):
+        self.sig_progress.emit(5, "正在查找Python路径..")
+        py_ = find_py_path()
+        self.sig_progress.emit(5, "正在加载配置..")
         if not os.path.exists(config_path):
-            self.sig_progress.emit(5, "正在查找Python路径..")
             open(config_path, 'w')
-            G.config.python_path = find_py_path()
+            G.config.python_path = py_
             G.config.install_path = install_path
             G.config.to_file()
         else:
-            self.sig_progress.emit(5, "正在加载配置..")
             try:
                 with open(config_path, 'r')as fp:
                     G.config.update(json.load(fp))
+                    G.config.python_path.update(py_)
             except Exception as e:
                 os.remove(config_path)
                 self.sig_progress.emit(5, "配置文件损坏")
                 self.box_init()
         self.sig_progress.emit(100, "初始化完成")
-        time.sleep(0.3)
+        time.sleep(0.5)
         self.sig_progress.emit(-1, "")

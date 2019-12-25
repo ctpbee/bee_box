@@ -1,6 +1,6 @@
-from PySide2.QtCore import QObject, Signal, Slot, Qt
-from PySide2.QtGui import QIcon, QCloseEvent, QBitmap, QPainter
-from PySide2.QtWidgets import QMainWindow, QSystemTrayIcon, QMenu, QDesktopWidget, QMessageBox
+from PySide2.QtCore import QObject, Signal, Slot, Qt, QEvent
+from PySide2.QtGui import QIcon, QCloseEvent, QBitmap, QPainter, QFocusEvent
+from PySide2.QtWidgets import QMainWindow, QSystemTrayIcon, QMenu, QDesktopWidget, QMessageBox, QApplication, QWidget
 
 from app.lib.global_var import G
 from app.ui import qss
@@ -22,6 +22,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super(self.__class__, self).__init__()
         self.quit_ = False
         self.setupUi(self)
+        self.setWindowFlags(Qt.WindowStaysOnTopHint)
         self.setStyleSheet(qss)
         self.job = Job()
         self.layout_init()
@@ -62,7 +63,7 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.tray.setContextMenu(menu)
         self.tray.activated.connect(self.iconActivated)
         self.tray.show()
-        self.tray.setToolTip("🍯~ bee box")
+        self.tray.setToolTip("bee box")
 
     def home_handler(self):
         self.widget = HomeWidget(self)
@@ -70,11 +71,9 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def iconActivated(self, reason):
         """托盘点击插槽"""
-        if reason in (QSystemTrayIcon.Trigger, QSystemTrayIcon.DoubleClick):
-            if self.isHidden():
-                self.show()
-            else:
-                self.hide()
+        if reason is QSystemTrayIcon.Trigger:
+            self.show()
+            self.raise_()
 
     def quit_action(self):
         self.quit_ = True

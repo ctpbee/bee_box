@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'new_env.ui',
 # licensing of 'new_env.ui' applies.
 #
-# Created: Thu Dec 12 19:19:32 2019
+# Created: Wed Dec 25 11:07:50 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,6 +14,9 @@ class Ui_NewEnv(object):
     def setupUi(self, NewEnv):
         NewEnv.setObjectName("NewEnv")
         NewEnv.resize(498, 300)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/icon/icon/CTPBEE.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        NewEnv.setWindowIcon(icon)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(NewEnv)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -99,3 +102,4 @@ class Ui_NewEnv(object):
         self.ok_btn.setText(QtWidgets.QApplication.translate("NewEnv", "确定", None, -1))
         self.cancel_btn.setText(QtWidgets.QApplication.translate("NewEnv", "取消", None, -1))
 
+import app.resource.bee_box_rc

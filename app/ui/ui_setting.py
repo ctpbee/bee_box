@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'setting.ui',
 # licensing of 'setting.ui' applies.
 #
-# Created: Wed Dec 11 19:53:56 2019
+# Created: Wed Dec 25 11:07:30 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,6 +14,9 @@ class Ui_Setting(object):
     def setupUi(self, Setting):
         Setting.setObjectName("Setting")
         Setting.resize(601, 537)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/icon/icon/CTPBEE.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Setting.setWindowIcon(icon)
         self.verticalLayout = QtWidgets.QVBoxLayout(Setting)
         self.verticalLayout.setObjectName("verticalLayout")
         self.tabWidget = QtWidgets.QTabWidget(Setting)
@@ -82,3 +85,4 @@ class Ui_Setting(object):
         self.install_btn.setText(QtWidgets.QApplication.translate("Setting", "选择安装路径", None, -1))
         self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_3), QtWidgets.QApplication.translate("Setting", "安装路径", None, -1))
 
+import app.resource.bee_box_rc

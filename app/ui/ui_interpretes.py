@@ -1,11 +1,10 @@
-0
-1
+
 # -*- coding: utf-8 -*-
 
 # Form implementation generated from reading ui file 'interpretes.ui',
 # licensing of 'interpretes.ui' applies.
 #
-# Created: Thu Dec 12 19:17:41 2019
+# Created: Wed Dec 25 11:07:39 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -16,6 +15,9 @@ class Ui_Interpreters(object):
     def setupUi(self, Interpreters):
         Interpreters.setObjectName("Interpreters")
         Interpreters.resize(743, 397)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/icon/icon/CTPBEE.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Interpreters.setWindowIcon(icon)
         self.verticalLayout_2 = QtWidgets.QVBoxLayout(Interpreters)
         self.verticalLayout_2.setObjectName("verticalLayout_2")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -56,3 +58,4 @@ class Ui_Interpreters(object):
         self.del_btn.setText(QtWidgets.QApplication.translate("Interpreters", "➖", None, -1))
         self.change_btn.setText(QtWidgets.QApplication.translate("Interpreters", "🖊", None, -1))
 
+import app.resource.bee_box_rc

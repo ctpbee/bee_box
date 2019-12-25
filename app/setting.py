@@ -2,11 +2,10 @@ import os
 import re
 
 from PySide2 import QtGui
-from PySide2.QtCore import Slot, Qt
-from PySide2.QtWidgets import QWidget, QTableWidgetItem, QFileDialog
+from PySide2.QtCore import  Qt
+from PySide2.QtWidgets import QWidget, QFileDialog
 
 from app.lib.global_var import G
-from app.lib.path_lib import beebox_path
 from app.py_manage import PyManageWidget
 from app.tip import TipDialog
 from app.ui import qss
@@ -35,7 +34,7 @@ class SettingWidget(QWidget, Ui_Setting):
         self.sm = True
 
     def install_path_slot(self):
-        path = QFileDialog.getExistingDirectory(self, "安装路径", beebox_path)
+        path = QFileDialog.getExistingDirectory(self, "安装路径", '/')
         if not path:
             return
         if os.path.exists(path) and os.path.isdir(path):

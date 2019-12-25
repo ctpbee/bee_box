@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'modify_env.ui',
 # licensing of 'modify_env.ui' applies.
 #
-# Created: Thu Dec 12 19:26:18 2019
+# Created: Wed Dec 25 11:08:05 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,6 +14,9 @@ class Ui_Modify(object):
     def setupUi(self, Modify):
         Modify.setObjectName("Modify")
         Modify.resize(424, 130)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/icon/icon/CTPBEE.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Modify.setWindowIcon(icon)
         self.verticalLayout = QtWidgets.QVBoxLayout(Modify)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout = QtWidgets.QHBoxLayout()
@@ -62,3 +65,4 @@ class Ui_Modify(object):
         self.save_btn.setText(QtWidgets.QApplication.translate("Modify", "保存", None, -1))
         self.cancel_btn.setText(QtWidgets.QApplication.translate("Modify", "取消", None, -1))
 
+import app.resource.bee_box_rc

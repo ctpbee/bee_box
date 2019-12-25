@@ -97,9 +97,7 @@ class PyManageWidget(QWidget, Ui_Form):
         py_ = self.path.text()
         G.config.installed_apps[self.app_name.text()].update({"py_": py_})
         G.config.to_file()
-        for name, p in G.config.python_path.items():
-            if py_ == p:
-                self.cur_py.setText(name)
+        self.cur_py.setText(self.py_box.currentText())
         TipDialog("设置成功")
 
     def py_setting_slot(self):
@@ -177,7 +175,7 @@ class InterpreterWidget(QDialog, Ui_Interpreters):
             G.config.python_path.pop(name, None)
             for p in G.config.installed_apps.values():
                 if path == p.get('py_', ""):
-                    p.update({"py_": ""})
+                    p.pop('py_')
             G.config.to_file()
             self.load_py()
             TipDialog("已删除")
@@ -276,13 +274,14 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
     def ok_btn_slot(self):
         self.infobox = ProgressMsgDialog()
         self.infobox.sig.msg.emit("准备中...")
+        self.infobox.show()
+        self.infobox.raise_()
         name = self.name.text()
         if self.env_radio.isChecked():
             path = self.path.text()
             py_ = G.config.python_path[self.base_py_list.currentText()]
             vir_path = os.path.join(path, name)
             self.create_env(py_, vir_path, name)
-            self.infobox.exec_()
         if self.exit_radio.isChecked():
             path = self.exis_path.text()
             G.config.python_path.update({name: path})

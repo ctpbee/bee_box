@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'py_manage.ui',
 # licensing of 'py_manage.ui' applies.
 #
-# Created: Thu Dec 12 08:43:05 2019
+# Created: Wed Dec 25 11:07:58 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -14,6 +14,9 @@ class Ui_Form(object):
     def setupUi(self, Form):
         Form.setObjectName("Form")
         Form.resize(702, 578)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/icon/icon/CTPBEE.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Form.setWindowIcon(icon)
         self.verticalLayout = QtWidgets.QVBoxLayout(Form)
         self.verticalLayout.setObjectName("verticalLayout")
         self.horizontalLayout_3 = QtWidgets.QHBoxLayout()
@@ -66,3 +69,4 @@ class Ui_Form(object):
         self.cur_py.setText(QtWidgets.QApplication.translate("Form", "空", None, -1))
         self.set_app_py.setText(QtWidgets.QApplication.translate("Form", "选为解释器", None, -1))
 
+import app.resource.bee_box_rc

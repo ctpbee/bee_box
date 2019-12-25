@@ -268,7 +268,7 @@ class Standard(object):
                 if content_size:
                     self._transfer("bar", dict(value=current))
                 speed = format_size(current / (time.time() - self.start_time))
-                self._transfer("msg", speed + "/s")
+                self._transfer("msg", f"{round(current/1024,2)}KB/{round(content_size/1024,2) or '-'}KB | {speed}/s")
         extract(file_temp)  # 解压
         return True
 

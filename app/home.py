@@ -27,7 +27,6 @@ class HomeWidget(QWidget, Ui_Home):
         self.progressBar.setFixedHeight(3)
         self.job = HomeJob()
         ## button
-        self.quit_btn.clicked.connect(self.mainwindow.quit_action)
         self.setting_btn.clicked.connect(self.setting_click)
         self.github.clicked.connect(self.github_click)
         self.qq.clicked.connect(self.qq_click)
@@ -38,7 +37,6 @@ class HomeWidget(QWidget, Ui_Home):
     def setting_click(self):
         self.setting_widget = SettingWidget()
         self.setting_widget.show()
-
 
     def ready_action(self):
         self.init_ui()

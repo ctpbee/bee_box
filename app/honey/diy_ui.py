@@ -91,12 +91,14 @@ class AppDiv:
             self.progressbar.hide()
 
     def progressbar_signal_slot(self, data: dict):
-        self.progressbar.setRange(*data['range'])
-        self.progressbar.setValue(data['value'])
+        if data.get('range'):
+            self.progressbar.setRange(*data['range'])
+        if data.get('value'):
+            self.progressbar.setValue(data['value'])
 
     def msg_signal_slot(self, msg: str):
         fontWidth = QFontMetrics(self.progress_msg.font())
-        elideNote = fontWidth.elidedText(msg, Qt.ElideRight, self.name.width() + self.action.width() - 15)
+        elideNote = fontWidth.elidedText(msg, Qt.ElideRight, self.name.width() + self.action.width() - 30)
         self.progress_msg.setText(elideNote)
 
     def action_signal_slot(self, act: str):

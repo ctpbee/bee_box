@@ -3,7 +3,7 @@
 # Form implementation generated from reading ui file 'home.ui',
 # licensing of 'home.ui' applies.
 #
-# Created: Fri Dec 13 15:01:01 2019
+# Created: Wed Dec 25 14:20:01 2019
 #      by: pyside2-uic  running on PySide2 5.13.2
 #
 # WARNING! All changes made in this file will be lost!
@@ -145,12 +145,6 @@ class Ui_Home(object):
         self.toolButton.setIcon(icon3)
         self.toolButton.setObjectName("toolButton")
         self.horizontalLayout_2.addWidget(self.toolButton)
-        self.quit_btn = QtWidgets.QToolButton(Home)
-        icon4 = QtGui.QIcon()
-        icon4.addPixmap(QtGui.QPixmap(":/icon/icon/quit.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
-        self.quit_btn.setIcon(icon4)
-        self.quit_btn.setObjectName("quit_btn")
-        self.horizontalLayout_2.addWidget(self.quit_btn)
         self.verticalLayout.addLayout(self.horizontalLayout_2)
         self.verticalLayout.setStretch(0, 1)
         self.verticalLayout.setStretch(2, 8)
@@ -169,6 +163,5 @@ class Ui_Home(object):
         self.qq.setToolTip(QtWidgets.QApplication.translate("Home", "<html><head/><body><p>ctpbee开源量化社区群：756319143</p></body></html>", None, -1))
         self.toolButton.setToolTip(QtWidgets.QApplication.translate("Home", "<html><head/><body><p>当前版本：1.0</p></body></html>", None, -1))
         self.toolButton.setText(QtWidgets.QApplication.translate("Home", "1.0", None, -1))
-        self.quit_btn.setText(QtWidgets.QApplication.translate("Home", "...", None, -1))
 
 import app.resource.bee_box_rc
