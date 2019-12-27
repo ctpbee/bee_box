@@ -8,5 +8,6 @@
     <file>icon/setting.png</file>
     <file>icon/bee_temp_grey.png</file>
     <file>icon/CTPBEE.png</file>
+    <file>icon/icon.png</file>
   </qresource>
 </RCC>

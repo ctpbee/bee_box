@@ -2,7 +2,7 @@ import os
 import re
 
 from PySide2 import QtGui
-from PySide2.QtCore import  Qt
+from PySide2.QtCore import Qt
 from PySide2.QtWidgets import QWidget, QFileDialog
 
 from app.lib.global_var import G

@@ -268,7 +268,8 @@ class Standard(object):
                 if content_size:
                     self._transfer("bar", dict(value=current))
                 speed = format_size(current / (time.time() - self.start_time))
-                self._transfer("msg", f"{round(current/1024,2)}KB/{round(content_size/1024,2) or '-'}KB | {speed}/s")
+                self._transfer("msg",
+                               f"{round(current / 1024, 2)}KB/{round(content_size / 1024, 2) or '-'}KB | {speed}/s")
         extract(file_temp)  # 解压
         return True
 
@@ -313,10 +314,9 @@ class Standard(object):
     @before_install
     def install_handler(self):
         """解析 build.json"""
-        img_ = G.config.get_pypi_source()
         for line in self.requirement_:
             line = line.strip().replace('==', '>=')
-            cmd_ = [self.py_, "-m", "pip", "install", line] + img_
+            cmd_ = [self.py_, "-m", "pip", "install", line] + G.config.get_pypi_source()
             if self.cancel or G.pool_done:
                 return False
             self.process.start(" ".join(cmd_))
@@ -325,7 +325,7 @@ class Standard(object):
 
     def on_readoutput(self):
         output = self.process.readAllStandardOutput().data().decode()
-        self._transfer("msg", output)
+        self._transfer("msg", output.replace('\n', ''))
 
     def on_readerror(self):
         error = self.process.readAllStandardError().data().decode()

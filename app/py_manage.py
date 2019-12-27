@@ -1,13 +1,13 @@
 import os
 import subprocess
 
-from PySide2.QtCore import QThreadPool, QObject, Signal, Slot, Qt, QUrl, QRegExp, QProcess
-from PySide2.QtGui import QDesktopServices, QRegExpValidator
+from PySide2.QtCore import QThreadPool, QObject, Signal, Slot, Qt, QUrl, QProcess
+from PySide2.QtGui import QDesktopServices
 from PySide2.QtWidgets import QWidget, QFileDialog, QTableWidgetItem, QAbstractItemView, QMessageBox, QTableWidget, \
     QDialog, QMenu
 
 from app.lib.global_var import G
-from app.lib.path_lib import get_py_version, join_path, venv_path
+from app.lib.path_lib import get_py_version, join_path, venv_path, py_path_check
 from app.progressmsg import ProgressMsgDialog
 from app.tip import TipDialog
 from app.ui import qss
@@ -27,6 +27,7 @@ class PyManageWidget(QWidget, Ui_Form):
         self.setStyleSheet(qss)
         self.home = home
         self.interpreter = None
+        self.p = QProcess()
         self.thread_pool = QThreadPool()
         # btn
         self.py_setting_btn.clicked.connect(self.py_setting_slot)
@@ -64,20 +65,24 @@ class PyManageWidget(QWidget, Ui_Form):
     def load_pip(self, py_):
         """加载pip包列表"""
         self.pip_list.clear()
-        self.p = QProcess()
         # self.p.readyReadStandardOutput.connect(self.readout)
         self.p.finished.connect(self.pip_finish_slot)
         self.p.start(' '.join([py_, '-m', 'pip', 'freeze']))
 
     def pip_finish_slot(self):
-        output = self.p.readAllStandardOutput().data().decode()
-        for i in output.splitlines():
-            self.pip_list.addItem(i)
+        try:
+            output = self.p.readAllStandardOutput().data().decode()
+            for i in output.splitlines():
+                self.pip_list.addItem(i)
+        except RuntimeError:
+            pass
 
     def generate_menu(self, pos):
         row_num = -1
         for i in self.pip_list.selectionModel().selection().indexes():
             row_num = i.row()
+        if row_num < 0:
+            return
         menu = QMenu()
         item1 = menu.addAction("uninstall")
         action = menu.exec_(self.pip_list.mapToGlobal(pos))
@@ -220,6 +225,7 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         # rex
         # btn
         self.name.textChanged.connect(self.name_change_slot)
+        self.exis_path.textChanged.connect(self.exis_path_change_slot)
         self.env_radio.clicked.connect(self.env_radio_slot)
         self.exit_radio.clicked.connect(self.exit_radio_slot)
         self.path_btn.clicked.connect(self.path_btn_slot)
@@ -269,13 +275,17 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
 
     def exit_path_btn_slot(self):
         path, _ = QFileDialog.getOpenFileName(self, "选择Python解释器", '/', 'Python Interpreter (*.exe)')
-        self.exis_path.setText(path)
+        if py_path_check(path):
+            self.exis_path.setText(path)
+
+    def exis_path_change_slot(self):
+        path = self.exis_path.text()
+        if py_path_check(path):
+            self.exis_path.setText(path)
+        else:
+            self.exis_path.setText("")
 
     def ok_btn_slot(self):
-        self.infobox = ProgressMsgDialog()
-        self.infobox.sig.msg.emit("准备中...")
-        self.infobox.show()
-        self.infobox.raise_()
         name = self.name.text()
         if self.env_radio.isChecked():
             path = self.path.text()
@@ -300,9 +310,13 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
     def finished_slot(self):
         if self.infobox_flag:
             self.infobox.close()
+            G.config.to_file()
             self.job.sig.emit("创建完成")
 
     def create_env(self, py_, vir_path, name):
+        self.infobox = ProgressMsgDialog(msg="准备中...")
+        self.infobox.show()
+        self.infobox.raise_()
         self.infobox_flag = False
         self.p = QProcess()
         self.p.readyReadStandardOutput.connect(self.readout_slot)
@@ -320,14 +334,6 @@ class NewEnvWidget(QDialog, Ui_NewEnv):
         # record
         py_path = join_path(vir_path, 'Scripts', 'python.exe')
         G.config.python_path.update({name: py_path})
-        G.config.to_file()
-
-    def create_env_callback(self, res):
-        self.infobox.close()
-        if res is True:
-            self.job.sig.emit("创建成功")
-        elif res is False:
-            self.job.sig.emit("创建失败")
 
     def closeEvent(self, event):
         self.interpreter.load_py()
@@ -349,15 +355,38 @@ class ModifyEnvWidget(QDialog, Ui_Modify):
         self.raw_path = path
         self.name.setText(name)
         self.path.setText(path)
+        self.name.textChanged.connect(self.name_change_slot)
+        self.path.textChanged.connect(self.path_change_slot)
         self.path_btn.clicked.connect(self.path_btn_slot)
         self.save_btn.clicked.connect(self.save_btn_slot)
         self.cancel_btn.clicked.connect(self.close)
+
+    def name_change_slot(self):
+        name = self.name.text()
+        if name.strip() and name not in G.config.python_path:
+            self.name.setStyleSheet("color:green")
+            self.save_btn.setEnabled(True)
+        else:
+            self.name.setStyleSheet("color:red")
+            self.save_btn.setDisabled(True)
+
+    def path_change_slot(self):
+        path = self.path.text()
+        if py_path_check(path):
+            self.path.setText(path)
+            self.path.setEnabled(True)
+        else:
+            self.save_btn.setDisabled(True)
 
     def path_btn_slot(self):
         path, _ = QFileDialog.getOpenFileName(self, '选择Python路径', '/', 'Python Interpreter(*.exe)')
         if not path:
             return
-        self.path.setText(path)
+        if py_path_check(path):
+            self.path.setText(path)
+            self.path.setEnabled(True)
+        else:
+            self.save_btn.setDisabled(True)
 
     def save_btn_slot(self):
         name = self.name.text()

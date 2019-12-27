@@ -42,10 +42,9 @@ def get_py_version(path):
     try:
         cmd = f"{path} --version"
         v = subprocess.check_output(cmd)
-        return v.decode().strip() + "(Base)"
+        return v.decode().strip()
     except Exception as e:
         print(e)
-        return 'Python(Base)'
 
 
 def get_pip_version(path):
@@ -59,6 +58,13 @@ def get_pip_version(path):
         print(e)
 
 
+def py_path_check(path):
+    item = os.path.basename(path)
+    if re.match(pattern3, item):
+        return True
+    return False
+
+
 def find_py_path():
     res = {}
     paths = os.environ['path'].split(';')
@@ -68,7 +74,7 @@ def find_py_path():
             for item in os.listdir(path):
                 py_path = os.path.join(path, item)
                 if os.path.isfile(py_path):
-                    if re.match(pattern3, item):
+                    if py_path_check(py_path):  # 匹配python.exe
                         v = get_py_version(py_path)
                         c = 1
                         while v in res:
